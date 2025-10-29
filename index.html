@@ -294,6 +294,27 @@
         line-height: 1.4;
       }
 
+      .analysis-content {
+        line-height: 1.6;
+      }
+
+      .analysis-point {
+        margin: 15px 0;
+        padding: 12px;
+        background: #f8f9fa;
+        border-radius: 8px;
+        border-left: 4px solid #3498db;
+        font-size: 0.95em;
+      }
+
+      .analysis-point:first-child {
+        margin-top: 0;
+      }
+
+      .analysis-point:last-child {
+        margin-bottom: 0;
+      }
+
       @media (max-width: 768px) {
         .filters {
           justify-content: flex-start;
@@ -461,7 +482,31 @@
       function renderAnalysis() {
         const analysisElement = document.getElementById("analysis");
         if (resourceData.analysis) {
-          analysisElement.innerHTML = `<h3>📈 This Week's Analysis</h3><p>${resourceData.analysis}</p>`;
+          // Parse numbered points and wrap each in a div
+          let formattedAnalysis = resourceData.analysis;
+
+          // Split by numbered points pattern like (1), (2), etc.
+          const numberedPointRegex =
+            /(\(\d+\)[^()]*(?:\([^)]*\)[^()]*)*?)(?=\(\d+\)|$)/g;
+          const points = formattedAnalysis.match(numberedPointRegex);
+
+          if (points && points.length > 0) {
+            // Wrap each numbered point in a div
+            const wrappedPoints = points
+              .map(
+                (point) => `<div class="analysis-point">${point.trim()}</div>`
+              )
+              .join("");
+
+            // Get any text before the first numbered point
+            const beforePoints = formattedAnalysis.split(/\(\d+\)/)[0].trim();
+
+            formattedAnalysis = beforePoints
+              ? `${beforePoints} ${wrappedPoints}`
+              : wrappedPoints;
+          }
+
+          analysisElement.innerHTML = `<h3>📈 This Week's Analysis</h3><div class="analysis-content">${formattedAnalysis}</div>`;
           analysisElement.style.display = "block";
         } else {
           analysisElement.style.display = "none";
