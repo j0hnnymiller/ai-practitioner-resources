@@ -315,6 +315,26 @@
         margin-bottom: 0;
       }
 
+      /* Minimal Clean Style for unnumbered analysis */
+      .analysis-minimal {
+        font-size: 1.1em;
+        line-height: 1.8;
+        color: #2c3e50;
+      }
+
+      .analysis-minimal > p {
+        margin: 1.5em 0;
+        padding: 0;
+      }
+
+      .analysis-minimal > p:first-child {
+        margin-top: 0;
+      }
+
+      .analysis-minimal > p:last-child {
+        margin-bottom: 0;
+      }
+
       @media (max-width: 768px) {
         .filters {
           justify-content: flex-start;
@@ -648,34 +668,67 @@
         }
       }
 
+      function parseAnalysisByBreaks(text) {
+        // Remove existing numbered patterns and clean up
+        let cleanText = text
+          .replace(/\(\d+\)\s*/g, "") // Remove (1), (2), etc.
+          .replace(/^\d+\.\s*/gm, "") // Remove 1., 2., etc.
+          .trim();
+
+        // Split by semantic breaks
+        let points = [];
+
+        // Method 1: Split by double line breaks
+        if (cleanText.includes("\n\n")) {
+          points = cleanText.split(/\n\s*\n/).filter((p) => p.trim());
+        }
+        // Method 2: Split by HTML break tags
+        else if (cleanText.includes("<br>") || cleanText.includes("<br/>")) {
+          points = cleanText.split(/<br\s*\/?>/i).filter((p) => p.trim());
+        }
+        // Method 3: Treat as single flowing narrative
+        else {
+          points = [cleanText];
+        }
+
+        return points.filter((point) => point.trim().length > 10); // Filter out very short fragments
+      }
+
       function renderAnalysis() {
         const analysisElement = document.getElementById("analysis");
+
         if (resourceData.analysis) {
-          // Parse numbered points and wrap each in a div
-          let formattedAnalysis = resourceData.analysis;
+          let formattedAnalysis = resourceData.analysis.trim();
 
-          // Split by numbered points pattern like (1), (2), etc.
-          const numberedPointRegex =
-            /(\(\d+\)[^()]*(?:\([^)]*\)[^()]*)*?)(?=\(\d+\)|$)/g;
-          const points = formattedAnalysis.match(numberedPointRegex);
+          // Parse by natural breaks (removing numbered patterns)
+          const analysisPoints = parseAnalysisByBreaks(formattedAnalysis);
 
-          if (points && points.length > 0) {
-            // Wrap each numbered point in a div
-            const wrappedPoints = points
-              .map(
-                (point) => `<div class="analysis-point">${point.trim()}</div>`
-              )
+          if (analysisPoints.length > 1) {
+            // Multiple points detected - render as structured paragraphs
+            const pointsHtml = analysisPoints
+              .map((point) => `<p>${point.trim()}</p>`)
               .join("");
 
-            // Get any text before the first numbered point
-            const beforePoints = formattedAnalysis.split(/\(\d+\)/)[0].trim();
-
-            formattedAnalysis = beforePoints
-              ? `${beforePoints} ${wrappedPoints}`
-              : wrappedPoints;
+            analysisElement.innerHTML = `
+              <h3>📈 This Week's Analysis</h3>
+              <div class="analysis-content">
+                <div class="analysis-minimal">
+                  ${pointsHtml}
+                </div>
+              </div>
+            `;
+          } else {
+            // Single flowing text - render as paragraph
+            analysisElement.innerHTML = `
+              <h3>📈 This Week's Analysis</h3>
+              <div class="analysis-content">
+                <div class="analysis-minimal">
+                  <p>${formattedAnalysis}</p>
+                </div>
+              </div>
+            `;
           }
 
-          analysisElement.innerHTML = `<h3>📈 This Week's Analysis</h3><div class="analysis-content">${formattedAnalysis}</div>`;
           analysisElement.style.display = "block";
         } else {
           analysisElement.style.display = "none";
