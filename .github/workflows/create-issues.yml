@@ -1,0 +1,67 @@
+name: Create Issues from Templates
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run (do not create issues, just show what would be created)'
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - 'true'
+          - 'false'
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  create-issues:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      
+      - name: Create issues from templates
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: |
+          if [ "${{ github.event.inputs.dry_run }}" == "true" ]; then
+            echo "🔍 DRY RUN MODE - No issues will be created"
+            echo "================================================"
+            echo ""
+            echo "The following issues would be created:"
+            echo ""
+            for file in .github/ISSUE_TEMPLATE/*.md; do
+              if [ -f "$file" ]; then
+                # Extract title from frontmatter
+                title=$(grep "^title:" "$file" | sed 's/^title: *"\?\([^"]*\)"\?$/\1/')
+                # Extract labels
+                labels=$(grep "^labels:" "$file" | sed 's/^labels: *\[\(.*\)\]$/\1/')
+                echo "📝 Template: $(basename "$file")"
+                echo "   Title: $title"
+                echo "   Labels: $labels"
+                echo ""
+              fi
+            done
+          else
+            echo "🚀 Creating issues from templates..."
+            node scripts/create-issues-from-templates.js
+          fi
+      
+      - name: Summary
+        if: success()
+        run: |
+          echo "✅ Workflow completed successfully!"
+          if [ "${{ github.event.inputs.dry_run }}" == "true" ]; then
+            echo "This was a dry run. No issues were created."
+            echo "To actually create the issues, run this workflow again with dry_run=false"
+          fi

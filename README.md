@@ -169,12 +169,46 @@ The analysis section provides:
 - **Content Evolution**: Track changes over time
 - **User Guidance**: Help users find relevant resources
 
+## 📋 Issue Templates & Project Planning
+
+This repository includes 10 comprehensive issue templates for planned enhancements:
+
+- Testing framework implementation (Jest + Playwright)
+- GitHub footer link addition
+- Automated AI resource generation
+- Gradual fade effects for NEW tags
+- Private gist impact investigation
+- Local development environment support
+- Analysis ordering improvements
+- Content bias removal
+- And more...
+
+### Creating Issues from Templates
+
+You can automatically create GitHub issues from all templates using one of these methods:
+
+**Method 1: GitHub Actions (Recommended)**
+1. Go to **Actions** tab → **Create Issues from Templates** workflow
+2. Click **Run workflow**
+3. Choose dry run mode to preview, or run to create issues
+
+**Method 2: Script Execution**
+```bash
+GITHUB_TOKEN=your_token node scripts/create-issues-from-templates.js
+```
+
+**Method 3: Manual via GitHub UI**
+Create each issue manually from the template chooser.
+
+📖 **Full Documentation**: See [docs/CREATE_ISSUES.md](docs/CREATE_ISSUES.md) for detailed instructions.
+
 ## 🤝 Contributing
 
 1. Fork the repository
-2. Use the AI prompt to generate quality resources
-3. Ensure content follows HTML formatting requirements
-4. Submit pull request with schema-compliant JSON
+2. Check the issue templates for planned improvements
+3. Use the AI prompt to generate quality resources
+4. Ensure content follows HTML formatting requirements
+5. Submit pull request with schema-compliant JSON
 
 ## 📄 License
 
