@@ -40,9 +40,22 @@
             "type": "integer",
             "minimum": 1,
             "description": "Number of weeks the resource has been on the list"
+          },
+          "blurb": {
+            "type": "string",
+            "minLength": 10,
+            "maxLength": 300,
+            "description": "Brief description or summary of the resource's content and value"
           }
         },
-        "required": ["type", "title", "source", "score", "weeks_on_list"],
+        "required": [
+          "type",
+          "title",
+          "source",
+          "score",
+          "weeks_on_list",
+          "blurb"
+        ],
         "additionalProperties": false
       },
       "minItems": 1,

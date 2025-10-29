@@ -32,6 +32,7 @@ The output must be a JSON object with these four required properties:
    - **source**: A valid URL to the resource (preferably non-Amazon sources for books)
    - **score**: Integer from 0-100 based on the criteria above
    - **weeks_on_list**: Set to 1 for all new resources (external script will manage this)
+   - **blurb**: A concise 1-2 sentence description (10-300 characters) explaining what the resource covers and why it's valuable for AI developers
 3. **legend**: A string containing HTML markup that renders the scoring system legend, including:
    - Color-coded score ranges (use emoji or CSS for colors)
    - Explanation of scoring criteria and weightings

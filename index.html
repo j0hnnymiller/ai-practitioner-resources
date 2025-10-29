@@ -167,9 +167,15 @@
       }
 
       @keyframes pulse {
-        0% { opacity: 1; }
-        50% { opacity: 0.7; }
-        100% { opacity: 1; }
+        0% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.7;
+        }
+        100% {
+          opacity: 1;
+        }
       }
 
       .resource-type-container {
@@ -189,7 +195,15 @@
       .resource-source {
         color: #7f8c8d;
         font-size: 0.9em;
+        margin-bottom: 10px;
+      }
+
+      .resource-blurb {
+        color: #555;
+        font-size: 0.9em;
+        line-height: 1.4;
         margin-bottom: 15px;
+        font-style: italic;
       }
 
       .resource-meta {
@@ -530,7 +544,11 @@
                         <div class="resource-type type-${resource.type.toLowerCase()}">${
               resource.type
             }</div>
-                        ${resource.weeks_on_list === 1 ? '<span class="new-tag">NEW</span>' : ''}
+                        ${
+                          resource.weeks_on_list === 1
+                            ? '<span class="new-tag">NEW</span>'
+                            : ""
+                        }
                     </div>
                     <div class="resource-title">${resource.title}</div>
                     <div class="resource-source">
@@ -540,6 +558,11 @@
                             ${new URL(resource.source).hostname}
                         </a>
                     </div>
+                    ${
+                      resource.blurb
+                        ? `<div class="resource-blurb">${resource.blurb}</div>`
+                        : ""
+                    }
                     <div class="resource-meta">
                         <div class="score">${resource.score}</div>
                         <div class="weeks-badge">${
