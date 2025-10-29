@@ -1,107 +1,141 @@
-# AI Practitioner Resources - Web Viewer
+# 🤖 AI Practitioner Resources
 
-This HTML file renders your JSON data as a beautiful, interactive web page that can be hosted anywhere or loaded from a GitHub gist.
+A curated collection of the best AI-powered development resources, featuring an intelligent content generation system and beautiful web viewer for discovering books, articles, blogs, and podcasts about AI in software development.
 
-## 🚀 Quick Setup
+## ✨ Features
 
-### Step 1: Create a GitHub Gist
+- **📊 Intelligent Resource Curation**: AI-powered prompt system generates comprehensive resource lists
+- **🎯 Smart Scoring**: Resources evaluated on practical value, clarity, depth, and relevance
+- **📱 Beautiful Web Interface**: Responsive design with filtering, statistics, and modern UI
+- **🔄 Automated Updates**: JSON schema-driven content management with external script integration
+- **🏷️ Rich Metadata**: Includes introduction, analysis, legends, and resource descriptions
+- **⚡ Real-time Display**: Live updates from GitHub gists with no server required
 
-1. Go to https://gist.github.com
-2. Create a new gist
-3. Add your `resources.json` file
-4. Make sure the gist is public
-5. Save the gist
+## 🚀 Quick Start
 
-### Step 2: Get the Raw URL
+### Option 1: Use the Live Site
 
-1. In your gist, click on the "Raw" button next to your JSON file
-2. Copy the URL (it should look like: `https://gist.githubusercontent.com/username/gistid/raw/resources.json`)
+Visit the live viewer at: **https://j0hnnymiller.github.io/ai-practitioner-resources/**
 
-### Step 3: Configure the HTML
+### Option 2: Set Up Your Own
 
-1. Open `resources-viewer.html` in a text editor
-2. Find the `GIST_CONFIG` section (around line 155)
-3. Replace the URL with your gist's raw URL:
+1. **Fork this repository**
+2. **Create a GitHub Gist** with your resources JSON file
+3. **Update the configuration** in `index.html`:
    ```javascript
    const GIST_CONFIG = {
-     url: "https://gist.githubusercontent.com/yourusername/yourgistid/raw/resources.json",
+     url: "https://gist.githubusercontent.com/yourusername/gistid/raw/resources.json",
    };
    ```
+4. **Enable GitHub Pages** in your repository settings
 
-### Step 4: Deploy
+## 📋 Project Structure
 
-Choose one of these options:
+```
+ai-practitioner-resources/
+├── index.html                          # Main web viewer
+├── schema.json                         # JSON schema for validation
+├── .github/instructions/               # AI prompt system
+│   └── ai-practitioner-resources-json.prompt.md
+└── README.md                          # This file
+```
 
-#### Option A: GitHub Pages
+## 🤖 AI Content Generation
 
-1. Create a new GitHub repository
-2. Upload the `resources-viewer.html` file
-3. Rename it to `index.html`
-4. Enable GitHub Pages in repository settings
-5. Your site will be available at `https://yourusername.github.io/repository-name`
+This project includes an intelligent prompt system for generating high-quality resource lists:
 
-#### Option B: Netlify Drop
+### Generate New Content
 
-1. Go to https://app.netlify.com/drop
-2. Drag and drop your `resources-viewer.html` file
-3. Get an instant live URL
+Use the prompt in `.github/instructions/ai-practitioner-resources-json.prompt.md` with any AI assistant to generate content that matches the schema.
 
-#### Option C: GitHub Gist + RawGit Alternative
+### Schema Structure
 
-1. Add the HTML file to the same gist as your JSON
-2. Use a service like GitHack or jsDelivr to serve it:
-   - GitHack: `https://raw.githack.com/gist/username/gistid/resources-viewer.html`
+Resources follow this comprehensive schema:
 
-#### Option D: Local Testing
+```json
+{
+  "introduction": "Brief explanation of the list's purpose...",
+  "resources": [
+    {
+      "type": "Book|Article|Blog|Podcast",
+      "title": "Resource Title",
+      "source": "https://example.com",
+      "score": 95,
+      "weeks_on_list": 1,
+      "blurb": "Brief description of the resource's value..."
+    }
+  ],
+  "legend": "<div>HTML scoring system legend</div>",
+  "analysis": "Analysis of trends with <strong>HTML</strong> formatting"
+}
+```
 
-1. Simply open `resources-viewer.html` in your web browser
-2. If you have the JSON file locally, it will try to load it
-3. Otherwise, configure the gist URL as described above
+### Scoring Criteria
 
-## 🎨 Features
+- **Practical hands-on coding value (40%)**
+- **Clarity and accessibility (25%)**
+- **Depth and completeness (20%)**
+- **Relevance and recency (15%)**
 
-- **Responsive Design**: Works on desktop, tablet, and mobile
-- **Interactive Filters**: Filter by resource type (Books, Articles, Podcasts, etc.)
-- **Statistics Dashboard**: Shows total counts, average scores, etc.
-- **Sorting**: Resources automatically sorted by score
-- **Modern UI**: Beautiful gradient design with hover effects
-- **Fast Loading**: Efficiently loads data from GitHub gists
+## 🎨 Web Viewer Features
+
+- **📱 Responsive Design**: Perfect on desktop, tablet, and mobile
+- **🔍 Smart Filtering**: Filter by resource type with counts
+- **📊 Live Statistics**: Total resources, types, average scores
+- **🏆 Intelligent Sorting**: Resources ordered by quality score
+- **🆕 New Resource Badges**: Highlights recently added items
+- **📝 Rich Descriptions**: Blurbs provide context before clicking
+- **📈 Visual Analysis**: Trend insights in styled sections
+- **🎯 Modern UI**: Beautiful gradients and hover animations
+- **⚡ Fast Loading**: Efficient GitHub gist integration
 
 ## 🔧 Customization
 
-### Colors and Styling
+### Styling the Interface
 
-You can modify the CSS variables at the top of the `<style>` section to change colors, fonts, and layout.
+Modify the CSS in `index.html` to customize:
 
-### Data Structure
+- Color schemes and gradients
+- Typography and fonts
+- Layout and spacing
+- Animation effects
 
-The viewer expects JSON data with this structure:
+### Content Sections
 
-```json
-[
-  {
-    "type": "Book",
-    "title": "Resource Title",
-    "source": "https://example.com",
-    "score": 95,
-    "weeks_on_list": 1
-  }
-]
-```
+The viewer renders four main sections:
 
-### Adding New Resource Types
+1. **Introduction** - Purpose and context
+2. **Resources Grid** - Filterable, sortable resource cards
+3. **Legend** - Scoring system with HTML formatting
+4. **Analysis** - Weekly insights with numbered points
 
-New resource types will automatically get their own filter button and color coding.
+### Adding Resource Types
 
-## 🔄 Updating Data
+New resource types automatically receive:
 
-Simply update your gist with new JSON data - the webpage will automatically show the latest version!
+- Dedicated filter buttons with counts
+- Color-coded type badges
+- Integrated statistics
 
-## 🛠️ Advanced Configuration
+## 🔄 Content Management
 
-### Using GitHub API Instead of Raw URLs
+### Automated Updates
 
-For more control, you can use the GitHub API:
+- **External Scripts**: Manage `weeks_on_list` values automatically
+- **Version Control**: Track resource longevity and trends
+- **Gist Integration**: Update JSON file to refresh live site instantly
+
+### Manual Updates
+
+1. Generate new content using the AI prompt
+2. Update your GitHub gist with the new JSON
+3. Site refreshes automatically with latest data
+
+## 🛠️ Advanced Setup
+
+### GitHub API Configuration
+
+For enhanced control, use the GitHub API:
 
 ```javascript
 const GIST_CONFIG = {
@@ -110,19 +144,42 @@ const GIST_CONFIG = {
 };
 ```
 
-### CORS Considerations
+### Schema Validation
 
-- Raw gist URLs work from anywhere (no CORS issues)
-- GitHub API has rate limits but provides more metadata
-- For production use, consider caching the data
+Validate your JSON against `schema.json` to ensure compatibility:
 
-## 📱 Mobile Optimization
+- All required fields present
+- Correct data types and formats
+- HTML formatting in text fields
+- Valid URLs and score ranges
 
-The viewer is fully responsive and includes:
+### Development Workflow
 
-- Responsive grid layout
-- Touch-friendly buttons
-- Optimized typography for small screens
-- Horizontal scroll for filter buttons on mobile
+1. **Generate Content**: Use AI prompt to create resource list
+2. **Validate**: Check against JSON schema
+3. **Test Locally**: Open `index.html` in browser
+4. **Deploy**: Update gist and push to GitHub Pages
 
-Enjoy your beautiful AI resources webpage! 🎉
+## 📊 Analytics & Insights
+
+The analysis section provides:
+
+- **Trend Identification**: Spot patterns in resource types
+- **Quality Assessment**: Score distribution analysis
+- **Content Evolution**: Track changes over time
+- **User Guidance**: Help users find relevant resources
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Use the AI prompt to generate quality resources
+3. Ensure content follows HTML formatting requirements
+4. Submit pull request with schema-compliant JSON
+
+## 📄 License
+
+This project is open source. Feel free to use, modify, and distribute.
+
+---
+
+**🚀 Ready to curate the best AI development resources!** Visit the live site or deploy your own version today! 🎉
