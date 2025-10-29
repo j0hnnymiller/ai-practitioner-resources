@@ -337,6 +337,172 @@
           padding: 15px !important;
         }
       }
+
+      /* Footer Styles */
+      .page-footer {
+        background: linear-gradient(135deg, #2c3e50, #34495e);
+        color: white;
+        margin-top: 40px;
+        padding: 40px 0 20px 0;
+        border-top: 4px solid #3498db;
+      }
+
+      .footer-content {
+        max-width: 1200px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 30px;
+        padding: 0 20px;
+      }
+
+      .footer-section h4 {
+        color: #ecf0f1;
+        margin-bottom: 15px;
+        font-size: 1.1em;
+        border-bottom: 2px solid #3498db;
+        padding-bottom: 8px;
+        display: inline-block;
+      }
+
+      .footer-section p {
+        color: #bdc3c7;
+        line-height: 1.6;
+        margin-bottom: 15px;
+      }
+
+      .footer-links {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .footer-links a {
+        color: #3498db;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 12px;
+        border-radius: 6px;
+        transition: all 0.3s ease;
+        background: rgba(52, 152, 219, 0.1);
+        border: 1px solid rgba(52, 152, 219, 0.3);
+      }
+
+      .footer-links a:hover {
+        background: rgba(52, 152, 219, 0.2);
+        border-color: #3498db;
+        transform: translateX(5px);
+      }
+
+      .github-link:hover {
+        color: #f39c12 !important;
+        border-color: #f39c12 !important;
+      }
+
+      .issues-link:hover {
+        color: #e74c3c !important;
+        border-color: #e74c3c !important;
+      }
+
+      .fork-link:hover {
+        color: #27ae60 !important;
+        border-color: #27ae60 !important;
+      }
+
+      .contribute-list {
+        list-style: none;
+        padding: 0;
+      }
+
+      .contribute-list li {
+        color: #bdc3c7;
+        padding: 5px 0;
+        position: relative;
+        padding-left: 20px;
+      }
+
+      .contribute-list li:before {
+        content: "▸";
+        color: #3498db;
+        position: absolute;
+        left: 0;
+        font-weight: bold;
+        speak: none;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+
+      .footer-meta {
+        font-size: 0.9em;
+        color: #95a5a6;
+      }
+
+      .version-info {
+        display: block;
+        margin-bottom: 5px;
+      }
+
+      .license-info {
+        color: #7f8c8d;
+      }
+
+      .footer-bottom {
+        border-top: 1px solid #34495e;
+        margin-top: 30px;
+        padding: 20px;
+        text-align: center;
+        background: rgba(0, 0, 0, 0.1);
+      }
+
+      .footer-bottom p {
+        color: #95a5a6;
+        margin: 0;
+        font-size: 0.9em;
+      }
+
+      .footer-bottom a {
+        color: #3498db;
+        text-decoration: none;
+      }
+
+      .footer-bottom a:hover {
+        color: #5dade2;
+        text-decoration: underline;
+      }
+
+      /* Responsive Footer */
+      @media (max-width: 768px) {
+        .footer-content {
+          grid-template-columns: 1fr;
+          gap: 20px;
+          padding: 0 15px;
+        }
+
+        .page-footer {
+          padding: 30px 0 15px 0;
+        }
+
+        .footer-links {
+          flex-direction: column;
+        }
+
+        .footer-bottom {
+          padding: 15px;
+        }
+
+        .footer-bottom p {
+          font-size: 0.8em;
+        }
+      }
+
+      /* Dark mode support */
+      @media (prefers-color-scheme: dark) {
+        .page-footer {
+          background: linear-gradient(135deg, #1a1a1a, #2d3748);
+        }
+      }
     </style>
   </head>
   <body>
@@ -625,8 +791,24 @@
         document.getElementById("resources").innerHTML = resourcesHtml;
       }
 
+      // Initialize footer with dynamic last updated date
+      function initializeFooter() {
+        const lastUpdated = document.getElementById("last-updated");
+        if (lastUpdated) {
+          const now = new Date();
+          lastUpdated.textContent = now.toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+          });
+        }
+      }
+
       // Load resources when page loads
-      document.addEventListener("DOMContentLoaded", loadResources);
+      document.addEventListener("DOMContentLoaded", function () {
+        loadResources();
+        initializeFooter();
+      });
 
       // For testing with local data (remove this in production)
       if (GIST_CONFIG.url.includes("USERNAME/GIST_ID")) {
@@ -671,5 +853,52 @@
         }, 1000);
       }
     </script>
+
+    <!-- Footer Section -->
+    <footer class="page-footer">
+      <div class="footer-content">
+        <div class="footer-section">
+          <h4>About This Project</h4>
+          <p>An AI-curated collection of the best resources for AI-assisted software development. This is an open-source project that welcomes contributions from the community.</p>
+          <div class="footer-meta">
+            <span class="version-info">Last Updated: <span id="last-updated">Loading...</span></span>
+            <span class="license-info">Open Source Project</span>
+          </div>
+        </div>
+
+        <div class="footer-section">
+          <h4>Repository Links</h4>
+          <div class="footer-links">
+            <a href="https://github.com/j0hnnymiller/ai-practitioner-resources" target="_blank" rel="noopener noreferrer" class="github-link">
+              <span>📦</span> View on GitHub
+            </a>
+            <a href="https://github.com/j0hnnymiller/ai-practitioner-resources/issues" target="_blank" rel="noopener noreferrer" class="issues-link">
+              <span>🐛</span> Report Issues
+            </a>
+            <a href="https://github.com/j0hnnymiller/ai-practitioner-resources/fork" target="_blank" rel="noopener noreferrer" class="fork-link">
+              <span>🍴</span> Fork This Project
+            </a>
+          </div>
+        </div>
+
+        <div class="footer-section">
+          <h4>How to Contribute</h4>
+          <ul class="contribute-list">
+            <li>Submit pull requests with new resources</li>
+            <li>Report bugs or suggest improvements</li>
+            <li>Share the project with others</li>
+            <li>Star the repository on GitHub</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <p>
+          Made with ❤️ by the open source community | 
+          <a href="https://github.com/j0hnnymiller/ai-practitioner-resources" target="_blank" rel="noopener noreferrer">GitHub Repository</a> | 
+          <a href="https://codemag.com" target="_blank" rel="noopener noreferrer">Brought to you by the friendly folks at CODE</a>
+        </p>
+      </div>
+    </footer>
   </body>
 </html>
