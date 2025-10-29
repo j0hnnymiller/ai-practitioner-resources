@@ -216,7 +216,7 @@ async function createIssue(template) {
 async function main() {
   console.log('🚀 GitHub Issue Creator from Templates\n');
   console.log(`Repository: ${REPO_OWNER}/${REPO_NAME}`);
-  console.log('=' .repeat(60));
+  console.log('='.repeat(60));
   
   // Read templates
   const templates = readTemplates();
