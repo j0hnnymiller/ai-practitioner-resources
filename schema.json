@@ -1,0 +1,62 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://example.com/ai-practitioner-resources-schema.json",
+  "title": "AI Practitioner Resources",
+  "description": "Schema for AI and programming resources including books, blogs, articles, and podcasts with metadata",
+  "type": "object",
+  "properties": {
+    "introduction": {
+      "type": "string",
+      "description": "Brief introduction explaining the purpose and value of the resource list"
+    },
+    "resources": {
+      "type": "array",
+      "description": "Array of AI practitioner resources",
+      "items": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": ["Book", "Blog", "Article", "Podcast"],
+            "description": "The type of resource"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The title of the resource"
+          },
+          "source": {
+            "type": "string",
+            "format": "uri",
+            "description": "The URL or source of the resource"
+          },
+          "score": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 100,
+            "description": "Quality score of the resource (0-100)"
+          },
+          "weeks_on_list": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Number of weeks the resource has been on the list"
+          }
+        },
+        "required": ["type", "title", "source", "score", "weeks_on_list"],
+        "additionalProperties": false
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "legend": {
+      "type": "string",
+      "description": "HTML content containing the scoring system legend and explanation of scoring criteria"
+    },
+    "analysis": {
+      "type": "string",
+      "description": "Analysis of this week's list, highlighting trends, notable additions, or insights about the resources"
+    }
+  },
+  "required": ["introduction", "resources", "legend", "analysis"],
+  "additionalProperties": false
+}

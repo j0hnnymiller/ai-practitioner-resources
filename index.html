@@ -205,6 +205,57 @@
         border-left: 5px solid #f44336;
       }
 
+      /* Additional styles for new schema content */
+      .introduction h3,
+      .analysis h3,
+      .legend h3 {
+        color: #2c3e50;
+        margin-bottom: 15px;
+        font-size: 1.3em;
+      }
+
+      .legend .scoring-legend {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+
+      .legend .score-ranges {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin: 15px 0;
+      }
+
+      .legend .score-range {
+        padding: 10px;
+        border-radius: 5px;
+        background: #f8f9fa;
+      }
+
+      .legend .score-range.excellent {
+        border-left: 4px solid #27ae60;
+      }
+
+      .legend .score-range.good {
+        border-left: 4px solid #f39c12;
+      }
+
+      .legend .score-range.fair {
+        border-left: 4px solid #e74c3c;
+      }
+
+      .legend .scoring-criteria ul {
+        margin: 10px 0;
+        padding-left: 20px;
+      }
+
+      .legend .scoring-criteria li {
+        margin: 5px 0;
+        line-height: 1.4;
+      }
+
       @media (max-width: 768px) {
         .filters {
           justify-content: flex-start;
@@ -218,6 +269,13 @@
 
         .stats {
           grid-template-columns: repeat(2, 1fr);
+        }
+
+        .introduction,
+        .legend,
+        .analysis {
+          margin: 10px !important;
+          padding: 15px !important;
         }
       }
     </style>
@@ -236,11 +294,46 @@
       <div id="error" class="error" style="display: none"></div>
 
       <div id="content" style="display: none">
+        <div
+          id="introduction"
+          class="introduction"
+          style="
+            margin: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            line-height: 1.6;
+          "
+        ></div>
+
         <div class="stats" id="stats"></div>
 
         <div class="filters" id="filters"></div>
 
         <div class="resources-grid" id="resources"></div>
+
+        <div
+          id="legend"
+          class="legend"
+          style="
+            margin: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+          "
+        ></div>
+
+        <div
+          id="analysis"
+          class="analysis"
+          style="
+            margin: 20px;
+            padding: 20px;
+            background: #e8f4fd;
+            border-radius: 10px;
+            border-left: 5px solid #3498db;
+          "
+        ></div>
       </div>
     </div>
 
@@ -248,7 +341,7 @@
       // Configuration - Replace with your gist details
       const GIST_CONFIG = {
         // Option 1: Direct gist raw URL
-        url: "https://gist.githubusercontent.com/j0hnnymiller/1a9d84d165a170d6f62cc052db97b8bb/raw/resources.json",
+        url: "https://gist.github.com/j0hnnymiller/1a9d84d165a170d6f62cc052db97b8bb/raw/8a640370d03439eff1241ac62f55e2a67f5b61dc/resources.json",
 
         // Option 2: GitHub API (for more control)
         // apiUrl: 'https://api.github.com/gists/GIST_ID',
@@ -256,6 +349,7 @@
       };
 
       let allResources = [];
+      let resourceData = {};
       let currentFilter = "All";
 
       async function loadResources() {
@@ -264,7 +358,7 @@
           if (GIST_CONFIG.url) {
             const response = await fetch(GIST_CONFIG.url);
             if (!response.ok) throw new Error(`HTTP ${response.status}`);
-            allResources = await response.json();
+            resourceData = await response.json();
           }
 
           // Method 2: GitHub API (more robust)
@@ -273,15 +367,21 @@
             if (!response.ok) throw new Error(`HTTP ${response.status}`);
             const gistData = await response.json();
             const fileContent = gistData.files[GIST_CONFIG.filename].content;
-            allResources = JSON.parse(fileContent);
+            resourceData = JSON.parse(fileContent);
           }
+
+          // Extract resources array from new schema structure
+          allResources = resourceData.resources || resourceData;
 
           document.getElementById("loading").style.display = "none";
           document.getElementById("content").style.display = "block";
 
+          renderIntroduction();
           renderStats();
           renderFilters();
           renderResources();
+          renderLegend();
+          renderAnalysis();
         } catch (error) {
           console.error("Error loading resources:", error);
           document.getElementById("loading").style.display = "none";
@@ -297,6 +397,36 @@
                         <li>Replace the GIST_CONFIG.url in this HTML file</li>
                     </ol>
                 `;
+        }
+      }
+
+      function renderIntroduction() {
+        const introElement = document.getElementById("introduction");
+        if (resourceData.introduction) {
+          introElement.innerHTML = `<h3>📚 About This Collection</h3><p>${resourceData.introduction}</p>`;
+          introElement.style.display = "block";
+        } else {
+          introElement.style.display = "none";
+        }
+      }
+
+      function renderLegend() {
+        const legendElement = document.getElementById("legend");
+        if (resourceData.legend) {
+          legendElement.innerHTML = resourceData.legend;
+          legendElement.style.display = "block";
+        } else {
+          legendElement.style.display = "none";
+        }
+      }
+
+      function renderAnalysis() {
+        const analysisElement = document.getElementById("analysis");
+        if (resourceData.analysis) {
+          analysisElement.innerHTML = `<h3>📈 This Week's Analysis</h3><p>${resourceData.analysis}</p>`;
+          analysisElement.style.display = "block";
+        } else {
+          analysisElement.style.display = "none";
         }
       }
 
@@ -384,7 +514,7 @@
                         </a>
                     </div>
                     <div class="resource-meta">
-                        <div class="score">${resource.score}/100</div>
+                        <div class="score">${resource.score}</div>
                         <div class="weeks-badge">${
                           resource.weeks_on_list
                         } week${resource.weeks_on_list !== 1 ? "s" : ""}</div>
@@ -407,12 +537,22 @@
           fetch("./resources.json")
             .then((response) => response.json())
             .then((data) => {
-              allResources = data;
+              // Handle both old array format and new object format
+              if (Array.isArray(data)) {
+                resourceData = { resources: data };
+                allResources = data;
+              } else {
+                resourceData = data;
+                allResources = data.resources || [];
+              }
               document.getElementById("loading").style.display = "none";
               document.getElementById("content").style.display = "block";
+              renderIntroduction();
               renderStats();
               renderFilters();
               renderResources();
+              renderLegend();
+              renderAnalysis();
             })
             .catch((error) => {
               // Show demo message if local file not found
