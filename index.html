@@ -154,6 +154,30 @@
         color: #8bc34a;
       }
 
+      .new-tag {
+        display: inline-block;
+        background: #e74c3c;
+        color: white;
+        font-size: 0.7em;
+        font-weight: bold;
+        padding: 2px 6px;
+        border-radius: 10px;
+        margin-left: 8px;
+        animation: pulse 2s infinite;
+      }
+
+      @keyframes pulse {
+        0% { opacity: 1; }
+        50% { opacity: 0.7; }
+        100% { opacity: 1; }
+      }
+
+      .resource-type-container {
+        display: flex;
+        align-items: center;
+        margin-bottom: 10px;
+      }
+
       .resource-title {
         font-size: 1.2em;
         font-weight: bold;
@@ -502,9 +526,12 @@
           .map(
             (resource) => `
                 <div class="resource-card">
-                    <div class="resource-type type-${resource.type.toLowerCase()}">${
+                    <div class="resource-type-container">
+                        <div class="resource-type type-${resource.type.toLowerCase()}">${
               resource.type
             }</div>
+                        ${resource.weeks_on_list === 1 ? '<span class="new-tag">NEW</span>' : ''}
+                    </div>
                     <div class="resource-title">${resource.title}</div>
                     <div class="resource-source">
                         <a href="${
