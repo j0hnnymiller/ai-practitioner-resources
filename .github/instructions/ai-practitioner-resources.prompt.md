@@ -1,3 +1,5 @@
+This is the original prompt used to generate the AI Practitioner Resources list. It's been replaced by the JSON-specific prompt .github\instructions\ai-practitioner-resources.prompt.md
+
 Provide a list containing the best books, articles, blog posts, and podcasts that are good resources for using AI to generate code.
 
 Organize the books by practical hands-on coding value using these four categories:
@@ -49,4 +51,3 @@ At the very end of the output, include a reminder:
 Format the output as:
 - A clean Markdown table under each Category heading
 - Followed by the legend, scoring explanation, the prompt, the JSON array, and the reminder.
-

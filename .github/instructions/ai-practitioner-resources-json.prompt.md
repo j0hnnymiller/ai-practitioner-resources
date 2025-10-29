@@ -37,11 +37,21 @@ The output must be a JSON object with these four required properties:
    - Color-coded score ranges (use emoji or CSS for colors)
    - Explanation of scoring criteria and weightings
    - Visual representation of the scoring scale
+   - Must use proper HTML formatting (no Markdown)
 4. **analysis**: A string containing analysis of this week's list, such as:
    - Notable trends or patterns in the resources
    - New additions or changes from previous weeks
    - Insights about the AI coding landscape
    - Distribution of resource types and scores
+
+Important Formatting Requirements:
+
+- **Use HTML formatting, NOT Markdown**: All text content should use HTML tags instead of Markdown syntax
+- **Bold text**: Use `<strong>` tags instead of `**bold**`
+- **Emphasis**: Use `<em>` tags instead of `*italic*`
+- **Lists**: Use `<ul>` and `<li>` tags instead of `-` or `*`
+- **Headers**: Use `<h4>`, `<h5>` etc. instead of `####`
+- **Code**: Use `<code>` tags instead of backticks
 
 Output Requirements:
 
@@ -49,6 +59,8 @@ Output Requirements:
 - All four properties (introduction, resources, legend, analysis) must be present
 - The resources array should contain 15-25 high-quality resources
 - HTML in the legend should be properly escaped for JSON
-- Analysis should provide meaningful insights about the current selection
+- \*\*Analysis should provide meaningful insights about the current selection
+- **Analysis content must use HTML formatting** with `<strong>` tags for bold text and proper HTML structure
+- **No Markdown syntax** should be used in any text fields (introduction, legend, analysis, blurb)
 
 The JSON output must be valid and conform exactly to the AI Practitioner Resources schema structure.
