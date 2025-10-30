@@ -684,7 +684,7 @@
         }
         // Method 2: Split by HTML break tags
         else if (cleanText.includes("<br>") || cleanText.includes("<br/>")) {
-          points = cleanText.split(/<br\s*\/?>/i).filter((p) => p.trim());
+          points = cleanText.split(/(\s*<br\s*\/?>\s*){2,}/i).filter((p) => p.trim());
         }
         // Method 3: Treat as single flowing narrative
         else {
