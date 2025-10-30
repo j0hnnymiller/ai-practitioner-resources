@@ -92,10 +92,45 @@ async function generateResources() {
         throw new Error("No JSON object found in response");
       }
 
-      const jsonOnly = cleanedResponse.substring(jsonStart, jsonEnd);
+      let jsonOnly = cleanedResponse.substring(jsonStart, jsonEnd);
       console.log("🧹 Cleaned JSON for parsing");
 
-      const resources = JSON.parse(jsonOnly);
+      // Try to fix common JSON issues
+      // Fix trailing commas
+      jsonOnly = jsonOnly.replace(/,(\s*[}\]])/g, "$1");
+      
+      // Try multiple parsing strategies
+      let resources;
+      try {
+        resources = JSON.parse(jsonOnly);
+      } catch (firstError) {
+        console.log("🔧 First parse failed, trying to fix common issues...");
+        
+        // Try to fix unescaped quotes by adding backslashes
+        let fixedJson = jsonOnly.replace(/([^\\])"/g, (match, p1, offset, string) => {
+          // Don't fix if it's a proper JSON delimiter
+          const before = string[offset - 1];
+          const after = string[offset + 2];
+          if (before === ':' || before === ',' || before === '[' || before === '{' ||
+              after === ',' || after === '}' || after === ']' || after === ':') {
+            return match;
+          }
+          return p1 + '\\"';
+        });
+        
+        try {
+          resources = JSON.parse(fixedJson);
+          console.log("✅ Fixed JSON parsing succeeded");
+        } catch (secondError) {
+          console.log("🔧 Second parse failed, trying manual property fixing...");
+          
+          // Last resort: try to fix property names that might be unquoted
+          fixedJson = fixedJson.replace(/([{,]\s*)([a-zA-Z_][a-zA-Z0-9_]*)\s*:/g, '$1"$2":');
+          
+          resources = JSON.parse(fixedJson);
+          console.log("✅ Manual property fixing succeeded");
+        }
+      }
 
       // Basic validation
       if (!resources.resources || !Array.isArray(resources.resources)) {
