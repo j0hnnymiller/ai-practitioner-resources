@@ -54,7 +54,7 @@ async function generateResources() {
     console.log("⏳ Calling OpenAI API (this may take a minute)...");
 
     const completion = await openai.chat.completions.create({
-      model: "gpt-4",
+      model: "gpt-3.5-turbo",
       messages: [
         {
           role: "system",
