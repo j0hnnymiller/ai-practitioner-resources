@@ -59,7 +59,7 @@ async function generateResources() {
         {
           role: "system",
           content:
-            "You are an AI assistant that generates JSON data according to schemas. Return only valid JSON with no additional text.",
+            "You are an AI assistant that generates JSON data according to schemas. Return ONLY valid JSON with no additional text, explanations, or markdown formatting. Ensure all property names and string values are properly quoted with double quotes.",
         },
         {
           role: "user",
@@ -76,7 +76,26 @@ async function generateResources() {
 
     // Parse and validate JSON
     try {
-      const resources = JSON.parse(jsonResponse);
+      // Clean up the response - sometimes AI adds markdown or extra text
+      let cleanedResponse = jsonResponse.trim();
+
+      // Remove markdown code blocks if present
+      cleanedResponse = cleanedResponse
+        .replace(/```json\n?/g, "")
+        .replace(/```\n?/g, "");
+
+      // Find JSON object boundaries
+      const jsonStart = cleanedResponse.indexOf("{");
+      const jsonEnd = cleanedResponse.lastIndexOf("}") + 1;
+
+      if (jsonStart === -1 || jsonEnd === 0) {
+        throw new Error("No JSON object found in response");
+      }
+
+      const jsonOnly = cleanedResponse.substring(jsonStart, jsonEnd);
+      console.log("🧹 Cleaned JSON for parsing");
+
+      const resources = JSON.parse(jsonOnly);
 
       // Basic validation
       if (!resources.resources || !Array.isArray(resources.resources)) {
@@ -105,7 +124,23 @@ async function generateResources() {
       return resources;
     } catch (parseError) {
       console.error("❌ Failed to parse JSON response:", parseError.message);
+      console.error("Full response:", jsonResponse);
       console.error("Response preview:", jsonResponse.substring(0, 500));
+
+      // Try to save the raw response for debugging
+      try {
+        const tmpDir = "/tmp";
+        if (!fs.existsSync(tmpDir)) {
+          fs.mkdirSync(tmpDir, { recursive: true });
+        }
+        fs.writeFileSync(path.join(tmpDir, "raw-response.txt"), jsonResponse);
+        console.log(
+          "🔍 Raw response saved to /tmp/raw-response.txt for debugging"
+        );
+      } catch (saveError) {
+        console.error("Could not save raw response:", saveError.message);
+      }
+
       throw new Error(`Invalid JSON generated: ${parseError.message}`);
     }
   } catch (error) {
