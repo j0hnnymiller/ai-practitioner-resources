@@ -9,10 +9,26 @@ node_modules/
 .env
 .env.local
 
+# Test resources file
+resources.json
+
 # Logs
 *.log
 npm-debug.log*
 
 # OS files
+yarn-debug.log*
+yarn-error.log*
+
+# Editor directories and files
+.idea
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# OS
 .DS_Store
 Thumbs.db
