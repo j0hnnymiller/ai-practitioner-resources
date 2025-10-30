@@ -48,23 +48,23 @@ async function generateResources() {
   try {
     console.log("⏳ Calling OpenAI API (this may take a minute)...");
 
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
+    const response = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': ANTHROPIC_API_KEY,
-        'anthropic-version': '2023-06-01'
+        "Content-Type": "application/json",
+        "x-api-key": ANTHROPIC_API_KEY,
+        "anthropic-version": "2023-06-01",
       },
       body: JSON.stringify({
-        model: 'claude-3-5-sonnet-20241022',
-        max_tokens: 8000,
+        model: "claude-sonnet-4-20250514",
+        max_tokens: 10000,
         messages: [
           {
-            role: 'user',
-            content: `You are an expert AI researcher who curates high-quality resources for developers. Generate ONLY valid JSON with no additional text. Requirements: 1) Use REAL, ACTUAL resources with genuine URLs (never use example.com or placeholder links), 2) Include 15-25 diverse resources from reputable sources like official documentation, established publishers (O'Reilly, Manning, Pragmatic Programmers), respected blogs (Martin Fowler, Stack Overflow), and popular podcasts, 3) Ensure all property names and string values are properly quoted with double quotes.\n\n${promptContent}`
-          }
-        ]
-      })
+            role: "user",
+            content: `You are an expert AI researcher who curates high-quality resources for developers. Generate ONLY valid JSON with no additional text. Requirements: 1) Use REAL, ACTUAL resources with genuine URLs (never use example.com or placeholder links), 2) Include 15-25 diverse resources from reputable sources like official documentation, established publishers (O'Reilly, Manning, Pragmatic Programmers), respected blogs (Martin Fowler, Stack Overflow), and popular podcasts, 3) Ensure all property names and string values are properly quoted with double quotes.\n\n${promptContent}`,
+          },
+        ],
+      }),
     });
 
     if (!response.ok) {
