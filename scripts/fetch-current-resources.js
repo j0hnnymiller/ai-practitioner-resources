@@ -7,7 +7,7 @@
  * and saves it to /tmp/current-resources.json for use by merge script.
  * 
  * Required environment variables:
- *   - GITHUB_GIST_TOKEN: Personal access token with gist permissions
+ *   - GIST_TOKEN: Personal access token with gist permissions
  *   - GIST_ID: The ID of the target gist
  */
 
@@ -16,12 +16,12 @@ const fs = require('fs');
 const path = require('path');
 
 // Configuration
-const GITHUB_GIST_TOKEN = process.env.GITHUB_GIST_TOKEN;
+const GIST_TOKEN = process.env.GIST_TOKEN;
 const GIST_ID = process.env.GIST_ID;
 
 // Validate configuration
-if (!GITHUB_GIST_TOKEN) {
-  console.error('❌ Error: GITHUB_GIST_TOKEN environment variable is required');
+if (!GIST_TOKEN) {
+  console.error('❌ Error: GIST_TOKEN environment variable is required');
   process.exit(1);
 }
 
@@ -42,7 +42,7 @@ async function fetchCurrentResources() {
   try {
     const response = await fetch(gistUrl, {
       headers: {
-        'Authorization': `token ${GITHUB_GIST_TOKEN}`,
+        'Authorization': `token ${GIST_TOKEN}`,
         'Accept': 'application/vnd.github.v3+json',
         'User-Agent': 'ai-practitioner-resources-automation'
       }

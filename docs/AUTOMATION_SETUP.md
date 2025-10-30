@@ -41,7 +41,7 @@ This guide will help you set up the automated weekly AI resources generation sys
    - **Name:** `OPENAI_API_KEY`  
      **Value:** Your OpenAI API key from step 3
 
-   - **Name:** `GITHUB_GIST_TOKEN`  
+   - **Name:** `GIST_TOKEN`  
      **Value:** Your GitHub personal access token from step 2
 
    - **Name:** `GIST_ID`  
@@ -79,7 +79,7 @@ This guide will help you set up the automated weekly AI resources generation sys
 **Problem:** GitHub token permissions issue  
 **Solution:**
 - Regenerate the GitHub token with `gist` scope
-- Update the `GITHUB_GIST_TOKEN` secret
+- Update the `GIST_TOKEN` secret
 
 ### Resources Not Merging Correctly
 
@@ -122,7 +122,7 @@ Test the automation locally before running in GitHub Actions:
 ```bash
 # Set environment variables
 export OPENAI_API_KEY="your-key-here"
-export GITHUB_GIST_TOKEN="your-token-here"
+export GIST_TOKEN="your-token-here"
 export GIST_ID="your-gist-id"
 
 # Install dependencies
