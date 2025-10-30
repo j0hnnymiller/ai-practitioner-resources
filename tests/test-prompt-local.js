@@ -28,6 +28,7 @@ if (!ANTHROPIC_API_KEY) {
 
 const PROMPT_PATH = path.join(
   __dirname,
+  "..",
   ".github",
   "instructions",
   "ai-practitioner-resources-json.prompt.md"

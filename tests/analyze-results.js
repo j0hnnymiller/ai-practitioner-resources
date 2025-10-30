@@ -13,7 +13,7 @@ function compareRuns() {
   console.log("");
 
   // Check if we have the current results
-  const artifactsPath = "automation-results";
+  const artifactsPath = path.join(__dirname, "..", "automation-results");
   if (!fs.existsSync(artifactsPath)) {
     console.log("❌ No automation-results directory found");
     console.log("💡 Run: gh run download <run-id> to get artifacts");

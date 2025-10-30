@@ -1,0 +1,27 @@
+{
+  "timestamp": "2025-10-30T12:05:35.085Z",
+  "current": {
+    "total": 20
+  },
+  "generated": {
+    "total": 23
+  },
+  "merged": {
+    "total": 23
+  },
+  "statistics": {
+    "typeDistribution": {
+      "Book": 5,
+      "Article": 9,
+      "Blog": 5,
+      "Podcast": 4
+    },
+    "newResources": 23,
+    "continuingResources": 0,
+    "averageScore": 87,
+    "scoreRange": {
+      "min": 80,
+      "max": 94
+    }
+  }
+}

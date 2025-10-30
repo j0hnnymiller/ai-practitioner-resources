@@ -1,0 +1,29 @@
+{
+  "introduction": "Test new resources including some matching and some new ones",
+  "resources": [
+    {
+      "type": "Book",
+      "title": "AI-Powered Software Development: A Practical Guide",
+      "source": "https://www.oreilly.com/library/view/ai-powered-software-development/9781098148591/",
+      "score": 92,
+      "weeks_on_list": 1,
+      "blurb": "Comprehensive guide covering AI tools."
+    },
+    {
+      "type": "Article",
+      "title": "GitHub Copilot: Getting the Most Out of Your AI Pair Programmer",
+      "source": "https://github.blog/2023-06-20-how-to-write-better-prompts-for-github-copilot/",
+      "score": 89,
+      "weeks_on_list": 1,
+      "blurb": "Official GitHub guide on optimizing prompts."
+    },
+    {
+      "type": "Blog",
+      "title": "New AI Development Blog Post",
+      "source": "https://example.com/new-blog-post",
+      "score": 85,
+      "weeks_on_list": 1,
+      "blurb": "A brand new resource about AI development."
+    }
+  ]
+}
