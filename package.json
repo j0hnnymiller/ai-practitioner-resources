@@ -13,7 +13,6 @@
     "run-automation": "npm run fetch-current && npm run generate && npm run merge && npm run validate && npm run update-gist && npm run create-summary"
   },
   "dependencies": {
-    "openai": "^4.20.0",
     "node-fetch": "^2.7.0",
     "ajv": "^8.12.0",
     "ajv-formats": "^2.1.1"

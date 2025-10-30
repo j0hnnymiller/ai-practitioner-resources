@@ -7,7 +7,7 @@ on:
   workflow_dispatch: # Allow manual triggering
 
 env:
-  OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+  ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
   GIST_TOKEN: ${{ secrets.GIST_TOKEN }}
   GIST_ID: ${{ secrets.GIST_ID }}
 

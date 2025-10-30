@@ -1,0 +1,39 @@
+{
+  "introduction": "This comprehensive list highlights top-tier resources for using AI to generate code, focusing on practical hands-on coding value, clarity, accessibility, depth, completeness, relevance, and recency. Each resource is scored based on these criteria to help AI developers find valuable insights and tools.",
+  "resources": [
+    {
+      "type": "Book",
+      "title": "AI Powered Coding: How AI is Transforming Software Development",
+      "source": "https://www.springer.com/gp/book/9783030712975",
+      "score": 92,
+      "weeks_on_list": 1,
+      "blurb": "Explores the impact of AI on software development, providing practical insights on AI-powered coding tools and techniques."
+    },
+    {
+      "type": "Article",
+      "title": "The Rise of AI-Powered Coding Tools",
+      "source": "https://towardsdatascience.com/the-rise-of-ai-powered-coding-tools-87b2a0b1f6d4",
+      "score": 85,
+      "weeks_on_list": 1,
+      "blurb": "An in-depth look at the evolution of AI-powered coding tools and their practical applications in software development workflows."
+    },
+    {
+      "type": "Blog",
+      "title": "Mastering Prompt Engineering for Code Generation",
+      "source": "https://blog.openai.com/mastering-prompt-engineering/",
+      "score": 88,
+      "weeks_on_list": 1,
+      "blurb": "Provides actionable insights and techniques for effective prompt engineering in AI-assisted code generation tasks."
+    },
+    {
+      "type": "Podcast",
+      "title": "AI in Programming: Practical Applications and Future Trends",
+      "source": "https://www.listennotes.com/c/546f7c6b5f4a4b1e836c3b9a9e33f0d4/",
+      "score": 80,
+      "weeks_on_list": 1,
+      "blurb": "Discusses real-world applications of generative AI in programming, offering insights into the future of AI in software development."
+    }
+  ],
+  "legend": "<h4>Scoring System Legend</h4><ul><li><strong>90-100</strong>: Excellent, top-tier resources with exceptional practical value</li><li><strong>75-89</strong>: Solid, useful resources with good practical application</li><li><strong>0-74</strong>: Weaker resources, less practical or more theoretical</li></ul><h4>Scoring Criteria and Weightings</h4><ul><li><strong>Practical hands-on coding value:</strong> 40%</li><li><strong>Clarity and accessibility:</strong> 25%</li><li><strong>Depth and completeness:</strong> 20%</li><li><strong>Relevance and recency:</strong> 15%</li></ul><h4>Visual Representation of the Scoring Scale</h4><p><strong>90-100</strong>: &#127775; <strong>75-89</strong>: &#128077; <strong>0-74</strong>: &#128078;</p>",
+  "analysis": "<strong>Analysis:</strong><p>The current list showcases a diverse range of high-quality resources covering AI-powered coding tools, GitHub Copilot, prompt engineering, and practical applications of generative AI in programming. Notable trends include a strong emphasis on practical hands-on coding value and an increased focus on prompt engineering techniques. The distribution of resource types is well-balanced, offering a comprehensive view of AI in code generation.</p>"
+}

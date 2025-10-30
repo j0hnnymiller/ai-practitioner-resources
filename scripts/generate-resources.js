@@ -1,21 +1,20 @@
 #!/usr/bin/env node
 
 /**
- * Generate new resources using OpenAI API
+ * Generate new resources using Anthropic Claude API
  *
  * This script reads the AI prompt from the instructions directory,
- * sends it to OpenAI API, and saves the generated JSON to /tmp/new-resources.json
+ * sends it to Claude API, and saves the generated JSON to /tmp/new-resources.json
  *
  * Required environment variables:
- *   - OPENAI_API_KEY: API key for OpenAI GPT-4 access
+ *   - ANTHROPIC_API_KEY: API key for Claude access
  */
 
-const { OpenAI } = require("openai");
 const fs = require("fs");
 const path = require("path");
 
 // Configuration
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
 const PROMPT_PATH = path.join(
   __dirname,
   "..",
@@ -25,8 +24,8 @@ const PROMPT_PATH = path.join(
 );
 
 // Validate configuration
-if (!OPENAI_API_KEY) {
-  console.error("❌ Error: OPENAI_API_KEY environment variable is required");
+if (!ANTHROPIC_API_KEY) {
+  console.error("❌ Error: ANTHROPIC_API_KEY environment variable is required");
   process.exit(1);
 }
 
@@ -36,14 +35,10 @@ if (!fs.existsSync(PROMPT_PATH)) {
 }
 
 /**
- * Generate resources using OpenAI API
+ * Generate resources using Anthropic Claude API
  */
 async function generateResources() {
-  console.log("🤖 Generating new resources using OpenAI API...");
-
-  const openai = new OpenAI({
-    apiKey: OPENAI_API_KEY,
-  });
+  console.log("🤖 Generating new resources using Anthropic Claude API...");
 
   // Read the prompt file
   const promptContent = fs.readFileSync(PROMPT_PATH, "utf8");
@@ -53,25 +48,33 @@ async function generateResources() {
   try {
     console.log("⏳ Calling OpenAI API (this may take a minute)...");
 
-    const completion = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
-      messages: [
-        {
-          role: "system",
-          content:
-            "You are an expert AI researcher who curates high-quality resources for developers. Generate ONLY valid JSON with no additional text. Requirements: 1) Use REAL, ACTUAL resources with genuine URLs (never use example.com or placeholder links), 2) Include 15-25 diverse resources from reputable sources like official documentation, established publishers (O'Reilly, Manning, Pragmatic Programmers), respected blogs (Martin Fowler, Stack Overflow), and popular podcasts, 3) Ensure all property names and string values are properly quoted with double quotes.",
-        },
-        {
-          role: "user",
-          content: promptContent,
-        },
-      ],
-      temperature: 0.7,
-      max_tokens: 6000,
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': ANTHROPIC_API_KEY,
+        'anthropic-version': '2023-06-01'
+      },
+      body: JSON.stringify({
+        model: 'claude-3-5-sonnet-20241022',
+        max_tokens: 8000,
+        messages: [
+          {
+            role: 'user',
+            content: `You are an expert AI researcher who curates high-quality resources for developers. Generate ONLY valid JSON with no additional text. Requirements: 1) Use REAL, ACTUAL resources with genuine URLs (never use example.com or placeholder links), 2) Include 15-25 diverse resources from reputable sources like official documentation, established publishers (O'Reilly, Manning, Pragmatic Programmers), respected blogs (Martin Fowler, Stack Overflow), and popular podcasts, 3) Ensure all property names and string values are properly quoted with double quotes.\n\n${promptContent}`
+          }
+        ]
+      })
     });
 
-    const jsonResponse = completion.choices[0].message.content;
-    console.log("✅ Received response from OpenAI");
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Claude API error: ${response.status} ${errorText}`);
+    }
+
+    const result = await response.json();
+    const jsonResponse = result.content[0].text;
+    console.log("✅ Received response from Claude");
     console.log(`   Response length: ${jsonResponse.length} characters`);
 
     // Parse and validate JSON
