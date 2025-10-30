@@ -41,7 +41,7 @@ on:
 
 env:
   OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-  GIST_TOKEN: ${{ secrets.GIST_TOKEN }}
+  GIST_TOKEN: ${{ secrets_GIST_TOKEN }}
   GIST_ID: ${{ secrets.GIST_ID }}
 
 jobs:
