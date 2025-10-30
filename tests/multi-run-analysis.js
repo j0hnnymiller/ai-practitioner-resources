@@ -17,7 +17,7 @@ function analyzeMultipleRuns() {
   // Load data from all runs
   console.log("\n📊 LOADING RUN DATA:");
   runs.forEach((runDir, index) => {
-    const runPath = path.join(runDir, "automation-results");
+    const runPath = path.join(__dirname, "results", runDir, "automation-results");
 
     if (!fs.existsSync(runPath)) {
       console.log(`   ❌ ${runDir}: No data found`);

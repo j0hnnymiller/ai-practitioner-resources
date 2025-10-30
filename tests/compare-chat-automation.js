@@ -5,6 +5,7 @@
  */
 
 const fs = require("fs");
+const path = require("path");
 
 function compareResults() {
   console.log("🔍 Comparing Chat vs Automation Results");
@@ -12,13 +13,14 @@ function compareResults() {
 
   // Load results
   const chatResults = JSON.parse(
-    fs.readFileSync("chat-generated-results.json", "utf8")
+    fs.readFileSync(path.join(__dirname, "results", "chat-generated-results.json"), "utf8")
   );
 
   let automationResults = null;
-  if (fs.existsSync("automation-results/merged-resources.json")) {
+  const automationPath = path.join(__dirname, "..", "automation-results/merged-resources.json");
+  if (fs.existsSync(automationPath)) {
     automationResults = JSON.parse(
-      fs.readFileSync("automation-results/merged-resources.json", "utf8")
+      fs.readFileSync(automationPath, "utf8")
     );
   }
 

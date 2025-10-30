@@ -12,6 +12,7 @@ const path = require("path");
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
 const PROMPT_PATH = path.join(
   __dirname,
+  "..",
   ".github",
   "instructions",
   "ai-practitioner-resources-json.prompt.md"

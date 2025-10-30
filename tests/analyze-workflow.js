@@ -5,6 +5,7 @@
  */
 
 const fs = require("fs");
+const path = require("path");
 
 function analyzeWorkflowRun() {
   console.log("📊 COMPREHENSIVE WORKFLOW ANALYSIS");
@@ -12,13 +13,13 @@ function analyzeWorkflowRun() {
 
   // Load all the files
   const current = JSON.parse(
-    fs.readFileSync("automation-results/current-resources.json", "utf8")
+    fs.readFileSync(path.join(__dirname, "..", "automation-results/current-resources.json"), "utf8")
   );
   const newRes = JSON.parse(
-    fs.readFileSync("automation-results/new-resources.json", "utf8")
+    fs.readFileSync(path.join(__dirname, "..", "automation-results/new-resources.json"), "utf8")
   );
   const merged = JSON.parse(
-    fs.readFileSync("automation-results/merged-resources.json", "utf8")
+    fs.readFileSync(path.join(__dirname, "..", "automation-results/merged-resources.json"), "utf8")
   );
 
   console.log("\n🔢 RESOURCE COUNTS:");

@@ -12,6 +12,9 @@ node_modules/
 # Test resources file
 resources.json
 
+# Test results
+tests/results/
+
 # Logs
 *.log
 npm-debug.log*
