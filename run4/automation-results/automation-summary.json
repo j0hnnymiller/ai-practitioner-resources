@@ -1,7 +1,7 @@
 {
-  "timestamp": "2025-10-30T13:12:49.738Z",
+  "timestamp": "2025-10-30T10:04:07.853Z",
   "current": {
-    "total": 23
+    "total": 21
   },
   "generated": {
     "total": 20
@@ -12,16 +12,16 @@
   "statistics": {
     "typeDistribution": {
       "Book": 3,
-      "Article": 7,
-      "Blog": 6,
+      "Article": 9,
+      "Blog": 4,
       "Podcast": 4
     },
-    "newResources": 19,
-    "continuingResources": 1,
-    "averageScore": 86,
+    "newResources": 20,
+    "continuingResources": 0,
+    "averageScore": 84,
     "scoreRange": {
-      "min": 80,
-      "max": 95
+      "min": 76,
+      "max": 92
     }
   }
 }
