@@ -2,34 +2,34 @@
 
 /**
  * Update GitHub Gist with merged resources
- * 
+ *
  * This script:
  * 1. Reads the merged resources from /tmp/merged-resources.json
  * 2. Updates the gist with both resources.json (current) and a timestamped version
  * 3. Provides archive functionality with dated backups
- * 
+ *
  * Required environment variables:
- *   - GITHUB_GIST_TOKEN: Personal access token with gist permissions
+ *   - GIST_TOKEN: Personal access token with gist permissions
  *   - GIST_ID: The ID of the target gist
  */
 
-const fetch = require('node-fetch');
-const fs = require('fs');
-const path = require('path');
+const fetch = require("node-fetch");
+const fs = require("fs");
+const path = require("path");
 
 // Configuration
-const GITHUB_GIST_TOKEN = process.env.GITHUB_GIST_TOKEN;
+const GIST_TOKEN = process.env.GIST_TOKEN;
 const GIST_ID = process.env.GIST_ID;
-const MERGED_RESOURCES_PATH = path.join('/tmp', 'merged-resources.json');
+const MERGED_RESOURCES_PATH = path.join("/tmp", "merged-resources.json");
 
 // Validate configuration
-if (!GITHUB_GIST_TOKEN) {
-  console.error('❌ Error: GITHUB_GIST_TOKEN environment variable is required');
+if (!GIST_TOKEN) {
+  console.error("❌ Error: GIST_TOKEN environment variable is required");
   process.exit(1);
 }
 
 if (!GIST_ID) {
-  console.error('❌ Error: GIST_ID environment variable is required');
+  console.error("❌ Error: GIST_ID environment variable is required");
   process.exit(1);
 }
 
@@ -37,17 +37,20 @@ if (!GIST_ID) {
  * Update gist with merged resources
  */
 async function updateGist() {
-  console.log('📤 Updating GitHub Gist...');
+  console.log("📤 Updating GitHub Gist...");
   console.log(`   Gist ID: ${GIST_ID}`);
 
   // Read merged resources
   if (!fs.existsSync(MERGED_RESOURCES_PATH)) {
-    console.error('❌ Error: Merged resources file not found at:', MERGED_RESOURCES_PATH);
+    console.error(
+      "❌ Error: Merged resources file not found at:",
+      MERGED_RESOURCES_PATH
+    );
     process.exit(1);
   }
 
-  const mergedResources = fs.readFileSync(MERGED_RESOURCES_PATH, 'utf8');
-  const timestamp = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
+  const mergedResources = fs.readFileSync(MERGED_RESOURCES_PATH, "utf8");
+  const timestamp = new Date().toISOString().split("T")[0]; // YYYY-MM-DD format
 
   console.log(`   Timestamp: ${timestamp}`);
 
@@ -56,54 +59,56 @@ async function updateGist() {
   // Prepare update data with both current and archived versions
   const updateData = {
     files: {
-      'resources.json': {
-        content: mergedResources
+      "resources.json": {
+        content: mergedResources,
       },
       [`resources.${timestamp}.json`]: {
-        content: mergedResources
-      }
-    }
+        content: mergedResources,
+      },
+    },
   };
 
   try {
     const response = await fetch(gistUrl, {
-      method: 'PATCH',
+      method: "PATCH",
       headers: {
-        'Authorization': `token ${GITHUB_GIST_TOKEN}`,
-        'Accept': 'application/vnd.github.v3+json',
-        'Content-Type': 'application/json',
-        'User-Agent': 'ai-practitioner-resources-automation'
+        Authorization: `token ${GIST_TOKEN}`,
+        Accept: "application/vnd.github.v3+json",
+        "Content-Type": "application/json",
+        "User-Agent": "ai-practitioner-resources-automation",
       },
-      body: JSON.stringify(updateData)
+      body: JSON.stringify(updateData),
     });
 
     if (!response.ok) {
       const errorText = await response.text();
-      throw new Error(`Failed to update gist: ${response.status} ${response.statusText}\n${errorText}`);
+      throw new Error(
+        `Failed to update gist: ${response.status} ${response.statusText}\n${errorText}`
+      );
     }
 
     const result = await response.json();
 
-    console.log('✅ Gist updated successfully');
+    console.log("✅ Gist updated successfully");
     console.log(`   Current version: resources.json`);
     console.log(`   Archived version: resources.${timestamp}.json`);
     console.log(`   Gist URL: ${result.html_url}`);
 
     return result;
   } catch (error) {
-    console.error('❌ Failed to update gist:', error.message);
+    console.error("❌ Failed to update gist:", error.message);
     process.exit(1);
   }
 }
 
 // Main execution
 async function main() {
-  console.log('🚀 Update Gist Script\n');
+  console.log("🚀 Update Gist Script\n");
   await updateGist();
-  console.log('\n✨ Done!\n');
+  console.log("\n✨ Done!\n");
 }
 
-main().catch(error => {
-  console.error('❌ Fatal error:', error);
+main().catch((error) => {
+  console.error("❌ Fatal error:", error);
   process.exit(1);
 });

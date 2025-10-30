@@ -8,7 +8,7 @@ on:
 
 env:
   OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-  GITHUB_GIST_TOKEN: ${{ secrets.GITHUB_GIST_TOKEN }}
+  GIST_TOKEN: ${{ secrets.GIST_TOKEN }}
   GIST_ID: ${{ secrets.GIST_ID }}
 
 permissions:

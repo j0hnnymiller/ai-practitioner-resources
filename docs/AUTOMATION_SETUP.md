@@ -38,13 +38,13 @@ This guide will help you set up the automated weekly AI resources generation sys
 1. In your GitHub repository, go to Settings → Secrets and variables → Actions
 2. Click "New repository secret" and add three secrets:
 
-   - **Name:** `OPENAI_API_KEY`  
+   - **Name:** `OPENAI_API_KEY`
      **Value:** Your OpenAI API key from step 3
 
-   - **Name:** `GITHUB_GIST_TOKEN`  
+   - **Name:** `GIST_TOKEN`
      **Value:** Your GitHub personal access token from step 2
 
-   - **Name:** `GIST_ID`  
+   - **Name:** `GIST_ID`
      **Value:** Your Gist ID from step 1
 
 ### 5. Verify Setup
@@ -60,31 +60,35 @@ This guide will help you set up the automated weekly AI resources generation sys
 
 ### Workflow Fails at "Generate New Resources"
 
-**Problem:** OpenAI API key is invalid or has no credits  
-**Solution:** 
+**Problem:** OpenAI API key is invalid or has no credits
+**Solution:**
+
 - Verify your OpenAI API key is correct
 - Check your OpenAI account has available credits
 - Ensure you have access to GPT-4 models
 
 ### Workflow Fails at "Fetch Current Resources"
 
-**Problem:** GitHub token doesn't have gist permissions or Gist ID is wrong  
+**Problem:** GitHub token doesn't have gist permissions or Gist ID is wrong
 **Solution:**
+
 - Verify the Gist ID is correct
 - Ensure the GitHub token has the `gist` scope
 - Check the gist exists and is accessible
 
 ### Workflow Fails at "Update Gist"
 
-**Problem:** GitHub token permissions issue  
+**Problem:** GitHub token permissions issue
 **Solution:**
+
 - Regenerate the GitHub token with `gist` scope
-- Update the `GITHUB_GIST_TOKEN` secret
+- Update the `GIST_TOKEN` secret
 
 ### Resources Not Merging Correctly
 
-**Problem:** Resources have the same title but different sources  
+**Problem:** Resources have the same title but different sources
 **Solution:**
+
 - The merge logic matches on both title AND source
 - If you want resources to be treated as the same, ensure both fields match exactly
 
@@ -98,7 +102,7 @@ Edit `.github/workflows/weekly-ai-resources-update.yml`:
 on:
   schedule:
     # Change the cron schedule
-    - cron: "0 9 * * 1"  # Monday at 9 AM UTC
+    - cron: "0 9 * * 1" # Monday at 9 AM UTC
     # Examples:
     # "0 9 * * 5"  # Friday at 9 AM UTC
     # "0 12 * * 1,4"  # Monday and Thursday at 12 PM UTC
@@ -122,7 +126,7 @@ Test the automation locally before running in GitHub Actions:
 ```bash
 # Set environment variables
 export OPENAI_API_KEY="your-key-here"
-export GITHUB_GIST_TOKEN="your-token-here"
+export GIST_TOKEN="your-token-here"
 export GIST_ID="your-gist-id"
 
 # Install dependencies
@@ -143,6 +147,7 @@ npm run run-automation
 ### Review Artifacts
 
 After each run, artifacts are uploaded containing:
+
 - `current-resources.json` - Resources before generation
 - `new-resources.json` - Newly generated resources
 - `merged-resources.json` - Final merged resources
@@ -153,6 +158,7 @@ Download these to debug issues or review changes.
 ### GitHub Actions Summary
 
 Each run creates a summary with:
+
 - Resource counts and statistics
 - Resource type distribution
 - Score ranges and averages
