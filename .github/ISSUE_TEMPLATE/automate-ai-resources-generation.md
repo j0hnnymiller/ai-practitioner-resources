@@ -41,7 +41,7 @@ on:
 
 env:
   OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-  GITHUB_GIST_TOKEN: ${{ secrets.GITHUB_GIST_TOKEN }}
+  GIST_TOKEN: ${{ secrets_GIST_TOKEN }}
   GIST_ID: ${{ secrets.GIST_ID }}
 
 jobs:
@@ -95,7 +95,7 @@ async function fetchCurrentResources() {
   try {
     const response = await fetch(gistUrl, {
       headers: {
-        Authorization: `token ${process.env.GITHUB_GIST_TOKEN}`,
+        Authorization: `token ${process.env.GIST_TOKEN}`,
         Accept: "application/vnd.github.v3+json",
       },
     });
@@ -237,7 +237,7 @@ async function updateGist() {
   const response = await fetch(gistUrl, {
     method: "PATCH",
     headers: {
-      Authorization: `token ${process.env.GITHUB_GIST_TOKEN}`,
+      Authorization: `token ${process.env.GIST_TOKEN}`,
       Accept: "application/vnd.github.v3+json",
       "Content-Type": "application/json",
     },
@@ -288,7 +288,7 @@ async function updateGist() {
 
 ### 2. GitHub Gist Management
 
-- **`GITHUB_GIST_TOKEN`**: Personal Access Token with gist permissions
+- **`GIST_TOKEN`**: Personal Access Token with gist permissions
 - **`GIST_ID`**: The ID of the target gist for resource storage
 
 ### 3. Configuration Secrets
