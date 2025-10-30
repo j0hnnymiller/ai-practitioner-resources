@@ -59,7 +59,7 @@ async function generateResources() {
         {
           role: "system",
           content:
-            "You are an AI assistant that generates JSON data according to schemas. Return ONLY valid JSON with no additional text, explanations, or markdown formatting. Ensure all property names and string values are properly quoted with double quotes.",
+            "You are an expert AI researcher who curates high-quality resources for developers. Generate ONLY valid JSON with no additional text. Requirements: 1) Use REAL, ACTUAL resources with genuine URLs (never use example.com or placeholder links), 2) Include 15-25 diverse resources from reputable sources like official documentation, established publishers (O'Reilly, Manning, Pragmatic Programmers), respected blogs (Martin Fowler, Stack Overflow), and popular podcasts, 3) Ensure all property names and string values are properly quoted with double quotes.",
         },
         {
           role: "user",
@@ -67,7 +67,7 @@ async function generateResources() {
         },
       ],
       temperature: 0.7,
-      max_tokens: 4000,
+      max_tokens: 6000,
     });
 
     const jsonResponse = completion.choices[0].message.content;
@@ -98,35 +98,51 @@ async function generateResources() {
       // Try to fix common JSON issues
       // Fix trailing commas
       jsonOnly = jsonOnly.replace(/,(\s*[}\]])/g, "$1");
-      
+
       // Try multiple parsing strategies
       let resources;
       try {
         resources = JSON.parse(jsonOnly);
       } catch (firstError) {
         console.log("🔧 First parse failed, trying to fix common issues...");
-        
+
         // Try to fix unescaped quotes by adding backslashes
-        let fixedJson = jsonOnly.replace(/([^\\])"/g, (match, p1, offset, string) => {
-          // Don't fix if it's a proper JSON delimiter
-          const before = string[offset - 1];
-          const after = string[offset + 2];
-          if (before === ':' || before === ',' || before === '[' || before === '{' ||
-              after === ',' || after === '}' || after === ']' || after === ':') {
-            return match;
+        let fixedJson = jsonOnly.replace(
+          /([^\\])"/g,
+          (match, p1, offset, string) => {
+            // Don't fix if it's a proper JSON delimiter
+            const before = string[offset - 1];
+            const after = string[offset + 2];
+            if (
+              before === ":" ||
+              before === "," ||
+              before === "[" ||
+              before === "{" ||
+              after === "," ||
+              after === "}" ||
+              after === "]" ||
+              after === ":"
+            ) {
+              return match;
+            }
+            return p1 + '\\"';
           }
-          return p1 + '\\"';
-        });
-        
+        );
+
         try {
           resources = JSON.parse(fixedJson);
           console.log("✅ Fixed JSON parsing succeeded");
         } catch (secondError) {
-          console.log("🔧 Second parse failed, trying manual property fixing...");
-          
+          console.log(
+            "🔧 Second parse failed, trying manual property fixing..."
+          );
+
           // Last resort: try to fix property names that might be unquoted
-          fixedJson = fixedJson.replace(/([{,]\s*)([a-zA-Z_][a-zA-Z0-9_]*)\s*:/g, '$1"$2":');
-          
+          fixedJson = fixedJson.replace(
+            /([{,]\s*)([a-zA-Z_][a-zA-Z0-9_]*)\s*:/g,
+            '$1"$2":'
+          );
+
           resources = JSON.parse(fixedJson);
           console.log("✅ Manual property fixing succeeded");
         }

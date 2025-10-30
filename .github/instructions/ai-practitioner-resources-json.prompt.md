@@ -1,5 +1,7 @@
 Generate a comprehensive list of the best books, articles, blog posts, and podcasts that are good resources for using AI to generate code. Output the results as a JSON object that conforms to the AI Practitioner Resources schema.
 
+**IMPORTANT: Use only REAL, EXISTING resources with genuine URLs. Never use placeholder domains like example.com or fictional resources. Include actual books from publishers like O'Reilly, Manning, Pragmatic Programmers; real articles from established blogs; official documentation; and genuine podcasts.**
+
 Each resource should be evaluated and scored based on these criteria:
 
 - Practical hands-on coding value (weight: 40%)
@@ -29,7 +31,7 @@ The output must be a JSON object with these four required properties:
 2. **resources**: An array of resource objects, each containing:
    - **type**: Must be one of: "Book", "Article", "Blog", "Podcast"
    - **title**: The full title of the resource
-   - **source**: A valid URL to the resource (preferably non-Amazon sources for books)
+   - **source**: A REAL, working URL to the actual resource (e.g., official docs, publisher websites, established blogs like martinfowler.com, stackoverflow.blog, openai.com/blog). NEVER use example.com, placeholder URLs, or fictional links.
    - **score**: Integer from 0-100 based on the criteria above
    - **weeks_on_list**: Set to 1 for all new resources (external script will manage this)
    - **blurb**: A concise 1-2 sentence description (10-300 characters) explaining what the resource covers and why it's valuable for AI developers
