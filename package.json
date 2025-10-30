@@ -1,0 +1,24 @@
+{
+  "name": "ai-practitioner-resources-automation",
+  "version": "1.0.0",
+  "description": "Automation scripts for AI Practitioner Resources generation and gist management",
+  "private": true,
+  "scripts": {
+    "fetch-current": "node scripts/fetch-current-resources.js",
+    "generate": "node scripts/generate-resources.js",
+    "merge": "node scripts/merge-and-update.js",
+    "validate": "node scripts/validate-schema.js",
+    "update-gist": "node scripts/update-gist.js",
+    "create-summary": "node scripts/create-summary.js",
+    "run-automation": "npm run fetch-current && npm run generate && npm run merge && npm run validate && npm run update-gist && npm run create-summary"
+  },
+  "dependencies": {
+    "openai": "^4.20.0",
+    "node-fetch": "^2.7.0",
+    "ajv": "^8.12.0",
+    "ajv-formats": "^2.1.1"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

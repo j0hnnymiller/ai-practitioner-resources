@@ -1,9 +1,22 @@
+# Dependencies
+node_modules/
+
+# Temporary files
+/tmp/
+*.tmp
+
+# Environment variables
+.env
+.env.local
+
 # Test resources file
 resources.json
 
 # Logs
 *.log
 npm-debug.log*
+
+# OS files
 yarn-debug.log*
 yarn-error.log*
 
