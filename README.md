@@ -71,7 +71,7 @@ This project features **fully automated weekly resource generation** using GitHu
 To enable automation, configure these secrets in your repository:
 
 - `OPENAI_API_KEY` - Your OpenAI API key for GPT-4 access
-- `GITHUB_GIST_TOKEN` - Personal access token with gist permissions
+- `GITHUB_GIST_TOKEN` - Personal access token with **gist** scope (read and write permissions for gists)
 - `GIST_ID` - The ID of your target GitHub Gist
 
 ### Manual Triggering
