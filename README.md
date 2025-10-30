@@ -74,6 +74,8 @@ To enable automation, configure these secrets in your repository:
 - `GITHUB_GIST_TOKEN` - Personal access token with **gist** scope (read and write permissions for gists)
 - `GIST_ID` - The ID of your target GitHub Gist
 
+📖 **Detailed Setup Guide:** See [docs/AUTOMATION_SETUP.md](docs/AUTOMATION_SETUP.md) for step-by-step instructions.
+
 ### Manual Triggering
 
 You can manually trigger the workflow anytime:
