@@ -596,6 +596,9 @@
         // filename: 'resources.json'
       };
 
+      // Minimum length for analysis points to filter out very short fragments
+      const MIN_POINT_LENGTH = 10;
+
       let allResources = [];
       let resourceData = {};
       let currentFilter = "All";
@@ -691,7 +694,7 @@
           points = [cleanText];
         }
 
-        return points.filter((point) => point.trim().length > 10); // Filter out very short fragments
+        return points.filter((point) => point.trim().length > MIN_POINT_LENGTH);
       }
 
       function renderAnalysis() {
