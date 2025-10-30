@@ -668,6 +668,12 @@
         }
       }
 
+      function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+      }
+
       function parseAnalysisByBreaks(text) {
         // Remove existing numbered patterns and clean up
         let cleanText = text
@@ -706,7 +712,7 @@
           if (analysisPoints.length > 1) {
             // Multiple points detected - render as structured paragraphs
             const pointsHtml = analysisPoints
-              .map((point) => `<p>${point.trim()}</p>`)
+              .map((point) => `<p>${escapeHtml(point.trim())}</p>`)
               .join("");
 
             analysisElement.innerHTML = `
@@ -723,7 +729,7 @@
               <h3>📈 This Week's Analysis</h3>
               <div class="analysis-content">
                 <div class="analysis-minimal">
-                  <p>${formattedAnalysis}</p>
+                  <p>${escapeHtml(formattedAnalysis)}</p>
                 </div>
               </div>
             `;
