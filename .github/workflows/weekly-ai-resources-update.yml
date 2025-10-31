@@ -2,8 +2,8 @@ name: Weekly AI Resources Update
 
 on:
   schedule:
-    # Run every hour (temporarily changed from weekly)
-    - cron: "0 * * * *"
+    # Run weekly on Mondays at 1:00 AM GMT
+    - cron: "0 1 * * 1"
   workflow_dispatch: # Allow manual triggering
 
 env:
