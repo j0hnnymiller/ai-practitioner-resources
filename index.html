@@ -681,17 +681,6 @@
     </div>
 
     <script>
-      // Domain redirect logic - redirect root and www to ai subdomain
-      (function() {
-        const hostname = window.location.hostname;
-        const protocol = window.location.protocol;
-        
-        if (hostname === 'pdata.com' || hostname === 'www.pdata.com') {
-          const newUrl = protocol + '//ai.pdata.com' + window.location.pathname + window.location.search + window.location.hash;
-          window.location.replace(newUrl);
-          return;
-        }
-      })();
 
       // Configuration - Replace with your gist details
       const GIST_CONFIG = {
