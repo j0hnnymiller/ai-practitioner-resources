@@ -1,0 +1,107 @@
+{
+  "run": 1,
+  "timestamp": "2025-10-30T14:07:35.752Z",
+  "resourceCount": 20,
+  "resources": [
+    {
+      "title": "AI-Powered Development: Building Applications with GPT-4 and Beyond",
+      "source": "https://www.oreilly.com/library/view/ai-powered-development/9781098152475/",
+      "type": "Book"
+    },
+    {
+      "title": "GitHub Copilot for Business: A Developer's Guide",
+      "source": "https://github.blog/2023-02-14-github-copilot-for-business-now-available/",
+      "type": "Article"
+    },
+    {
+      "title": "Prompt Engineering for Developers",
+      "source": "https://platform.openai.com/docs/guides/prompt-engineering",
+      "type": "Blog"
+    },
+    {
+      "title": "The Stack Overflow Podcast: AI and the Future of Coding",
+      "source": "https://stackoverflow.blog/podcast/",
+      "type": "Podcast"
+    },
+    {
+      "title": "Programming with AI: A Practical Guide to Code Generation",
+      "source": "https://pragprog.com/titles/programming-with-ai/",
+      "type": "Book"
+    },
+    {
+      "title": "Best Practices for AI Pair Programming",
+      "source": "https://martinfowler.com/articles/ai-pair-programming.html",
+      "type": "Article"
+    },
+    {
+      "title": "Google AI for Developers: Code Generation with PaLM API",
+      "source": "https://developers.googleblog.com/2023/03/announcing-palm-api-and-makersuite.html",
+      "type": "Blog"
+    },
+    {
+      "title": "Amazon CodeWhisperer: AI-Powered Code Suggestions",
+      "source": "https://aws.amazon.com/codewhisperer/",
+      "type": "Article"
+    },
+    {
+      "title": "Software Engineering Daily: AI Code Generation",
+      "source": "https://softwareengineeringdaily.com/category/ai/",
+      "type": "Podcast"
+    },
+    {
+      "title": "The AI Developer's Handbook",
+      "source": "https://www.manning.com/books/the-ai-developers-handbook",
+      "type": "Book"
+    },
+    {
+      "title": "Anthropic's Guide to Code Generation with Claude",
+      "source": "https://www.anthropic.com/news/claude-2",
+      "type": "Blog"
+    },
+    {
+      "title": "Visual Studio Code and AI: Enhancing Developer Productivity",
+      "source": "https://code.visualstudio.com/docs/editor/artificial-intelligence",
+      "type": "Article"
+    },
+    {
+      "title": "Hugging Face: Code Generation Models and APIs",
+      "source": "https://huggingface.co/blog/code-generation",
+      "type": "Blog"
+    },
+    {
+      "title": "JetBrains AI Assistant: Intelligent Code Completion",
+      "source": "https://www.jetbrains.com/ai/",
+      "type": "Article"
+    },
+    {
+      "title": "Changelog: AI in Software Development",
+      "source": "https://changelog.com/topic/ai",
+      "type": "Podcast"
+    },
+    {
+      "title": "Generative AI for Software Developers",
+      "source": "https://www.oreilly.com/library/view/generative-ai-for/9781492094692/",
+      "type": "Book"
+    },
+    {
+      "title": "Stack Overflow: Developer Survey on AI Coding Tools",
+      "source": "https://stackoverflow.blog/2023/06/13/developer-survey-results-are-in/",
+      "type": "Article"
+    },
+    {
+      "title": "Microsoft Semantic Kernel for Developers",
+      "source": "https://devblogs.microsoft.com/semantic-kernel/",
+      "type": "Blog"
+    },
+    {
+      "title": "Tabnine: AI Code Completion Best Practices",
+      "source": "https://www.tabnine.com/blog/ai-code-completion-best-practices/",
+      "type": "Article"
+    },
+    {
+      "title": "Replit: Building with AI Code Generation",
+      "source": "https://blog.replit.com/ai",
+      "type": "Blog"
+    }
+  ]
+}
