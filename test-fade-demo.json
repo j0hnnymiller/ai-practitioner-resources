@@ -1,0 +1,176 @@
+{
+  "introduction": "<p>Test data for demonstrating the NEW tag fade effect with resources at different weeks on list values.</p>",
+  "resources": [
+    {
+      "type": "Article",
+      "title": "Week 1 Resource - Should have bright red NEW tag with pulse",
+      "source": "https://example.com/week1",
+      "risk_coverage": {
+        "security_vulnerabilities": 95,
+        "code_quality": 80,
+        "data_privacy": 85,
+        "licensing_ip": 70,
+        "maintainability": 75,
+        "bias_standards": "not_covered",
+        "over_reliance": "not_covered"
+      },
+      "overall_score": 88,
+      "highest_score": 95,
+      "coverage_breadth": 5,
+      "weeks_on_list": 1,
+      "blurb": "This resource should show a bright red NEW tag with pulse animation."
+    },
+    {
+      "type": "Article",
+      "title": "Week 2 Resource - Should have orange-red NEW tag, no pulse",
+      "source": "https://example.com/week2",
+      "risk_coverage": {
+        "security_vulnerabilities": 90,
+        "code_quality": 75,
+        "data_privacy": 85,
+        "licensing_ip": 65,
+        "maintainability": 70,
+        "bias_standards": "not_covered",
+        "over_reliance": "not_covered"
+      },
+      "overall_score": 85,
+      "highest_score": 90,
+      "coverage_breadth": 5,
+      "weeks_on_list": 2,
+      "blurb": "This resource should show an orange-red NEW tag with reduced opacity."
+    },
+    {
+      "type": "Tool",
+      "title": "Week 3 Resource - Should have orange NEW tag",
+      "source": "https://example.com/week3",
+      "risk_coverage": {
+        "security_vulnerabilities": 85,
+        "code_quality": 90,
+        "data_privacy": 80,
+        "licensing_ip": 75,
+        "maintainability": 85,
+        "bias_standards": "not_covered",
+        "over_reliance": "not_covered"
+      },
+      "overall_score": 82,
+      "highest_score": 90,
+      "coverage_breadth": 5,
+      "weeks_on_list": 3,
+      "blurb": "This resource should show an orange NEW tag with further reduced opacity."
+    },
+    {
+      "type": "Framework",
+      "title": "Week 4 Resource - Should have dark orange NEW tag",
+      "source": "https://example.com/week4",
+      "risk_coverage": {
+        "security_vulnerabilities": 80,
+        "code_quality": 85,
+        "data_privacy": 75,
+        "licensing_ip": 80,
+        "maintainability": 80,
+        "bias_standards": "not_covered",
+        "over_reliance": "not_covered"
+      },
+      "overall_score": 80,
+      "highest_score": 85,
+      "coverage_breadth": 5,
+      "weeks_on_list": 4,
+      "blurb": "This resource should show a dark orange NEW tag with more reduced opacity."
+    },
+    {
+      "type": "Guide",
+      "title": "Week 5 Resource - Should have purple NEW tag",
+      "source": "https://example.com/week5",
+      "risk_coverage": {
+        "security_vulnerabilities": 75,
+        "code_quality": 80,
+        "data_privacy": 85,
+        "licensing_ip": 75,
+        "maintainability": 75,
+        "bias_standards": "not_covered",
+        "over_reliance": "not_covered"
+      },
+      "overall_score": 78,
+      "highest_score": 85,
+      "coverage_breadth": 5,
+      "weeks_on_list": 5,
+      "blurb": "This resource should show a purple NEW tag with low opacity."
+    },
+    {
+      "type": "Article",
+      "title": "Week 6 Resource - Should have gray NEW tag (very faint)",
+      "source": "https://example.com/week6",
+      "risk_coverage": {
+        "security_vulnerabilities": 70,
+        "code_quality": 75,
+        "data_privacy": 80,
+        "licensing_ip": 70,
+        "maintainability": 70,
+        "bias_standards": "not_covered",
+        "over_reliance": "not_covered"
+      },
+      "overall_score": 75,
+      "highest_score": 80,
+      "coverage_breadth": 5,
+      "weeks_on_list": 6,
+      "blurb": "This resource should show a very faint gray NEW tag."
+    },
+    {
+      "type": "Tool",
+      "title": "Week 7 Resource - Should have NO NEW tag",
+      "source": "https://example.com/week7",
+      "risk_coverage": {
+        "security_vulnerabilities": 65,
+        "code_quality": 70,
+        "data_privacy": 75,
+        "licensing_ip": 65,
+        "maintainability": 65,
+        "bias_standards": "not_covered",
+        "over_reliance": "not_covered"
+      },
+      "overall_score": 70,
+      "highest_score": 75,
+      "coverage_breadth": 5,
+      "weeks_on_list": 7,
+      "blurb": "This resource should show NO NEW tag as it's beyond the 6-week threshold."
+    },
+    {
+      "type": "Framework",
+      "title": "Week 10 Resource - Should have NO NEW tag",
+      "source": "https://example.com/week10",
+      "risk_coverage": {
+        "security_vulnerabilities": 60,
+        "code_quality": 65,
+        "data_privacy": 70,
+        "licensing_ip": 60,
+        "maintainability": 60,
+        "bias_standards": "not_covered",
+        "over_reliance": "not_covered"
+      },
+      "overall_score": 65,
+      "highest_score": 70,
+      "coverage_breadth": 5,
+      "weeks_on_list": 10,
+      "blurb": "This older resource should show NO NEW tag."
+    }
+  ],
+  "legend": {
+    "risk_scores": {
+      "90_100": "Excellent coverage - comprehensive solutions addressing this risk area",
+      "75_89": "Strong coverage - solid approaches with room for minor improvements",
+      "60_74": "Good coverage - adequate solutions with some gaps or limitations",
+      "45_59": "Fair coverage - partial solutions requiring additional measures",
+      "30_44": "Limited coverage - minimal approaches to this risk area",
+      "0_29": "Weak coverage - insufficient attention to this risk area"
+    },
+    "coverage_indicators": {
+      "not_covered": "This risk area is not specifically addressed by this resource"
+    }
+  },
+  "analysis": [
+    "Test data demonstrates NEW tag fade progression across different weeks_on_list values.",
+    "Week 1 should show bright red with pulse animation, progressively fading through orange, dark orange, purple, and gray.",
+    "Resources beyond week 6 should show no NEW tag at all.",
+    "This allows testing of the gradual fade implementation."
+  ]
+}
