@@ -46,7 +46,7 @@ async function generateResources() {
   console.log(`   Prompt length: ${promptContent.length} characters`);
 
   try {
-    console.log("⏳ Calling OpenAI API (this may take a minute)...");
+    console.log("⏳ Calling Anthropic Claude API (this may take a minute)...");
 
     const response = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
