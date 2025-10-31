@@ -282,11 +282,14 @@ Create each issue manually from the template chooser.
 
 ## 🤝 Contributing
 
-1. Fork the repository
-2. Check the issue templates for planned improvements
-3. Use the AI prompt to generate quality resources
-4. Ensure content follows HTML formatting requirements
-5. Submit pull request with schema-compliant JSON
+**Important:** This project uses a unique AI-first contribution process. Please read our [Contributors Guide](CONTRIBUTORS.md) for details.
+
+**TL;DR:** We don't accept traditional pull requests. Instead:
+1. Create an issue with a detailed prompt describing your idea
+2. After review, approved issues are assigned to GitHub Copilot for implementation
+3. Want to review code and prompts? Request contributor access via issue
+
+See [CONTRIBUTORS.md](CONTRIBUTORS.md) for the complete contribution process.
 
 ## 📄 License
 
