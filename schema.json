@@ -1,8 +1,8 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://example.com/ai-practitioner-resources-schema.json",
-  "title": "AI Practitioner Resources",
-  "description": "Schema for AI and programming resources including books, blogs, articles, and podcasts with metadata",
+  "title": "AI Practitioner Resources - Risk-Mitigation Focused",
+  "description": "Schema for AI coding resources focused on mitigating principal risks of AI-assisted development, including security, quality, privacy, licensing, maintainability, bias, and over-reliance concerns",
   "type": "object",
   "properties": {
     "introduction": {
@@ -30,11 +30,137 @@
             "format": "uri",
             "description": "The URL or source of the resource"
           },
-          "score": {
+          "risk_coverage": {
+            "type": "object",
+            "description": "Individual risk area scores (60-100) or 'not_covered' for each AI coding risk",
+            "properties": {
+              "security_vulnerabilities": {
+                "oneOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 60,
+                    "maximum": 100
+                  },
+                  {
+                    "type": "string",
+                    "enum": ["not_covered"]
+                  }
+                ],
+                "description": "Score for security vulnerability mitigation (60-100) or 'not_covered'"
+              },
+              "code_quality": {
+                "oneOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 60,
+                    "maximum": 100
+                  },
+                  {
+                    "type": "string",
+                    "enum": ["not_covered"]
+                  }
+                ],
+                "description": "Score for code quality and logic validation (60-100) or 'not_covered'"
+              },
+              "data_privacy": {
+                "oneOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 60,
+                    "maximum": 100
+                  },
+                  {
+                    "type": "string",
+                    "enum": ["not_covered"]
+                  }
+                ],
+                "description": "Score for data privacy and confidentiality (60-100) or 'not_covered'"
+              },
+              "licensing_ip": {
+                "oneOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 60,
+                    "maximum": 100
+                  },
+                  {
+                    "type": "string",
+                    "enum": ["not_covered"]
+                  }
+                ],
+                "description": "Score for licensing and IP risk management (60-100) or 'not_covered'"
+              },
+              "maintainability": {
+                "oneOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 60,
+                    "maximum": 100
+                  },
+                  {
+                    "type": "string",
+                    "enum": ["not_covered"]
+                  }
+                ],
+                "description": "Score for maintainability and documentation (60-100) or 'not_covered'"
+              },
+              "bias_standards": {
+                "oneOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 60,
+                    "maximum": 100
+                  },
+                  {
+                    "type": "string",
+                    "enum": ["not_covered"]
+                  }
+                ],
+                "description": "Score for bias and standards consistency (60-100) or 'not_covered'"
+              },
+              "over_reliance": {
+                "oneOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 60,
+                    "maximum": 100
+                  },
+                  {
+                    "type": "string",
+                    "enum": ["not_covered"]
+                  }
+                ],
+                "description": "Score for over-reliance and skill development (60-100) or 'not_covered'"
+              }
+            },
+            "required": [
+              "security_vulnerabilities",
+              "code_quality",
+              "data_privacy",
+              "licensing_ip",
+              "maintainability",
+              "bias_standards",
+              "over_reliance"
+            ],
+            "additionalProperties": false
+          },
+          "overall_score": {
             "type": "integer",
-            "minimum": 0,
+            "minimum": 60,
             "maximum": 100,
-            "description": "Quality score of the resource (0-100)"
+            "description": "Average score of all addressed risk areas (60-100)"
+          },
+          "highest_score": {
+            "type": "integer",
+            "minimum": 60,
+            "maximum": 100,
+            "description": "Highest individual risk area score (used for resource selection priority)"
+          },
+          "coverage_breadth": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 7,
+            "description": "Number of risk areas addressed (1-7)"
           },
           "weeks_on_list": {
             "type": "integer",
@@ -52,7 +178,10 @@
           "type",
           "title",
           "source",
-          "score",
+          "risk_coverage",
+          "overall_score",
+          "highest_score",
+          "coverage_breadth",
           "weeks_on_list",
           "blurb"
         ],
@@ -63,11 +192,11 @@
     },
     "legend": {
       "type": "string",
-      "description": "HTML content containing the scoring system legend and explanation of scoring criteria"
+      "description": "HTML content containing the risk-based scoring system legend and explanation of the 7 principal AI coding risks"
     },
     "analysis": {
       "type": "string",
-      "description": "Analysis of this week's list, highlighting trends, notable additions, or insights about the resources"
+      "description": "HTML-formatted analysis of risk coverage patterns, resource selection methodology, and trends in AI coding risk mitigation"
     }
   },
   "required": ["introduction", "resources", "legend", "analysis"],
