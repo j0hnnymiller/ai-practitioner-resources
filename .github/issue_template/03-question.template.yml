@@ -1,0 +1,82 @@
+name: ❓ Question or Discussion
+description: Ask questions about the project, contribution process, or AI-first development
+title: "Question: [Brief Topic]"
+labels: ["question", "discussion"]
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## ❓ Question or Discussion
+        
+        We welcome questions about our unique AI-first contribution process, the project itself, or general discussions about AI-assisted development. Don't hesitate to ask!
+
+  - type: textarea
+    id: question
+    attributes:
+      label: 🤔 Your Question
+      description: What would you like to know or discuss?
+      placeholder: Please provide your question or topic for discussion. Be as specific as possible to help us give you the best answer.
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: question-category
+    attributes:
+      label: 📚 Related to
+      description: What is your question related to?
+      options:
+        - label: "Contributing to the project"
+        - label: "Understanding the AI-first development process"
+        - label: "Using the AI Practitioner Resources site"
+        - label: "Technical implementation details"
+        - label: "Prompt engineering for code generation"
+        - label: "Other (please specify below)"
+
+  - type: textarea
+    id: context
+    attributes:
+      label: 📖 Context (Optional)
+      description: Background information that might be helpful
+      placeholder: |
+        **What you've already tried**: [Any research, documentation, or attempts you've made]
+        **Specific use case**: [If applicable, describe your specific situation]
+
+  - type: dropdown
+    id: experience-level
+    attributes:
+      label: 🎓 Your Experience Level
+      description: How would you describe your experience with AI-assisted development?
+      options:
+        - New to AI-assisted development
+        - Some experience with AI coding tools
+        - Experienced with AI development workflows
+        - Expert level
+        - Other (please specify in context)
+
+  - type: checkboxes
+    id: response-type
+    attributes:
+      label: 🎯 What kind of response would be most helpful?
+      description: Select all that apply
+      options:
+        - label: "Detailed explanation"
+        - label: "Links to relevant documentation"
+        - label: "Example or code snippet"
+        - label: "Step-by-step guidance"
+        - label: "General discussion"
+        - label: "Other (please specify below)"
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: 💭 Additional Context
+      description: Anything else that would help us answer your question
+      placeholder: Include any additional details, specific use cases, or examples that might be relevant
+
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        
+        **We appreciate your engagement with the AI Practitioner Resources project! Your questions help us improve our documentation and processes.**

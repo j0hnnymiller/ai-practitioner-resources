@@ -1,0 +1,98 @@
+name: 🚀 General Contribution Request
+description: Suggest a new feature, improvement, or enhancement for AI implementation
+title: "Feature Request: [Brief Description]"
+labels: ["enhancement", "ai-implementation"]
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## 🎯 Feature Request
+
+        Thank you for contributing to our AI-first development project! Please provide a detailed prompt that an AI can use to implement your idea.
+
+  - type: textarea
+    id: ai-prompt
+    attributes:
+      label: 📝 Prompt for Implementation
+      description: Write a detailed prompt as if you're instructing an AI developer. Be specific about requirements, behavior, styling, and functionality.
+      placeholder: |
+        Example: "Add a dark mode toggle to the web interface that saves user preference to localStorage, applies a dark theme with appropriate contrast ratios, and includes smooth transition animations..."
+      value: |
+        ```
+        [Replace this with a clear, detailed prompt describing exactly what you want implemented]
+        ```
+    validations:
+      required: true
+
+  - type: textarea
+    id: why-matters
+    attributes:
+      label: 🤔 Why This Matters
+      description: Explain the value and impact of this improvement
+      placeholder: |
+        - Problem it solves: [What specific issue or limitation does this address?]
+        - User benefit: [How would this improve the user experience?]
+        - Project value: [Why is this important for the AI Practitioner Resources project?]
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: acceptance-criteria
+    attributes:
+      label: 📋 Acceptance Criteria
+      description: What would make this implementation successful? Check all that apply and add specifics in the descriptions below.
+      options:
+        - label: "**Functionality**: Core functionality requirements defined"
+        - label: "**User Interface**: UI/UX requirements specified"
+        - label: "**Performance**: Performance considerations identified"
+        - label: "**Accessibility**: Accessibility standards considered"
+        - label: "**Responsiveness**: Mobile/tablet compatibility addressed"
+        - label: "**Browser Support**: Cross-browser compatibility needs defined"
+        - label: "**Documentation**: Documentation updates identified"
+        - label: "**Testing**: Testing approach specified"
+
+  - type: textarea
+    id: acceptance-details
+    attributes:
+      label: 📋 Acceptance Criteria Details
+      description: Provide specific details for each checked item above
+      placeholder: |
+        - Functionality: [Describe the core functionality that must work]
+        - User Interface: [Any UI/UX requirements or standards to meet]
+        - Performance: [Any performance considerations or requirements]
+        - etc...
+
+  - type: textarea
+    id: examples
+    attributes:
+      label: 🎨 Examples/Mockups (Optional)
+      description: Provide examples, screenshots, or mockups if applicable
+      placeholder: Include links to examples, paste screenshots, or describe visual references that would help with implementation
+
+  - type: textarea
+    id: technical-considerations
+    attributes:
+      label: 🔧 Technical Considerations (Optional)
+      description: Any specific technical requirements or constraints
+      placeholder: |
+        - Files to modify: [Which files might need changes?]
+        - Dependencies: [Any new libraries or dependencies needed?]
+        - Data changes: [Any changes to data structure or schema?]
+        - Configuration: [Any config changes required?]
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: 📚 Additional Context
+      description: Any other context, research, or background information
+      placeholder: Include links to relevant resources, similar implementations, or research that supports this request
+
+  - type: markdown
+    attributes:
+      value: |
+        ---
+
+        ## 🤖 For Maintainers
+
+        **This issue will be assigned to GitHub Copilot for implementation if approved. Please ensure your prompt is detailed and clear enough for AI-driven development.**
