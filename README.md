@@ -5,7 +5,7 @@ A curated collection of the best AI-powered development resources, featuring an 
 ## ✨ Features
 
 - **📊 Intelligent Resource Curation**: AI-powered prompt system generates comprehensive resource lists
-- **🎯 Smart Scoring**: Resources evaluated on practical value, clarity, depth, and relevance
+- **🎯 Risk-Based Scoring**: Resources evaluated on their ability to mitigate 7 principal AI coding risks
 - **📱 Beautiful Web Interface**: Responsive design with filtering, statistics, and modern UI
 - **🔄 Automated Updates**: Fully automated weekly resource generation and gist updates via GitHub Actions
 - **🏷️ Rich Metadata**: Includes introduction, analysis, legends, and resource descriptions
@@ -79,6 +79,7 @@ To enable automation, configure these secrets in your repository:
 ### Manual Triggering
 
 You can manually trigger the workflow anytime:
+
 1. Go to the **Actions** tab in your repository
 2. Select **Weekly AI Resources Update**
 3. Click **Run workflow**
@@ -138,19 +139,26 @@ Resources follow this comprehensive schema:
 }
 ```
 
-### Scoring Criteria
+### Risk-Based Scoring Framework
 
-- **Practical hands-on coding value (40%)**
-- **Clarity and accessibility (25%)**
-- **Depth and completeness (20%)**
-- **Relevance and recency (15%)**
+Resources are evaluated based on their ability to address the **7 Principal Risks of AI-Assisted Coding**:
+
+1. **Security Vulnerabilities** - Design flaws and known vulnerabilities in AI-generated code
+2. **Logic & Quality Issues** - Semantically flawed code and inadequate error handling
+3. **Data Leakage & Confidentiality** - Unintended exposure of proprietary or sensitive data
+4. **Licensing & IP Concerns** - Accidental introduction of restrictive-licensed code
+5. **Maintainability & Traceability** - Hard-to-explain "black box" code with poor documentation
+6. **Bias & Inconsistent Standards** - Outdated patterns, insecure defaults, style inconsistencies
+7. **Over-Reliance & Skill Atrophy** - Excessive dependency reducing debugging abilities
+
+Each resource is scored 60-100 on individual risk areas it addresses, or marked "not_covered". Resources are selected based on their **highest individual risk area score**, ensuring practical risk mitigation value.
 
 ## 🎨 Web Viewer Features
 
 - **📱 Responsive Design**: Perfect on desktop, tablet, and mobile
 - **🔍 Smart Filtering**: Filter by resource type with counts
 - **📊 Live Statistics**: Total resources, types, average scores
-- **🏆 Intelligent Sorting**: Resources ordered by quality score
+- **🏆 Risk-Based Sorting**: Resources ordered by highest risk mitigation score
 - **🆕 New Resource Badges**: Highlights recently added items
 - **📝 Rich Descriptions**: Blurbs provide context before clicking
 - **📈 Visual Analysis**: Trend insights in styled sections
@@ -256,11 +264,13 @@ This repository includes 10 comprehensive issue templates for planned enhancemen
 You can automatically create GitHub issues from all templates using one of these methods:
 
 **Method 1: GitHub Actions (Recommended)**
+
 1. Go to **Actions** tab → **Create Issues from Templates** workflow
 2. Click **Run workflow**
 3. Choose dry run mode to preview, or run to create issues
 
 **Method 2: Script Execution**
+
 ```bash
 GITHUB_TOKEN=your_token node scripts/create-issues-from-templates.js
 ```
