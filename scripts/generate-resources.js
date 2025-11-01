@@ -19,7 +19,7 @@ const PROMPT_PATH = path.join(
   __dirname,
   "..",
   ".github",
-  "instructions",
+  "prompts",
   "ai-practitioner-resources-json.prompt.md"
 );
 

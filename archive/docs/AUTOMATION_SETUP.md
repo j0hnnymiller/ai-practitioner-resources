@@ -200,7 +200,7 @@ If you encounter issues:
 After successful setup:
 
 1. Review the first automated generation
-2. Adjust the AI prompt in `.github/instructions/ai-practitioner-resources-json.prompt.md` if needed
+2. Adjust the AI prompt in `.github/prompts/ai-practitioner-resources-json.prompt.md` if needed
 3. Customize the schedule to your preference
 4. Monitor weekly runs to ensure quality
 5. Consider implementing Phase 2+ features (see main README)
