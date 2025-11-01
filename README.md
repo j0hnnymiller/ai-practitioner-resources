@@ -40,7 +40,7 @@ ai-practitioner-resources/
 ├── .github/
 │   ├── workflows/
 │   │   └── weekly-ai-resources-update.yml  # Automated weekly updates
-│   └── instructions/
+│   └── prompts/
 │       └── ai-practitioner-resources-json.prompt.md  # AI generation prompt
 ├── scripts/
 │   ├── fetch-current-resources.js     # Fetch existing resources from gist
@@ -115,7 +115,7 @@ The **Weekly AI Resources Update** workflow automatically generates new resource
 
 ### Manual Generation
 
-For manual or one-time generation, use the prompt in `.github/instructions/ai-practitioner-resources-json.prompt.md` with any AI assistant to generate content that matches the schema.
+For manual or one-time generation, use the prompt in `.github/prompts/ai-practitioner-resources-json.prompt.md` with any AI assistant to generate content that matches the schema.
 
 ### Schema Structure
 
@@ -285,6 +285,7 @@ Create each issue manually from the template chooser.
 **Important:** This project uses a unique AI-first contribution process. Please read our [Contributors Guide](CONTRIBUTORS.md) for details.
 
 **TL;DR:** We don't accept traditional pull requests. Instead:
+
 1. Create an issue with a detailed prompt describing your idea
 2. After review, approved issues are assigned to GitHub Copilot for implementation
 3. Want to review code and prompts? Request contributor access via issue
