@@ -1,0 +1,146 @@
+name: 🐛 Bug Report
+description: Report issues with the website, automation, or AI-generated content
+title: "Bug: [Brief Description]"
+labels: ["bug", "needs-investigation"]
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## 🐛 Bug Report
+
+        Found an issue with the website, automation system, or AI-generated content? Help us fix it!
+
+        **Common Issues:**
+        - Website display problems
+        - Resource loading errors
+        - Incorrect resource information
+        - Automation script failures
+        - AI-generated content quality issues
+
+  - type: textarea
+    id: bug-description
+    attributes:
+      label: 🔍 Bug Description
+      description: What happened? Provide a clear description of the issue.
+      placeholder: "Describe what you observed vs. what you expected to happen"
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps-to-reproduce
+    attributes:
+      label: 🔄 Steps to Reproduce
+      description: How can we reproduce this issue?
+      placeholder: |
+        1. Go to '...'
+        2. Click on '...'
+        3. Scroll down to '...'
+        4. See error
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: ✅ Expected Behavior
+      description: What should have happened instead?
+      placeholder: "What should have happened instead?"
+    validations:
+      required: true
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: 📸 Screenshots
+      description: If applicable, add screenshots to help explain the problem
+      placeholder: "Drag and drop images here or paste image URLs"
+
+  - type: checkboxes
+    id: affected-area
+    attributes:
+      label: 🎯 Affected Area
+      description: Which part of the project is affected?
+      options:
+        - label: "**Website Display**: Layout, styling, or visual issues"
+        - label: "**Resource Data**: Incorrect or missing resource information"
+        - label: "**Search/Filter**: Problems with finding or filtering resources"
+        - label: "**Mobile Experience**: Issues on mobile devices"
+        - label: "**Performance**: Slow loading or responsiveness issues"
+        - label: "**Automation**: GitHub Actions or automated processes"
+        - label: "**AI Content**: Quality issues with AI-generated content"
+        - label: "**Navigation**: Problems moving around the site"
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: 🚨 Severity
+      description: How severe is this issue?
+      options:
+        - "Low - Minor inconvenience"
+        - "Medium - Affects functionality but has workarounds"
+        - "High - Major functionality is broken"
+        - "Critical - Site is unusable or data is corrupted"
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: 🖥️ Environment
+      description: Tell us about your environment
+      placeholder: |
+        - Browser: [Chrome 91, Firefox 89, Safari 14, etc.]
+        - Operating System: [Windows 10, macOS Big Sur, Ubuntu 20.04, etc.]
+        - Device: [Desktop, Mobile, Tablet]
+        - Screen size: [1920x1080, Mobile portrait, etc.]
+        - Any browser extensions that might affect the site
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: 📝 Additional Context
+      description: Any other information that might help us understand and fix the issue
+      placeholder: |
+        - Does this happen consistently or intermittently?
+        - Any error messages you see in the browser console?
+        - Did this work correctly before?
+        - Any other relevant details
+
+  - type: checkboxes
+    id: troubleshooting
+    attributes:
+      label: 🔧 Troubleshooting Done
+      description: What have you already tried? (Optional but helpful)
+      options:
+        - label: "Refreshed the page"
+        - label: "Tried in a different browser"
+        - label: "Cleared browser cache and cookies"
+        - label: "Tried on a different device"
+        - label: "Checked browser console for errors"
+        - label: "Tried in incognito/private mode"
+
+  - type: markdown
+    attributes:
+      value: |
+        ---
+
+        ## 🤖 AI-First Bug Resolution
+
+        **How we handle bugs:**
+        1. **Triage**: We'll assess the severity and impact
+        2. **Investigation**: Determine if it's a code, content, or automation issue
+        3. **AI Implementation**: For code fixes, we'll create detailed prompts for GitHub Copilot
+        4. **Testing**: Verify the fix works across different environments
+        5. **Deployment**: Push the fix and monitor for any side effects
+
+        ## 🎯 Priority Levels
+
+        - **Critical**: Immediate attention (site down, data loss)
+        - **High**: Fixed in next release cycle
+        - **Medium**: Included in upcoming improvements
+        - **Low**: Addressed when time permits
+
+        **Thank you for helping us maintain a high-quality AI practitioner resource!**
