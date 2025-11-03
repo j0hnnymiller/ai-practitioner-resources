@@ -1,0 +1,38 @@
+name: 🚀 General Contribution Request
+description: Suggest a new feature, improvement, or enhancement for AI implementation
+title: 'Feature Request: [Brief Description]'
+labels: ['enhancement', 'ai-implementation']
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## �� Feature Request
+        
+        Thank you for contributing to our AI-first development project! Please provide a detailed prompt that an AI can use to implement your idea.
+
+  - type: textarea
+    id: ai-prompt
+    attributes:
+      label: 📝 Implementation Prompt
+      description: Write a detailed prompt as if you're instructing an AI developer. Be specific about requirements, behavior, styling, and functionality.
+      placeholder: |
+        Example: Add a dark mode toggle to the web interface that saves user preference to localStorage, applies a dark theme with appropriate contrast ratios, and includes smooth transition animations...
+      value: |
+        `
+        [Replace this with a clear, detailed prompt describing exactly what you want implemented]
+        `
+    validations:
+      required: true
+
+  - type: textarea
+    id: why-matters
+    attributes:
+      label: 🤔 Why This Matters
+      description: Explain the value and impact of this improvement
+      placeholder: |
+        - Problem it solves: [What specific issue or limitation does this address?]
+        - User benefit: [How would this improve the user experience?]
+        - Project value: [Why is this important for the AI Practitioner Resources project?]
+    validations:
+      required: true
