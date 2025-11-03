@@ -42,7 +42,7 @@ export function getWeeksBadgeColor(weeks) {
     // 2-5 weeks: Yellow
     return `rgb(255, 193, 7)`;
   } else {
-    // 1-2 weeks: Green
+    // 1 week: Green
     return `rgb(40, 167, 69)`;
   }
 }
