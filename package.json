@@ -10,12 +10,17 @@
     "validate": "node scripts/validate-schema.js",
     "update-gist": "node scripts/update-gist.js",
     "create-summary": "node scripts/create-summary.js",
-    "run-automation": "npm run fetch-current && npm run generate && npm run merge && npm run validate && npm run update-gist && npm run create-summary"
+    "run-automation": "npm run fetch-current && npm run generate && npm run merge && npm run validate && npm run update-gist && npm run create-summary",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "node-fetch": "^2.7.0",
     "ajv": "^8.12.0",
     "ajv-formats": "^2.1.1"
+  },
+  "devDependencies": {
+    "vitest": "^1.6.0"
   },
   "engines": {
     "node": ">=18.0.0"

@@ -29,6 +29,19 @@ function buildRiskBadges(riskCoverage) {
 }
 
 /**
+ * Get hostname from URL with error handling
+ * @param {string} url - URL string
+ * @returns {string} Hostname or fallback
+ */
+function getHostname(url) {
+  try {
+    return new URL(url).hostname;
+  } catch (error) {
+    return url || "link";
+  }
+}
+
+/**
  * Render a single resource card
  * @param {Object} resource - Resource object
  * @returns {string} HTML string for resource card
@@ -37,6 +50,7 @@ export function renderResourceCard(resource) {
   const mainScore = getMainScore(resource);
   const scoreColor = getScoreColor(mainScore);
   const riskScoresBadges = buildRiskBadges(resource.risk_coverage);
+  const hostname = getHostname(resource.source);
 
   return `
     <div class="resource-card">
@@ -67,9 +81,7 @@ export function renderResourceCard(resource) {
       </div>
       <div class="resource-title">${resource.title}</div>
       <div class="resource-source">
-        <a href="${resource.source}" target="_blank">${
-    new URL(resource.source).hostname
-  }</a>
+        <a href="${resource.source}" target="_blank">${hostname}</a>
       </div>
       <div class="resource-blurb">${resource.blurb}</div>
     </div>

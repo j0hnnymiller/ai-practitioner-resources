@@ -4,9 +4,12 @@
  * These tests demonstrate how the modular architecture enables comprehensive testing.
  * To run these tests, you would typically use a test framework like Jest or Vitest.
  * 
- * Install Jest: npm install --save-dev jest
+ * Install Vitest: npm install --save-dev vitest
  * Run tests: npm test
  */
+
+// Import test functions from Vitest
+import { describe, test, expect } from 'vitest';
 
 // Import modules to test
 import { getScoreColor, getWeeksBadgeColor } from '../src/core/colors.js';

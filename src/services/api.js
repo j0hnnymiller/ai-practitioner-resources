@@ -27,7 +27,21 @@ export async function fetchResources(config) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const gistData = await response.json();
+      
+      // Validate gist data structure
+      if (!gistData.files) {
+        throw new Error("Invalid gist data: missing files object");
+      }
+      
+      if (!gistData.files[config.filename]) {
+        throw new Error(`File '${config.filename}' not found in gist`);
+      }
+      
       const fileContent = gistData.files[config.filename].content;
+      if (!fileContent) {
+        throw new Error(`File '${config.filename}' has no content`);
+      }
+      
       resourceData = JSON.parse(fileContent);
     } else {
       throw new Error(

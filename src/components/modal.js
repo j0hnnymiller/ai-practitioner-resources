@@ -34,9 +34,11 @@ export function setupMethodologyModal(
   }
 
   // Close modal when clicking outside of it
-  window.onclick = function (event) {
+  const onWindowClick = function (event) {
     if (event.target == modal) {
       modal.style.display = "none";
     }
   };
+  
+  window.addEventListener('click', onWindowClick);
 }
