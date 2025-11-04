@@ -25,8 +25,9 @@ Rules for labels:
   - priority:NN (0-100)
   - independence:high|low (add also `independent` when high)
   - risk:low|medium|high
-- If ready=false (needs work): ensure `needs-approval` is in remove and `needs-clarification` is in add.
-- If ready=true: include [`implementation ready`, `needs-approval`] in add and remove any of [`needs-clarification`].
+- **PM cannot remove approval-gating labels.** Never add `needs-approval` or `needs-clarification` to the `remove` array. Only humans can gate approval.
+- If ready=false (needs work): add `needs-clarification` to add (only); leave `remove` empty.
+- If ready=true: add `implementation ready` to add; leave `remove` empty or only remove non-gating labels like `needs-clarification` if already present.
 - Avoid duplicating labels already present on the issue.
 
 2. Second response should be a concise human-facing review for the author with:
