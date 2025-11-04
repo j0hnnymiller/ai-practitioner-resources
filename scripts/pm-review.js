@@ -84,7 +84,7 @@ async function generatePMReview({ title, body, labelsText, url }) {
   }
 
   const guidance = readPMPrompt();
-  const model = process.env.PM_MODEL || process.env.ANTHROPIC_MODEL || "claude-3.5-sonnet-latest";
+  const model = process.env.PM_MODEL || process.env.ANTHROPIC_MODEL || "claude-4.5-sonnet-latest";
   // Use the prompt file verbatim as the system message to avoid drift
   const system = guidance || "(pm-review.md not found; include baseline: strict JSON then concise human review)";
 
@@ -133,7 +133,7 @@ async function generatePMReview({ title, body, labelsText, url }) {
     model,
     system,
     max_tokens: 2000,
-    temperature: 0.2,
+    temperature: 0.8,
     messages: [
       { role: "user", content: [ { type: "text", text: user } ] },
       { role: "assistant", content: [ { type: "text", text: JSON.stringify(parsed) } ] },

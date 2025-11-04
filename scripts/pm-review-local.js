@@ -40,7 +40,7 @@ async function callAnthropic(model, system, user) {
     model,
     system,
     max_tokens: 2000,
-    temperature: 0.1,
+    temperature: 0.8,
     messages: [
       { role: "user", content: [{ type: "text", text: user }] },
     ],
@@ -89,7 +89,7 @@ async function main() {
   const labelsText = (issue.labels || []).map((l) => (typeof l === "string" ? l : l.name)).filter(Boolean).join(", ");
 
   const prompt = readPrompt();
-  const model = process.env.PM_MODEL || process.env.ANTHROPIC_MODEL || "claude-3.5-sonnet-latest";
+  const model = process.env.PM_MODEL || process.env.ANTHROPIC_MODEL || "claude-4.5-sonnet-latest";
   const system = prompt;
   const user = `Issue to review:\nTitle: ${issue.title}\nURL: ${issue.html_url}\nLabels: ${labelsText}\n\nBody:\n${issue.body || "(no body)"}`;
 

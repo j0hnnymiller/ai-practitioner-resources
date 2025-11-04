@@ -44,5 +44,5 @@ jobs:
           GITHUB_REPOSITORY: ${{ github.repository }}
           GITHUB_EVENT_PATH: ${{ github.event_path }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          PM_MODEL: claude-3.5-sonnet-latest
+          PM_MODEL: claude-4.5-sonnet-latest
         run: node scripts/pm-review.js
