@@ -1,32 +1,77 @@
 # Scripts Directory
 
-This directory contains automation scripts for the ai-practitioner-resources project.
+Automation and maintenance scripts for the ai-practitioner-resources project.
 
-## Available Scripts
+Requirements:
 
-### 1. `create-issues-from-templates.js`
+- Node.js v18+ (fetch built-in, modern async/await)
+- For GitHub API operations: a PAT with appropriate scopes
 
-**Purpose**: Automatically create GitHub issues from all issue templates
+## Overview of Scripts
 
-**Usage**:
+| Script                            | Purpose                                                             |
+| --------------------------------- | ------------------------------------------------------------------- |
+| `fetch-current-resources.js`      | Download current resources JSON from the configured Gist            |
+| `generate-resources.js`           | Generate a new set of resources using the OpenAI API                |
+| `merge-and-update.js`             | Merge current and new resources, update `weeks_on_list`             |
+| `validate-schema.js`              | Validate resources JSON against `schema.json` using Ajv             |
+| `update-gist.js`                  | Push current and timestamped resources to the target Gist           |
+| `create-summary.js`               | Produce an automation summary with stats and insights               |
+| `create-issues-from-templates.js` | Create GitHub issues from all templates in `.github/ISSUE_TEMPLATE` |
+| `test-templates.js`               | Dry-run to parse and validate issue templates without API calls     |
+| `issue-intake.js`                 | Process issue intake for prompts/modes (supports AI-first workflow) |
+| `rebalance-lanes.js`              | Rebalance project lane labels per PM mode rules                     |
+| `create-issues-with-gh.ps1`       | PowerShell helper to create issues using GitHub CLI                 |
+
+Convenience npm scripts are defined in `package.json`:
+
+```bash
+npm run fetch-current
+npm run generate
+npm run merge
+npm run validate
+npm run update-gist
+npm run create-summary
+npm run run-automation
+```
+
+Environment variables (where applicable):
+
+- `OPENAI_API_KEY` (generation)
+- `GITHUB_GIST_TOKEN` (gist read/write)
+- `GIST_ID` (target gist id)
+- `GITHUB_TOKEN` and optionally `GITHUB_REPOSITORY` (issue creation)
+
+---
+
+## Create Issues from Templates
+
+### `create-issues-from-templates.js`
+
+Automatically create GitHub issues from all issue templates.
+
+Usage:
+
 ```bash
 GITHUB_TOKEN=your_token node scripts/create-issues-from-templates.js
 ```
 
-**Requirements**:
+Requirements:
+
 - Node.js v18 or later
 - GitHub Personal Access Token with `repo` scope
 - Environment variable: `GITHUB_TOKEN`
 
-**Features**:
+Features:
+
 - ✅ Parses YAML frontmatter from templates
 - ✅ Creates issues via GitHub API
 - ✅ Detects and skips duplicate issues
-- ✅ Preserves all template metadata (title, labels, body)
-- ✅ Includes rate limiting
-- ✅ Provides detailed progress output
+- ✅ Preserves template metadata (title, labels, body)
+- ✅ Includes rate limiting and progress output
 
-**Output Example**:
+Output Example:
+
 ```
 🚀 GitHub Issue Creator from Templates
 
@@ -54,130 +99,81 @@ Creating issues...
 ❌ Failed:  0 issue(s)
 ```
 
-### 2. `test-templates.js`
+### `test-templates.js`
 
-**Purpose**: Validate template parsing without making API calls
+Validate template parsing without making API calls.
 
-**Usage**:
+Usage:
+
 ```bash
 node scripts/test-templates.js
 ```
 
-**Requirements**:
-- Node.js v14 or later
-- No authentication needed
+Features:
 
-**Features**:
 - ✅ Validates all templates can be parsed
 - ✅ Shows metadata for each template
 - ✅ Displays statistics
 - ✅ No GitHub API calls (safe for testing)
 
-**Output Example**:
-```
-🔍 Template Validation Test
-
-Reading templates from: .github/ISSUE_TEMPLATE
-======================================================================
-
-Found 10 template files
-
-1. add-comprehensive-testing.md
-   Title: "Testing: Add Comprehensive Test Suite..."
-   Labels: [testing, refactoring, quality-assurance, technical-debt]
-   Assignees: (none)
-   Body length: 27466 characters
-...
-
-✅ Validation Summary
-
-Total templates: 10
-All templates parsed successfully!
-
-📊 Statistics:
-   Total labels: 36
-   Unique labels: 23
-```
-
-## Directory Structure
-
-```
-scripts/
-├── create-issues-from-templates.js  # Main issue creation script
-├── test-templates.js                # Template validation script
-└── README.md                        # This file
-```
+---
 
 ## Common Tasks
 
-### Preview what would be created
+Preview what would be created:
+
 ```bash
 node scripts/test-templates.js
 ```
 
-### Create all issues
+Create all issues:
+
 ```bash
 GITHUB_TOKEN=your_token node scripts/create-issues-from-templates.js
 ```
 
-### Create issues for a different repository
+Create issues for a different repository:
+
 ```bash
 GITHUB_TOKEN=your_token GITHUB_REPOSITORY=owner/repo node scripts/create-issues-from-templates.js
 ```
 
+---
+
 ## Error Handling
 
-Both scripts include comprehensive error handling:
+Scripts include comprehensive error handling:
 
-- **Missing token**: Clear error message with usage instructions
-- **Invalid repository**: Validates repository format
-- **API errors**: Catches and reports GitHub API errors
-- **Template parsing errors**: Validates template structure
-- **Rate limiting**: Includes delays to respect API limits
+- Missing token → clear error message with usage
+- Invalid repository → validates format
+- API errors → bubbled with details
+- Template parsing errors → validated with clear output
+- Rate limiting → delays to respect API limits
 
 ## Integration
 
-These scripts can be used:
+Use in three ways:
 
-1. **Locally**: Run from command line with personal access token
-2. **CI/CD**: Via GitHub Actions workflow (see `.github/workflows/create-issues.yml`)
-3. **Automated**: Triggered by events or scheduled runs
+1. Locally (CLI)
+2. CI/CD via GitHub Actions
+3. Automated as part of weekly workflows
 
 ## Documentation
 
-For more information, see:
-- [CREATE_ISSUES.md](../docs/CREATE_ISSUES.md) - Full documentation
-- [QUICK_START.md](../docs/QUICK_START.md) - Quick reference guide
-- [IMPLEMENTATION_SUMMARY.md](../docs/IMPLEMENTATION_SUMMARY.md) - Technical overview
+See:
 
-## Troubleshooting
-
-### Script won't run
-- Ensure Node.js is installed: `node --version`
-- Check file permissions: `chmod +x scripts/*.js`
-
-### Authentication errors
-- Verify your token has `repo` scope
-- Check token is not expired
-- Ensure environment variable is set: `echo $GITHUB_TOKEN`
-
-### Template parsing errors
-- Run test script first: `node scripts/test-templates.js`
-- Check template YAML frontmatter format
-- Ensure templates are valid markdown
-
-### API errors
-- Check GitHub API status: https://www.githubstatus.com
-- Verify repository exists and you have access
-- Review rate limiting (script includes delays)
+- [CREATE_ISSUES.md](../docs/CREATE_ISSUES.md)
+- [QUICK_START.md](../docs/QUICK_START.md)
+- [IMPLEMENTATION_SUMMARY.md](../docs/IMPLEMENTATION_SUMMARY.md)
 
 ## Contributing
 
 When adding new scripts:
+
 1. Follow existing code style
 2. Include error handling
 3. Add usage documentation
-4. Make scripts executable: `chmod +x script-name.js`
+4. Make scripts executable where relevant
 5. Test thoroughly before committing
 
 ## License
