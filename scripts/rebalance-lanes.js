@@ -170,9 +170,7 @@ async function main() {
   });
 
   // Build candidate list for active lanes: approved only (independence is a tiebreaker in sorting)
-  const approvedIssues = prepared.filter(
-    (i) => i.approved
-  );
+  const approvedIssues = prepared.filter((i) => i.approved);
   approvedIssues.sort(cmpIssues);
 
   const atBat = approvedIssues.slice(0, 3).map((i) => i.number);
