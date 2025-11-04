@@ -198,6 +198,9 @@ async function main() {
 
     // Only patch when different to reduce API calls
     const currentLane = getLane(it.labelsSet);
+    if (currentLane === null) {
+      console.warn(`Issue #${it.number} has no lane label`);
+    }
     const laneChanged =
       (currentLane || "").toLowerCase() !== desiredLane.toLowerCase();
     if (laneChanged) {
