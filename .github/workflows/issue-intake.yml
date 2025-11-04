@@ -36,3 +36,13 @@ jobs:
           PROJECT_NUMBER: 1
           PROJECT_STATUS_FIELD_NAME: Status
         run: node scripts/issue-intake.js
+
+      - name: Copilot PM review (AI)
+        env:
+          TOKEN: ${{ secrets.PROJECTS_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_EVENT_PATH: ${{ github.event_path }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          PM_MODEL: gpt-4o-mini
+        run: node scripts/pm-review.js
