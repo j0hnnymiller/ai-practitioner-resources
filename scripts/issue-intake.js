@@ -240,10 +240,7 @@ async function main() {
 
   await setIssueLabels(owner, repo, number, [...newSet]);
 
-  const comment = `Thanks for opening this issue!\n\nPM intake checklist (baseline):\n- [ ] Scope is clear and testable (acceptance criteria provided)\n- [ ] Dependencies identified and minimal (or resolved)\n- [ ] Risk acceptable\n- [ ] Independent enough to run in parallel (label 'independent' or 'independence:high' when true)\n- [ ] Priority score provided (label 'priority:NN' or 'score:NN')\n- [ ] Size estimated (label 'size:small|medium'). Items labeled size:large will not be approved; please split into smaller sub-issues.\n\nCopilot (PM mode) will post an automated review with findings and suggested labels shortly.\n\nType-specific checklists are documented in .github/prompts/modes/project-manager.md under "Approval criteria by type".\n\nIf approved, mark it 'implementation ready' and assign a contributor.\n\nThis issue has been placed on the bench initially. Lanes are rebalanced only when issues are closed.`;
-
-  await addComment(owner, repo, number, comment);
-  console.log(`#${number} intake completed (labels/comment applied).`);
+  console.log(`#${number} intake completed (labels applied).`);
 }
 
 main().catch((err) => {

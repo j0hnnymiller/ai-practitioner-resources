@@ -15,7 +15,8 @@ function die(msg) {
 
 function readPrompt() {
   const p = path.resolve(process.cwd(), ".github/prompts/pm-review.md");
-  if (!fs.existsSync(p)) die("Prompt file not found: .github/prompts/pm-review.md");
+  if (!fs.existsSync(p))
+    die("Prompt file not found: .github/prompts/pm-review.md");
   return fs.readFileSync(p, "utf8");
 }
 
@@ -41,9 +42,7 @@ async function callAnthropic(model, system, user) {
     system,
     max_tokens: 2000,
     temperature: 0.8,
-    messages: [
-      { role: "user", content: [{ type: "text", text: user }] },
-    ],
+    messages: [{ role: "user", content: [{ type: "text", text: user }] }],
   };
   const res = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
@@ -60,12 +59,16 @@ async function callAnthropic(model, system, user) {
   }
   const data = await res.json();
   const contentBlocks = data?.content || [];
-  return contentBlocks.map((b) => b?.text || "").join("\n").trim();
+  return contentBlocks
+    .map((b) => b?.text || "")
+    .join("\n")
+    .trim();
 }
 
 async function main() {
   const [, , numArg, ownerArg, repoArg] = process.argv;
-  if (!numArg) die("Usage: node scripts/pm-review-local.js <issueNumber> [owner] [repo]");
+  if (!numArg)
+    die("Usage: node scripts/pm-review-local.js <issueNumber> [owner] [repo]");
   const number = Number(numArg);
   if (!Number.isFinite(number)) die("Issue number must be a number");
 
@@ -74,7 +77,9 @@ async function main() {
   let repo = repoArg;
   if (!owner || !repo) {
     try {
-      const remote = execFileSync("git", ["remote", "get-url", "origin"], { encoding: "utf8" }).trim();
+      const remote = execFileSync("git", ["remote", "get-url", "origin"], {
+        encoding: "utf8",
+      }).trim();
       // Match https://github.com/owner/repo.git or git@github.com:owner/repo.git
       const m = remote.match(/github\.com[/:]([^/]+)\/([^/.]+)(?:\.git)?/i);
       if (m) {
@@ -83,15 +88,24 @@ async function main() {
       }
     } catch (_) {}
   }
-  if (!owner || !repo) die("Owner/repo not provided and could not infer from git remote.");
+  if (!owner || !repo)
+    die("Owner/repo not provided and could not infer from git remote.");
 
   const issue = getIssue(owner, repo, number);
-  const labelsText = (issue.labels || []).map((l) => (typeof l === "string" ? l : l.name)).filter(Boolean).join(", ");
+  const labelsText = (issue.labels || [])
+    .map((l) => (typeof l === "string" ? l : l.name))
+    .filter(Boolean)
+    .join(", ");
 
   const prompt = readPrompt();
-  const model = process.env.PM_MODEL || process.env.ANTHROPIC_MODEL || "claude-4.5-sonnet-latest";
+  const model =
+    process.env.PM_MODEL ||
+    process.env.ANTHROPIC_MODEL ||
+    "claude-sonnet-4-5-20250929";
   const system = prompt;
-  const user = `Issue to review:\nTitle: ${issue.title}\nURL: ${issue.html_url}\nLabels: ${labelsText}\n\nBody:\n${issue.body || "(no body)"}`;
+  const user = `Issue to review:\nTitle: ${issue.title}\nURL: ${
+    issue.html_url
+  }\nLabels: ${labelsText}\n\nBody:\n${issue.body || "(no body)"}`;
 
   // First: JSON output
   const jsonText = await callAnthropic(model, system, user);
@@ -100,16 +114,24 @@ async function main() {
     const match = jsonText.match(/\{[\s\S]*\}/);
     parsed = match ? JSON.parse(match[0]) : JSON.parse(jsonText);
   } catch (e) {
-    die("Failed to parse JSON from model output:\n" + jsonText + "\nError: " + e.message);
+    die(
+      "Failed to parse JSON from model output:\n" +
+        jsonText +
+        "\nError: " +
+        e.message
+    );
   }
 
-  // Second: human-facing review referencing the JSON
-  const system2 = system + "\n\n(You have already produced the JSON. Now produce the concise human-facing review only.)";
-  const user2 = user + "\n\nJSON decision above. Provide the concise report now.";
+  // Second: AI review comments referencing the JSON
+  const system2 =
+    system +
+    "\n\n(You have already produced the JSON. Now produce the concise AI review comments only.)";
+  const user2 =
+    user + "\n\nJSON decision above. Provide the concise report now.";
   const reviewText = await callAnthropic(model, system2, user2);
 
   console.log("===== PM REVIEW JSON =====\n" + JSON.stringify(parsed, null, 2));
-  console.log("\n===== PM REVIEW (HUMAN) =====\n" + reviewText.trim());
+  console.log("\n===== PM REVIEW (AI COMMENTS) =====\n" + reviewText.trim());
 }
 
 main().catch((e) => die(e.stack || e.message));

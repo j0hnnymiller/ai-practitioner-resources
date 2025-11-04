@@ -15,8 +15,17 @@ Strict output protocol
    "priorityScore": number, // 0-100 integer
    "riskLevel": "low" | "medium" | "high",
    "parallelSafety": "safe" | "unsafe" | "unclear",
-   "labels": { "add": string[], "remove": string[] }
+   "labels": { "add": string[], "remove": string[] },
+   "assignees": string[] // if ready=true and author is contributor, include [author]. Otherwise empty.
    }
+
+2. Second response should be concise AI review comments for the issue comment with:
+
+   - Findings by checklist item (Pass / Needs work / Unclear) with brief evidence in a table.
+   - Concrete follow-ups/questions if needed.
+   - One-line verdict (Ready / Not ready).
+
+3. Third action: Post the review as a GitHub issue comment using `gh issue comment <number> --body "<review>"`.
 
 Rules for labels:
 
@@ -30,7 +39,14 @@ Rules for labels:
 - If ready=true: add `implementation ready` to add; leave `remove` empty or only remove non-gating labels like `needs-clarification` if already present.
 - Avoid duplicating labels already present on the issue.
 
-2. Second response should be a concise human-facing review for the author with:
+Rules for assignment:
+
+- **If ready=true AND author is a contributor:** assign the issue to the author in the `assignees` array.
+- **If ready=false:** leave `assignees` empty (no assignment for issues needing clarification).
+- The script will verify author contributor status before applying assignment.
+- Assignment incentivizes quality problem statements and maintains author accountability.
+
+2. Second response should be a concise AI review comments for the author with:
 
 - Findings by checklist item (Pass / Needs work / Unclear) with brief evidence.
 - Concrete follow-ups/questions.

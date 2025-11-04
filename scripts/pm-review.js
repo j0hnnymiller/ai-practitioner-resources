@@ -1,5 +1,5 @@
 // Copilot Project Manager review: analyze a newly opened issue and post a structured review comment.
-// - Uses OpenAI via OPENAI_API_KEY
+// - Uses Anthropic Claude via ANTHROPIC_API_KEY
 // - Reads issue context from GITHUB_EVENT_PATH and repository envs
 // - Posts a comment summarizing checklist findings and specific gaps
 
@@ -54,6 +54,30 @@ async function addComment(owner, repo, number, body) {
   });
 }
 
+async function isContributor(owner, repo, username) {
+  try {
+    // Check if user is in the contributors list
+    const res = await ghFetch(
+      `/repos/${owner}/${repo}/contributors?per_page=100`
+    );
+    const contributors = await res.json();
+    return contributors.some(
+      (c) => c.login.toLowerCase() === username.toLowerCase()
+    );
+  } catch {
+    // If check fails, assume not a contributor (conservative)
+    return false;
+  }
+}
+
+async function assignIssue(owner, repo, number, assignees) {
+  if (!assignees || assignees.length === 0) return;
+  await ghFetch(`/repos/${owner}/${repo}/issues/${number}`, {
+    method: "PATCH",
+    body: JSON.stringify({ assignees }),
+  });
+}
+
 function readPMGuidance() {
   try {
     const file = path.resolve(
@@ -84,9 +108,14 @@ async function generatePMReview({ title, body, labelsText, url }) {
   }
 
   const guidance = readPMPrompt();
-  const model = process.env.PM_MODEL || process.env.ANTHROPIC_MODEL || "claude-4.5-sonnet-latest";
+  const model =
+    process.env.PM_MODEL ||
+    process.env.ANTHROPIC_MODEL ||
+    "claude-4.5-sonnet-latest";
   // Use the prompt file verbatim as the system message to avoid drift
-  const system = guidance || "(pm-review.md not found; include baseline: strict JSON then concise human review)";
+  const system =
+    guidance ||
+    "(pm-review.md not found; include baseline: strict JSON then concise human review)";
 
   const user = `Issue to review:\nTitle: ${title}\nURL: ${url}\nLabels: ${labelsText}\n\nBody:\n${
     body || "(no body)"
@@ -98,9 +127,7 @@ async function generatePMReview({ title, body, labelsText, url }) {
     system,
     max_tokens: 1500,
     temperature: 0.1,
-    messages: [
-      { role: "user", content: [{ type: "text", text: user }] },
-    ],
+    messages: [{ role: "user", content: [{ type: "text", text: user }] }],
   };
 
   const res1 = await fetch("https://api.anthropic.com/v1/messages", {
@@ -118,14 +145,19 @@ async function generatePMReview({ title, body, labelsText, url }) {
   }
   const data1 = await res1.json();
   const contentBlocks1 = data1?.content || [];
-  const jsonText = contentBlocks1.map((b) => b?.text || "").join("\n").trim();
+  const jsonText = contentBlocks1
+    .map((b) => b?.text || "")
+    .join("\n")
+    .trim();
   let parsed = null;
   try {
     // Extract JSON if wrapped in fences
     const match = jsonText.match(/\{[\s\S]*\}/);
     parsed = match ? JSON.parse(match[0]) : JSON.parse(jsonText);
   } catch (e) {
-    throw new Error("Failed to parse PM review JSON: " + e.message + "\nText: " + jsonText);
+    throw new Error(
+      "Failed to parse PM review JSON: " + e.message + "\nText: " + jsonText
+    );
   }
 
   // Second call: human-friendly review text
@@ -135,9 +167,20 @@ async function generatePMReview({ title, body, labelsText, url }) {
     max_tokens: 2000,
     temperature: 0.8,
     messages: [
-      { role: "user", content: [ { type: "text", text: user } ] },
-      { role: "assistant", content: [ { type: "text", text: JSON.stringify(parsed) } ] },
-      { role: "user", content: [ { type: "text", text: "Now provide the concise report for the author (no JSON)." } ] },
+      { role: "user", content: [{ type: "text", text: user }] },
+      {
+        role: "assistant",
+        content: [{ type: "text", text: JSON.stringify(parsed) }],
+      },
+      {
+        role: "user",
+        content: [
+          {
+            type: "text",
+            text: "Now provide the concise report for the author (no JSON).",
+          },
+        ],
+      },
     ],
   };
   const res2 = await fetch("https://api.anthropic.com/v1/messages", {
@@ -155,7 +198,10 @@ async function generatePMReview({ title, body, labelsText, url }) {
   }
   const data2 = await res2.json();
   const contentBlocks2 = data2?.content || [];
-  const content = contentBlocks2.map((b) => b?.text || "").join("\n").trim();
+  const content = contentBlocks2
+    .map((b) => b?.text || "")
+    .join("\n")
+    .trim();
 
   return { skipped: false, content: content || "(No content)", result: parsed };
 }
@@ -182,7 +228,7 @@ async function main() {
 
   const header = `Copilot PM review — automated checklist assessment`;
   const footer = skipped
-    ? "\n\n_(Set OPENAI_API_KEY to enable AI review.)_"
+    ? "\n\n_(Set ANTHROPIC_API_KEY to enable AI review.)_"
     : "\n\n_(Authored by Copilot — Project Manager mode)_";
   const body = `### ${header}\n\n${content}${footer}`;
   await addComment(owner, repo, number, body);
@@ -190,15 +236,33 @@ async function main() {
   // Apply labels per AI decision
   if (!skipped && result && typeof result === "object") {
     await applyLabelsFromResult(owner, repo, number, result, issue.labels);
+
+    // Apply assignment if ready and author is a contributor
+    if (result.ready === true && issue.user && issue.user.login) {
+      const isAuthorContributor = await isContributor(
+        owner,
+        repo,
+        issue.user.login
+      );
+      if (isAuthorContributor) {
+        await assignIssue(owner, repo, number, [issue.user.login]);
+      }
+    }
   }
-  console.log(`#${number} PM review ${skipped ? "skipped (missing key)" : "posted and labels applied"}.`);
+  console.log(
+    `#${number} PM review ${
+      skipped ? "skipped (missing key)" : "posted and labels applied"
+    }.`
+  );
 }
 
 async function listLabels(owner, repo) {
   const labels = [];
   let page = 1;
   while (true) {
-    const res = await ghFetch(`/repos/${owner}/${repo}/labels?per_page=100&page=${page}`);
+    const res = await ghFetch(
+      `/repos/${owner}/${repo}/labels?per_page=100&page=${page}`
+    );
     const data = await res.json();
     labels.push(...data);
     if (data.length < 100) break;
@@ -207,9 +271,17 @@ async function listLabels(owner, repo) {
   return labels;
 }
 
-async function ensureLabel(owner, repo, name, color = "ededed", description = "") {
+async function ensureLabel(
+  owner,
+  repo,
+  name,
+  color = "ededed",
+  description = ""
+) {
   const existing = await listLabels(owner, repo);
-  const found = existing.find((l) => l.name.toLowerCase() === name.toLowerCase());
+  const found = existing.find(
+    (l) => l.name.toLowerCase() === name.toLowerCase()
+  );
   if (found) return found;
   const res = await ghFetch(`/repos/${owner}/${repo}/labels`, {
     method: "POST",
@@ -233,11 +305,21 @@ async function setIssueLabels(owner, repo, number, names) {
   });
 }
 
-async function applyLabelsFromResult(owner, repo, number, result, existingLabels) {
+async function applyLabelsFromResult(
+  owner,
+  repo,
+  number,
+  result,
+  existingLabels
+) {
   const current = toNameSet(existingLabels);
 
-  const adds = new Set(Array.isArray(result?.labels?.add) ? result.labels.add : []);
-  const removes = new Set(Array.isArray(result?.labels?.remove) ? result.labels.remove : []);
+  const adds = new Set(
+    Array.isArray(result?.labels?.add) ? result.labels.add : []
+  );
+  const removes = new Set(
+    Array.isArray(result?.labels?.remove) ? result.labels.remove : []
+  );
 
   // Derived labels from fields
   if (result?.size && ["small", "medium", "large"].includes(result.size)) {
@@ -251,7 +333,10 @@ async function applyLabelsFromResult(owner, repo, number, result, existingLabels
     adds.add(`independence:${result.independence}`);
     if (result.independence === "high") adds.add("independent");
   }
-  if (result?.riskLevel && ["low", "medium", "high"].includes(result.riskLevel)) {
+  if (
+    result?.riskLevel &&
+    ["low", "medium", "high"].includes(result.riskLevel)
+  ) {
     adds.add(`risk:${result.riskLevel}`);
   }
 
