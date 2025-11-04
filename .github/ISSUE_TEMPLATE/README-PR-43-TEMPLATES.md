@@ -14,12 +14,6 @@ This directory contains issue templates for items identified during the PR #43 c
 
 ## How to Create Issues from These Templates
 
-### Option 1: Via GitHub Web Interface
-1. Go to https://github.com/j0hnnymiller/ai-practitioner-resources/issues/new/choose
-2. Select the appropriate template
-3. Fill in any additional details
-4. Click "Submit new issue"
-
 ### Option 2: Manually Copy Content
 1. Open the template file
 2. Copy the content (excluding the YAML frontmatter between `---`)
