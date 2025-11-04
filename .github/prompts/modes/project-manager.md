@@ -83,10 +83,12 @@ Label operations (GitHub CLI examples)
   - gh issue edit <num> --add-label "at bat"
 - Bulk remove a lane label (PowerShell loop):
   - gh issue list --state open --label "at bat" --json number | jq '.[].number' -r | % { gh issue edit $_ --remove-label 'at bat' }
+  - gh issue list --state open --label "at bat" --json number | jq '.[].number' -r | % { gh issue edit $_ --remove-label 'at bat' }
 
 PowerShell-only alternatives (no jq)
 
 - Bulk remove a lane label:
+  - gh issue list --state open --label "at bat" --json number | powershell -Command "(Get-Content -Raw -) | ConvertFrom-Json | ForEach-Object { gh issue edit $_.number --remove-label 'at bat' }"
   - gh issue list --state open --label "at bat" --json number | powershell -Command "(Get-Content -Raw -) | ConvertFrom-Json | ForEach-Object { gh issue edit $_.number --remove-label 'at bat' }"
 - List issues with more than one lane label (exclusivity audit):
   - gh issue list --state open --json number,title,labels | powershell -Command "(Get-Content -Raw -) | ConvertFrom-Json | Where-Object { ($_.labels.name | Where-Object { $_ -in @('at bat','on deck','in the hole','on the bench') }).Count -ne 1 } | Select-Object number,title"
@@ -180,6 +182,7 @@ Approval/assignment quick commands (replace placeholders)
 - Move to "at bat" (<num>, <approver>, <copilot-operator>):
   - gh issue edit <num> --remove-label "on deck" --remove-label "in the hole" --remove-label "on the bench"
   - gh issue edit <num> --add-label "at bat"
+  - gh issue edit <num> --add-assignee <copilot-operator> --add-assignee <approver>
   - gh issue edit <num> --add-assignee <copilot-operator> --add-assignee <approver>
 
 Assignment rules
