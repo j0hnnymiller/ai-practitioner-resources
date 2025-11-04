@@ -169,12 +169,14 @@ Each resource is scored 60-100 on individual risk areas it addresses, or marked 
 
 ### Styling the Interface
 
-Modify the CSS in `index.html` to customize:
+Modify the CSS in `styles.css` to customize:
 
 - Color schemes and gradients
 - Typography and fonts
 - Layout and spacing
 - Animation effects
+
+The UI is built with modular JavaScript in `src/` and a standalone stylesheet `styles.css` for clarity and easier maintenance.
 
 ### Content Sections
 
