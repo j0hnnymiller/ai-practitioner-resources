@@ -1,12 +1,12 @@
-// Rebalance issue lanes on close-only events.
+// Rebalance Project 1 Status on close-only events.
 // Rules implemented (see .github/prompts/modes/project-manager.md):
-// - Lanes: "at bat", "on deck", "in the hole", "on the bench" (exactly one per issue)
+// - Status values: "at bat", "on deck", "in the hole"; everything else → "on the bench"
 // - Caps: 3 each for at bat/on deck/in the hole
 // - Active pipeline only includes issues labeled "implementation ready"
 // - Choose top items by Priority Score desc; tiebreakers: independence (true first), smaller size, older issue
 // - Independence: label "independent" or "independence:high" → true; default false
 // - Size labels: "size:small|medium|large" → small<medium<large; default medium
-// - Bench everything else (including not implementation-ready)
+// - Set Project 1 Status accordingly and remove any legacy lane labels if present
 
 const fetch = require("node-fetch");
 
@@ -72,6 +72,10 @@ function extractSizeRank(labelsSet) {
   return 1; // medium or unknown
 }
 
+function sizeNameFromRank(rank) {
+  return rank === 0 ? "small" : rank === 2 ? "large" : "medium";
+}
+
 function getLane(labelsSet) {
   for (const lane of LANES) {
     if (hasLabel(labelsSet, lane)) return lane;
@@ -124,6 +128,85 @@ async function ghFetch(url, opts = {}) {
   return res;
 }
 
+// GraphQL helpers for Projects v2
+async function ghGraphQL(query, variables) {
+  const token = process.env.GITHUB_TOKEN || process.env.TOKEN;
+  if (!token) throw new Error("GITHUB_TOKEN not set");
+  const url =
+    process.env.GITHUB_GRAPHQL_URL || "https://api.github.com/graphql";
+  const res = await fetch(url, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/vnd.github+json",
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ query, variables }),
+  });
+  const data = await res.json();
+  if (!res.ok || data.errors) {
+    throw new Error("GraphQL error: " + JSON.stringify(data.errors || data));
+  }
+  return data.data;
+}
+
+async function getProject(owner, number) {
+  const fieldFragments = `fields(first:100){ nodes{ __typename ... on ProjectV2FieldCommon { id name } ... on ProjectV2SingleSelectField { id name options{ id name } } } }`;
+  const qOrg = `query($login:String!,$number:Int!){ organization(login:$login){ projectV2(number:$number){ id number ${fieldFragments} } } }`;
+  const qUser = `query($login:String!,$number:Int!){ user(login:$login){ projectV2(number:$number){ id number ${fieldFragments} } } }`;
+  try {
+    const dOrg = await ghGraphQL(qOrg, { login: owner, number });
+    const projOrg = dOrg?.organization?.projectV2;
+    if (projOrg) return projOrg;
+  } catch (_) {}
+  const dUser = await ghGraphQL(qUser, { login: owner, number });
+  const projUser = dUser?.user?.projectV2;
+  if (!projUser)
+    throw new Error(`Project ${number} not found for owner ${owner}`);
+  return projUser;
+}
+
+function findStatusField(project, statusFieldName) {
+  const nodes = project.fields?.nodes || [];
+  const match = nodes.find(
+    (f) =>
+      String(f.name).toLowerCase() === String(statusFieldName).toLowerCase()
+  );
+  if (!match)
+    throw new Error(
+      `Field '${statusFieldName}' not found in Project ${project.number}`
+    );
+  if (!match.options)
+    throw new Error(`Field '${statusFieldName}' is not a single-select field`);
+  return match;
+}
+
+function optionIdByName(field, name) {
+  const opt = (field.options || []).find(
+    (o) => String(o.name).toLowerCase() === String(name).toLowerCase()
+  );
+  return opt?.id || null;
+}
+
+async function getIssueProjectItemId(issueNodeId, projectId) {
+  const q = `query($id:ID!){ node(id:$id){ ... on Issue { projectItems(first:20){ nodes{ id project{ id number } } } } } }`;
+  const data = await ghGraphQL(q, { id: issueNodeId });
+  const items = data?.node?.projectItems?.nodes || [];
+  const found = items.find((n) => n.project?.id === projectId);
+  return found?.id || null;
+}
+
+async function addIssueToProject(projectId, contentId) {
+  const m = `mutation($projectId:ID!,$contentId:ID!){ addProjectV2ItemById(input:{projectId:$projectId, contentId:$contentId}){ item{ id } } }`;
+  const data = await ghGraphQL(m, { projectId, contentId });
+  return data?.addProjectV2ItemById?.item?.id || null;
+}
+
+async function setProjectItemStatus(projectId, itemId, fieldId, optionId) {
+  const m = `mutation($projectId:ID!,$itemId:ID!,$fieldId:ID!,$optionId:String!){ updateProjectV2ItemFieldValue(input:{ projectId:$projectId, itemId:$itemId, fieldId:$fieldId, value:{ singleSelectOptionId:$optionId }}){ projectV2Item{ id } } }`;
+  await ghGraphQL(m, { projectId, itemId, fieldId, optionId });
+}
+
 async function listOpenIssues(owner, repo) {
   const items = [];
   let page = 1;
@@ -151,6 +234,13 @@ async function main() {
   const repoFull = process.env.GITHUB_REPOSITORY;
   if (!repoFull) throw new Error("GITHUB_REPOSITORY not set");
   const [owner, repo] = repoFull.split("/");
+  const projectOwner = process.env.PROJECT_OWNER || owner;
+  const projectNumber = Number(process.env.PROJECT_NUMBER || 1);
+  const statusFieldName = process.env.PROJECT_STATUS_FIELD_NAME || "Status";
+  const laneMapRaw = process.env.LANE_STATUS_MAP || "";
+  const laneMap = laneMapRaw ? JSON.parse(laneMapRaw) : null;
+  const dryRun = /^(1|true|yes)$/i.test(String(process.env.DRY_RUN || ""));
+  const listOnly = /^(1|true|yes)$/i.test(String(process.env.LIST_ONLY || ""));
 
   const openIssues = await listOpenIssues(owner, repo);
 
@@ -187,22 +277,69 @@ async function main() {
     if (!targets.has(it.number)) targets.set(it.number, "on the bench");
   }
 
-  // Apply label changes (ensure exactly one lane label)
-  for (const it of prepared) {
-    const desiredLane = targets.get(it.number);
-    const clean = removeLaneLabels(it.labelsSet);
-    clean.add(desiredLane);
-    const newLabels = [...clean];
+  // If only listing, print priority ordering and exit before any mutations
+  if (listOnly) {
+    const approvedSorted = [...approvedIssues];
+    const otherSorted = prepared.filter((i) => !i.approved).sort(cmpIssues);
 
-    // Only patch when different to reduce API calls
-    const currentLane = getLane(it.labelsSet);
-    if (currentLane === null) {
-      console.warn(`Issue #${it.number} has no lane label`);
+    const fmt = (i) =>
+      `#${i.number} [score=${i.score}, indep=${i.independent}, size=${sizeNameFromRank(i.sizeRank)}, created=${i.created_at}] ${i.title}`;
+
+    console.log(`Priority — implementation ready (${approvedSorted.length}):`);
+    for (const i of approvedSorted) console.log("  " + fmt(i));
+
+    console.log(`\nPriority — others (${otherSorted.length}):`);
+    for (const i of otherSorted) console.log("  " + fmt(i));
+    return;
+  }
+
+  // Resolve project and status options
+  const project = await getProject(projectOwner, projectNumber);
+  const statusField = findStatusField(project, statusFieldName);
+  const optionId = (name) =>
+    optionIdByName(statusField, laneMap?.[name] || name);
+
+  // Apply Status updates and remove any legacy lane labels
+  for (const it of prepared) {
+    const desiredLane = targets.get(it.number) || "on the bench";
+    const option = optionId(desiredLane);
+    if (!option) {
+      console.warn(
+        `#${it.number}: desired status '${desiredLane}' not found — SKIP`
+      );
+      continue;
     }
-    const laneChanged =
-      (currentLane || "").toLowerCase() !== desiredLane.toLowerCase();
-    if (laneChanged) {
-      await updateIssueLabels(owner, repo, it.number, newLabels);
+    // Ensure we have node_id for GraphQL calls
+    if (!it.node_id) {
+      const res = await ghFetch(`/repos/${owner}/${repo}/issues/${it.number}`);
+      const fresh = await res.json();
+      it.node_id = fresh.node_id;
+    }
+    let itemId = null;
+    if (!dryRun) {
+      itemId = await getIssueProjectItemId(it.node_id, project.id);
+      if (!itemId) itemId = await addIssueToProject(project.id, it.node_id);
+      if (!itemId) {
+        console.warn(`#${it.number}: could not obtain project item id — SKIP`);
+        continue;
+      }
+      await setProjectItemStatus(project.id, itemId, statusField.id, option);
+    } else {
+      console.log(
+        `DRY RUN: #${it.number} would set Project Status → '${desiredLane}'`
+      );
+    }
+
+    // Clean up any legacy lane labels from the issue
+    const clean = removeLaneLabels(it.labelsSet);
+    if (clean.size !== it.labelsSet.size) {
+      if (!dryRun) {
+        await updateIssueLabels(owner, repo, it.number, [...clean]);
+      } else {
+        console.log(`DRY RUN: #${it.number} would remove legacy lane labels`);
+      }
+    }
+    if (!dryRun) {
       console.log(`#${it.number} → ${desiredLane}`);
     }
   }

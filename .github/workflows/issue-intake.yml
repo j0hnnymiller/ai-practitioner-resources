@@ -7,6 +7,7 @@ on:
 permissions:
   issues: write
   contents: read
+  repository-projects: write
 
 jobs:
   intake:
@@ -28,4 +29,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_REPOSITORY: ${{ github.repository }}
           GITHUB_EVENT_PATH: ${{ github.event_path }}
+          PROJECT_OWNER: ${{ github.repository_owner }}
+          PROJECT_NUMBER: 1
+          PROJECT_STATUS_FIELD_NAME: Status
         run: node scripts/issue-intake.js

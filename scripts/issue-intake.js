@@ -1,5 +1,6 @@
-// Issue intake on open: enforce initial lane and request approval.
-// - Add lane label "on the bench" (and remove any other lane labels)
+// Issue intake on open: initialize Project 1 Status and request approval.
+// - Ensure the issue is added to Project 1 (owner/number via env)
+// - Set Project Status to the bench value (default: "on the bench" or mapped)
 // - Add tracking label "needs-approval" unless already implementation-ready
 // - Post a short comment with the review checklist and quick approval commands
 
@@ -28,6 +29,85 @@ async function ghFetch(url, opts = {}) {
     );
   }
   return res;
+}
+
+// GraphQL helpers for Projects v2
+async function ghGraphQL(query, variables) {
+  const token = process.env.GITHUB_TOKEN || process.env.TOKEN;
+  if (!token) throw new Error("GITHUB_TOKEN not set");
+  const url =
+    process.env.GITHUB_GRAPHQL_URL || "https://api.github.com/graphql";
+  const res = await fetch(url, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/vnd.github+json",
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ query, variables }),
+  });
+  const data = await res.json();
+  if (!res.ok || data.errors) {
+    throw new Error("GraphQL error: " + JSON.stringify(data.errors || data));
+  }
+  return data.data;
+}
+
+async function getProject(owner, number) {
+  const fieldFragments = `fields(first:100){ nodes{ __typename ... on ProjectV2FieldCommon { id name } ... on ProjectV2SingleSelectField { id name options{ id name } } } }`;
+  const qOrg = `query($login:String!,$number:Int!){ organization(login:$login){ projectV2(number:$number){ id number ${fieldFragments} } } }`;
+  const qUser = `query($login:String!,$number:Int!){ user(login:$login){ projectV2(number:$number){ id number ${fieldFragments} } } }`;
+  try {
+    const dOrg = await ghGraphQL(qOrg, { login: owner, number });
+    const projOrg = dOrg?.organization?.projectV2;
+    if (projOrg) return projOrg;
+  } catch (_) {}
+  const dUser = await ghGraphQL(qUser, { login: owner, number });
+  const projUser = dUser?.user?.projectV2;
+  if (!projUser)
+    throw new Error(`Project ${number} not found for owner ${owner}`);
+  return projUser;
+}
+
+function findStatusField(project, statusFieldName) {
+  const nodes = project.fields?.nodes || [];
+  const match = nodes.find(
+    (f) =>
+      String(f.name).toLowerCase() === String(statusFieldName).toLowerCase()
+  );
+  if (!match)
+    throw new Error(
+      `Field '${statusFieldName}' not found in Project ${project.number}`
+    );
+  if (!match.options)
+    throw new Error(`Field '${statusFieldName}' is not a single-select field`);
+  return match; // { id,name,options[] }
+}
+
+function resolveOptionIdByName(field, name) {
+  const opt = (field.options || []).find(
+    (o) => String(o.name).toLowerCase() === String(name).toLowerCase()
+  );
+  return opt?.id || null;
+}
+
+async function getIssueProjectItemId(issueNodeId, projectId) {
+  const q = `query($id:ID!){ node(id:$id){ ... on Issue { projectItems(first:20){ nodes{ id project{ id number } } } } } }`;
+  const data = await ghGraphQL(q, { id: issueNodeId });
+  const items = data?.node?.projectItems?.nodes || [];
+  const found = items.find((n) => n.project?.id === projectId);
+  return found?.id || null;
+}
+
+async function addIssueToProject(projectId, contentId) {
+  const m = `mutation($projectId:ID!,$contentId:ID!){ addProjectV2ItemById(input:{projectId:$projectId, contentId:$contentId}){ item{ id } } }`;
+  const data = await ghGraphQL(m, { projectId, contentId });
+  return data?.addProjectV2ItemById?.item?.id || null;
+}
+
+async function setProjectItemStatus(projectId, itemId, fieldId, optionId) {
+  const m = `mutation($projectId:ID!,$itemId:ID!,$fieldId:ID!,$optionId:String!){ updateProjectV2ItemFieldValue(input:{ projectId:$projectId, itemId:$itemId, fieldId:$fieldId, value:{ singleSelectOptionId:$optionId }}){ projectV2Item{ id } } }`;
+  await ghGraphQL(m, { projectId, itemId, fieldId, optionId });
 }
 
 async function getIssue(owner, repo, number) {
@@ -122,9 +202,30 @@ async function main() {
     (n) => n.toLowerCase() === "implementation ready"
   );
 
-  // Enforce lane exclusivity and set initial lane to bench
+  // Convert to Project Status: ensure issue is in project, set Status to bench
+  const projectOwner = process.env.PROJECT_OWNER || owner;
+  const projectNumber = Number(process.env.PROJECT_NUMBER || 1);
+  const statusFieldName = process.env.PROJECT_STATUS_FIELD_NAME || "Status";
+  const laneMapRaw = process.env.LANE_STATUS_MAP || "";
+  const laneMap = laneMapRaw ? JSON.parse(laneMapRaw) : null;
+  const benchName = laneMap?.["on the bench"] || "on the bench";
+
+  const project = await getProject(projectOwner, projectNumber);
+  const statusField = findStatusField(project, statusFieldName);
+  const benchOptionId = resolveOptionIdByName(statusField, benchName);
+  if (!benchOptionId)
+    throw new Error(
+      `Status option '${benchName}' not found in Project ${project.number}`
+    );
+
+  let itemId = await getIssueProjectItemId(issue.node_id, project.id);
+  if (!itemId) itemId = await addIssueToProject(project.id, issue.node_id);
+  if (!itemId)
+    throw new Error(`Could not create project item for issue #${number}`);
+  await setProjectItemStatus(project.id, itemId, statusField.id, benchOptionId);
+
+  // Remove any legacy lane labels if present
   let newSet = stripLaneLabels(labelSet);
-  newSet.add("on the bench");
 
   // Apply needs-approval unless already approved
   if (!hasImplementationReady) newSet.add("needs-approval");
@@ -135,7 +236,7 @@ async function main() {
 
   await addComment(owner, repo, number, comment);
   console.log(
-    `#${number} initialized with lane 'on the bench' and review checklist.`
+    `#${number} initialized in Project ${project.number} with Status '${benchName}' and review checklist.`
   );
 }
 

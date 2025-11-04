@@ -1,4 +1,4 @@
-name: Rebalance lanes on issue close
+name: Rebalance Project Status on issue close
 
 on:
   issues:
@@ -6,6 +6,8 @@ on:
 
 permissions:
   issues: write
+  contents: read
+  repository-projects: write
 
 jobs:
   rebalance:
@@ -22,8 +24,11 @@ jobs:
       - name: Install deps (production only)
         run: npm ci --omit=dev
 
-      - name: Rebalance lanes
+      - name: Rebalance Project Status
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_REPOSITORY: ${{ github.repository }}
+          PROJECT_OWNER: ${{ github.repository_owner }}
+          PROJECT_NUMBER: 1
+          PROJECT_STATUS_FIELD_NAME: Status
         run: node scripts/rebalance-lanes.js
