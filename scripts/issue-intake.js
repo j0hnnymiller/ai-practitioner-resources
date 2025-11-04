@@ -187,14 +187,7 @@ async function main() {
   const number = event?.issue?.number;
   if (!number) throw new Error("Issue number not found in event payload");
 
-  // Ensure tracking label exists
-  await ensureLabel(
-    owner,
-    repo,
-    "needs-approval",
-    "7d8590",
-    "Pending human review; not approved for implementation"
-  );
+  // Do not pre-create or force 'needs-approval'; PM review will decide labels.
 
   // Fetch current issue
   const issue = await getIssue(owner, repo, number);
@@ -243,12 +236,11 @@ async function main() {
   // Remove any legacy lane labels if present
   let newSet = stripLaneLabels(labelSet);
 
-  // Apply needs-approval unless already approved
-  if (!hasImplementationReady) newSet.add("needs-approval");
+  // Do not auto-apply 'needs-approval'. The PM review step will decide labels.
 
   await setIssueLabels(owner, repo, number, [...newSet]);
 
-  const comment = `Thanks for opening this issue!\n\nPM intake checklist (baseline):\n- [ ] Scope is clear and testable (acceptance criteria provided)\n- [ ] Dependencies identified and minimal (or resolved)\n- [ ] Risk acceptable\n- [ ] Independent enough to run in parallel (label \'independent\' or \'independence:high\' when true)\n- [ ] Priority score provided (label \'priority:NN\' or \'score:NN\')\n- [ ] Size estimated (label \'size:small|medium\'). Items labeled size:large will not be approved; please split into smaller sub-issues.\n\nIf this issue includes a prompt, please include a short prompt packet: Objective, Inputs, Tools/permissions, Constraints, Steps/strategy, Acceptance criteria, Evaluation, Priority score, Size, Independence, Risks, Links.\n\nType-specific checklists are documented in .github/prompts/modes/project-manager.md under \"Approval criteria by type\".\n\nIf approved, mark it \'implementation ready\' and assign a contributor.\n\nQuick commands (replace placeholders):\n\n- Approve:\n  - gh issue comment ${number} --body \"Approved — implementation ready. Rationale: <one-line>\"\n  - gh issue edit ${number} --add-label \"implementation ready\" --remove-label \"needs-approval\"\n\nThis issue has been placed on the bench initially. Lanes are rebalanced only when issues are closed.`;
+  const comment = `Thanks for opening this issue!\n\nPM intake checklist (baseline):\n- [ ] Scope is clear and testable (acceptance criteria provided)\n- [ ] Dependencies identified and minimal (or resolved)\n- [ ] Risk acceptable\n- [ ] Independent enough to run in parallel (label 'independent' or 'independence:high' when true)\n- [ ] Priority score provided (label 'priority:NN' or 'score:NN')\n- [ ] Size estimated (label 'size:small|medium'). Items labeled size:large will not be approved; please split into smaller sub-issues.\n\nCopilot (PM mode) will post an automated review with findings and suggested labels shortly.\n\nType-specific checklists are documented in .github/prompts/modes/project-manager.md under "Approval criteria by type".\n\nIf approved, mark it 'implementation ready' and assign a contributor.\n\nThis issue has been placed on the bench initially. Lanes are rebalanced only when issues are closed.`;
 
   await addComment(owner, repo, number, comment);
   console.log(`#${number} intake completed (labels/comment applied).`);

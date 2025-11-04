@@ -43,6 +43,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_REPOSITORY: ${{ github.repository }}
           GITHUB_EVENT_PATH: ${{ github.event_path }}
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          PM_MODEL: gpt-4o-mini
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          PM_MODEL: claude-3.5-sonnet-latest
         run: node scripts/pm-review.js
