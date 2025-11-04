@@ -169,15 +169,15 @@ async function main() {
     };
   });
 
-  // Build candidate list for active lanes: approved + independent
-  const approvedIndependent = prepared.filter(
-    (i) => i.approved && i.independent
+  // Build candidate list for active lanes: approved only (independence is a tiebreaker in sorting)
+  const approvedIssues = prepared.filter(
+    (i) => i.approved
   );
-  approvedIndependent.sort(cmpIssues);
+  approvedIssues.sort(cmpIssues);
 
-  const atBat = approvedIndependent.slice(0, 3).map((i) => i.number);
-  const onDeck = approvedIndependent.slice(3, 6).map((i) => i.number);
-  const inTheHole = approvedIndependent.slice(6, 9).map((i) => i.number);
+  const atBat = approvedIssues.slice(0, 3).map((i) => i.number);
+  const onDeck = approvedIssues.slice(3, 6).map((i) => i.number);
+  const inTheHole = approvedIssues.slice(6, 9).map((i) => i.number);
 
   const targets = new Map();
   for (const n of atBat) targets.set(n, "at bat");
