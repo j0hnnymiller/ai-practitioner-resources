@@ -202,27 +202,41 @@ async function main() {
     (n) => n.toLowerCase() === "implementation ready"
   );
 
-  // Convert to Project Status: ensure issue is in project, set Status to bench
-  const projectOwner = process.env.PROJECT_OWNER || owner;
-  const projectNumber = Number(process.env.PROJECT_NUMBER || 1);
-  const statusFieldName = process.env.PROJECT_STATUS_FIELD_NAME || "Status";
-  const laneMapRaw = process.env.LANE_STATUS_MAP || "";
-  const laneMap = laneMapRaw ? JSON.parse(laneMapRaw) : null;
-  const benchName = laneMap?.["on the bench"] || "on the bench";
+  // Optionally manage Project item/Status here (default off when Project workflows handle it)
+  const manageProject = /^(1|true|yes)$/i.test(
+    String(process.env.INTAKE_MANAGE_PROJECT || "")
+  );
+  if (manageProject) {
+    const projectOwner = process.env.PROJECT_OWNER || owner;
+    const projectNumber = Number(process.env.PROJECT_NUMBER || 1);
+    const statusFieldName = process.env.PROJECT_STATUS_FIELD_NAME || "Status";
+    const laneMapRaw = process.env.LANE_STATUS_MAP || "";
+    const laneMap = laneMapRaw ? JSON.parse(laneMapRaw) : null;
+    const benchName = laneMap?.["on the bench"] || "on the bench";
 
-  const project = await getProject(projectOwner, projectNumber);
-  const statusField = findStatusField(project, statusFieldName);
-  const benchOptionId = resolveOptionIdByName(statusField, benchName);
-  if (!benchOptionId)
-    throw new Error(
-      `Status option '${benchName}' not found in Project ${project.number}`
+    const project = await getProject(projectOwner, projectNumber);
+    const statusField = findStatusField(project, statusFieldName);
+    const benchOptionId = resolveOptionIdByName(statusField, benchName);
+    if (!benchOptionId)
+      throw new Error(
+        `Status option '${benchName}' not found in Project ${project.number}`
+      );
+
+    let itemId = await getIssueProjectItemId(issue.node_id, project.id);
+    if (!itemId) itemId = await addIssueToProject(project.id, issue.node_id);
+    if (!itemId)
+      throw new Error(`Could not create project item for issue #${number}`);
+    await setProjectItemStatus(
+      project.id,
+      itemId,
+      statusField.id,
+      benchOptionId
     );
-
-  let itemId = await getIssueProjectItemId(issue.node_id, project.id);
-  if (!itemId) itemId = await addIssueToProject(project.id, issue.node_id);
-  if (!itemId)
-    throw new Error(`Could not create project item for issue #${number}`);
-  await setProjectItemStatus(project.id, itemId, statusField.id, benchOptionId);
+  } else {
+    console.log(
+      `Skipping Project item/Status management for #${number} (INTAKE_MANAGE_PROJECT not set)`
+    );
+  }
 
   // Remove any legacy lane labels if present
   let newSet = stripLaneLabels(labelSet);
@@ -235,9 +249,7 @@ async function main() {
   const comment = `Thanks for opening this issue!\n\nPM intake checklist (baseline):\n- [ ] Scope is clear and testable (acceptance criteria provided)\n- [ ] Dependencies identified and minimal (or resolved)\n- [ ] Risk acceptable\n- [ ] Independent enough to run in parallel (label \'independent\' or \'independence:high\' when true)\n- [ ] Priority score provided (label \'priority:NN\' or \'score:NN\')\n- [ ] Size estimated (label \'size:small|medium\'). Items labeled size:large will not be approved; please split into smaller sub-issues.\n\nIf this issue includes a prompt, please include a short prompt packet: Objective, Inputs, Tools/permissions, Constraints, Steps/strategy, Acceptance criteria, Evaluation, Priority score, Size, Independence, Risks, Links.\n\nType-specific checklists are documented in .github/prompts/modes/project-manager.md under \"Approval criteria by type\".\n\nIf approved, mark it \'implementation ready\' and assign a contributor.\n\nQuick commands (replace placeholders):\n\n- Approve:\n  - gh issue comment ${number} --body \"Approved — implementation ready. Rationale: <one-line>\"\n  - gh issue edit ${number} --add-label \"implementation ready\" --remove-label \"needs-approval\"\n\nThis issue has been placed on the bench initially. Lanes are rebalanced only when issues are closed.`;
 
   await addComment(owner, repo, number, comment);
-  console.log(
-    `#${number} initialized in Project ${project.number} with Status '${benchName}' and review checklist.`
-  );
+  console.log(`#${number} intake completed (labels/comment applied).`);
 }
 
 main().catch((err) => {
