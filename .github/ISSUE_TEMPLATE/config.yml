@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 📚 Project Documentation
+    url: https://github.com/j0hnnymiller/ai-practitioner-resources/blob/main/README.md
+    about: Learn more about the project and its AI-first development approach
+  - name: 🤝 Contributor Guidelines
+    url: https://github.com/j0hnnymiller/ai-practitioner-resources/blob/main/CONTRIBUTORS.md
+    about: Understand our unique contribution process and AI-powered development philosophy
+  - name: 💬 Discussions
+    url: https://github.com/j0hnnymiller/ai-practitioner-resources/discussions
+    about: General discussions about AI development, tools, and best practices

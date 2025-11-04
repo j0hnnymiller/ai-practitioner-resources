@@ -1,0 +1,151 @@
+name: 🤝 Contributor Access Request
+description: Request to become a contributor for reviewing AI-generated code and prompts
+title: "Contributor Request: [Your GitHub Username]"
+labels: ["contributor-request", "access", "needs-review"]
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## 🤝 Contributor Access Request
+
+        Thank you for your interest in becoming a contributor to our AI-first development project!
+
+        **What Contributors Do:**
+        - Review AI-generated prompts and code
+        - Provide quality assurance for implementations
+        - Test new features before release
+        - Help with project direction and prioritization
+        - Evaluate resource submissions and AI-generated content
+
+  - type: input
+    id: github-username
+    attributes:
+      label: 👤 GitHub Username
+      description: Your GitHub username (without the @ symbol)
+      placeholder: "your-username"
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: experience-areas
+    attributes:
+      label: 🛠️ Experience & Skills
+      description: What's your experience with AI development tools and practices? Check all that apply.
+      options:
+        - label: "**GitHub Copilot**: Regular user of GitHub Copilot"
+        - label: "**AI Prompt Engineering**: Experience writing prompts for AI tools"
+        - label: "**Code Review**: Experience reviewing code and pull requests"
+        - label: "**Web Development**: HTML, CSS, JavaScript experience"
+        - label: "**UI/UX Design**: User interface and experience design"
+        - label: "**Content Curation**: Experience evaluating and organizing resources"
+        - label: "**Documentation**: Technical writing and documentation"
+        - label: "**Testing**: Quality assurance and testing methodologies"
+
+  - type: textarea
+    id: ai-tools-experience
+    attributes:
+      label: 🤖 AI Development Tools Experience
+      description: Tell us about your experience with AI-powered development tools
+      placeholder: |
+        - GitHub Copilot: [How long you've used it, specific use cases]
+        - ChatGPT/Claude for coding: [Experience level, typical use cases]
+        - Other AI tools: [List any other AI development tools you use]
+        - Prompt engineering: [Experience writing effective prompts]
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: contribution-areas
+    attributes:
+      label: 🎯 Areas of Interest
+      description: Which areas would you like to contribute to? Check all that apply.
+      options:
+        - label: "**Content Curation**: Suggesting and evaluating AI development resources"
+        - label: "**Code Review**: Reviewing AI-generated code for quality and best practices"
+        - label: "**Prompt Review**: Evaluating and improving implementation prompts"
+        - label: "**UI/UX Improvements**: Enhancing user interface and experience"
+        - label: "**Documentation**: Writing and maintaining project documentation"
+        - label: "**Testing**: Quality assurance and feature testing"
+        - label: "**Schema Development**: Improving resource classification systems"
+        - label: "**Automation**: Enhancing AI workflows and automation"
+
+  - type: textarea
+    id: motivation
+    attributes:
+      label: 💡 Motivation & Vision
+      description: Why are you interested in this project? What draws you to AI-first development?
+      placeholder: |
+        - What interests you about AI-first development?
+        - How do you see AI changing software development?
+        - What unique perspective or skills would you bring?
+        - What aspects of this project excite you most?
+    validations:
+      required: true
+
+  - type: textarea
+    id: availability
+    attributes:
+      label: ⏰ Availability
+      description: How much time can you typically contribute per week?
+      placeholder: |
+        - Hours per week: [Estimate]
+        - Preferred schedule: [When you're most available]
+        - Time zone: [Your time zone]
+        - Any constraints: [Travel, work schedule, etc.]
+
+  - type: textarea
+    id: previous-contributions
+    attributes:
+      label: 🌟 Previous Open Source Contributions
+      description: Tell us about your experience with open source projects (if any)
+      placeholder: |
+        - Projects contributed to: [List any open source projects]
+        - Types of contributions: [Code, documentation, issues, etc.]
+        - Leadership roles: [Any maintainer or leadership experience]
+        - If new to open source: [What interests you about starting now?]
+
+  - type: checkboxes
+    id: project-understanding
+    attributes:
+      label: 📚 Project Understanding
+      description: Please confirm your understanding of our AI-first approach
+      options:
+        - label: "I understand this project uses AI (GitHub Copilot) for implementation"
+        - label: "I understand we don't accept traditional pull requests"
+        - label: "I understand contributions are made through detailed issue prompts"
+        - label: "I'm interested in the human-AI collaboration aspects"
+        - label: "I've read the CONTRIBUTORS.md file"
+
+  - type: textarea
+    id: additional-info
+    attributes:
+      label: 📝 Additional Information
+      description: Anything else you'd like us to know about your background or interest in the project?
+      placeholder: |
+        - Relevant portfolio/projects: [Links to your work]
+        - Specific expertise: [Any specialized knowledge]
+        - Questions about the role: [Anything you'd like to clarify]
+        - Other: [Any additional context]
+
+  - type: markdown
+    attributes:
+      value: |
+        ---
+
+        ## 🔄 What Happens Next?
+
+        1. **Review**: Maintainers will review your request
+        2. **Discussion**: We may ask follow-up questions
+        3. **Trial Period**: If approved, you'll start with a trial period
+        4. **Access**: Full contributor access after successful trial
+
+        ## 🤖 Our AI-First Philosophy
+
+        This project is an experiment in human-AI collaboration where:
+        - Humans provide direction, creativity, and quality oversight
+        - AI handles implementation details and routine tasks
+        - Contributors focus on prompt quality and outcome evaluation
+        - Code reviews emphasize prompt effectiveness and results
+
+        **Thank you for your interest in shaping the future of AI-powered development!**

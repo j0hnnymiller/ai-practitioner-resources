@@ -1,0 +1,188 @@
+name: 📚 Resource Suggestion
+description: Suggest a new AI development resource for inclusion in the curated list
+title: "Resource: [Resource Title]"
+labels: ["resource-suggestion", "content", "needs-review"]
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## 📚 Resource Suggestion
+
+        Help us expand our curated list of AI practitioner resources! This template helps you suggest high-quality resources that align with our AI-first development focus.
+
+        **What We're Looking For:**
+        - Books, articles, blogs, podcasts about AI-powered development
+        - Resources with practical coding value
+        - Content that helps developers work effectively with AI tools
+
+  - type: input
+    id: resource-title
+    attributes:
+      label: 📖 Resource Title
+      description: The exact title of the resource
+      placeholder: "e.g., 'The Pragmatic Programmer: From Journeyman to Master'"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: resource-type
+    attributes:
+      label: 📄 Resource Type
+      description: What type of resource is this?
+      options:
+        - Book
+        - Article
+        - Blog Post
+        - Podcast
+        - Video Series
+        - Documentation
+        - Tool/Platform
+        - Course
+    validations:
+      required: true
+
+  - type: input
+    id: resource-url
+    attributes:
+      label: 🔗 Resource URL
+      description: Direct link to the resource (non-Amazon preferred)
+      placeholder: "https://..."
+    validations:
+      required: true
+
+  - type: input
+    id: author-creator
+    attributes:
+      label: 👤 Author/Creator
+      description: Who created this resource?
+      placeholder: "e.g., 'David Thomas and Andrew Hunt'"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: 📂 Category
+      description: Which category best fits this resource?
+      options:
+        - "Getting Started (Beginner-Friendly)"
+        - "Practical Developer Workflow"
+        - "Prompt Engineering & Applied AI"
+        - "Advanced & Theoretical Foundations"
+    validations:
+      required: true
+
+  - type: textarea
+    id: why-valuable
+    attributes:
+      label: 💡 Why This Resource is Valuable
+      description: Explain why this resource should be included. What makes it useful for AI practitioners?
+      placeholder: |
+        - What specific knowledge does it provide?
+        - How does it help with AI-powered development?
+        - What practical skills can developers learn?
+        - Why is it better than similar resources?
+    validations:
+      required: true
+
+  - type: textarea
+    id: content-summary
+    attributes:
+      label: 📝 Content Summary
+      description: Brief summary of what the resource covers
+      placeholder: |
+        - Main topics covered
+        - Key takeaways
+        - Target audience
+        - Unique aspects or approaches
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: quality-criteria
+    attributes:
+      label: ✅ Quality Assessment
+      description: Rate this resource against our quality criteria
+      options:
+        - label: "**Practical Value**: Contains hands-on, actionable advice"
+        - label: "**AI Relevance**: Directly applicable to AI-powered development"
+        - label: "**Clarity**: Well-written and easy to understand"
+        - label: "**Completeness**: Comprehensive coverage of its topics"
+        - label: "**Recency**: Up-to-date with current practices and tools"
+        - label: "**Credibility**: From a reputable source or author"
+
+  - type: input
+    id: suggested-score
+    attributes:
+      label: 🎯 Suggested Score (1-100)
+      description: Based on our scoring criteria, what score would you give this resource?
+      placeholder: "85"
+    validations:
+      required: true
+
+  - type: textarea
+    id: score-justification
+    attributes:
+      label: 📊 Score Justification
+      description: Explain your suggested score based on our criteria
+      placeholder: |
+        - Practical hands-on coding value (40%): [Score and reasoning]
+        - Clarity and accessibility (25%): [Score and reasoning]
+        - Depth and completeness (20%): [Score and reasoning]
+        - Relevance and recency (15%): [Score and reasoning]
+        - Overall: [Final score and summary]
+    validations:
+      required: true
+
+  - type: textarea
+    id: target-audience
+    attributes:
+      label: 👥 Target Audience
+      description: Who would benefit most from this resource?
+      placeholder: |
+        - Experience level: [Beginner, Intermediate, Advanced]
+        - Role: [Developers, Architects, Students, etc.]
+        - Specific interests: [AI tools, prompt engineering, etc.]
+
+  - type: textarea
+    id: similar-resources
+    attributes:
+      label: 🔄 Similar Resources
+      description: How does this compare to similar resources? (Optional)
+      placeholder: |
+        - Resources it's similar to: [List any similar resources]
+        - What makes this one unique: [Key differentiators]
+        - Why choose this over alternatives: [Advantages]
+
+  - type: textarea
+    id: additional-notes
+    attributes:
+      label: 📝 Additional Notes
+      description: Any other information that would help evaluate this resource? (Optional)
+      placeholder: |
+        - Publication date or last update
+        - Language or accessibility considerations
+        - Prerequisites or requirements
+        - Notable endorsements or reviews
+
+  - type: markdown
+    attributes:
+      value: |
+        ---
+
+        ## 🤖 AI Evaluation Process
+
+        **After submission, this resource will be:**
+        1. **Human Review**: Evaluated by maintainers for quality and fit
+        2. **AI Analysis**: Processed by our AI system for scoring validation
+        3. **Integration**: Added to the resource list if approved
+        4. **Monitoring**: Tracked for community feedback and usage
+
+        **Scoring Criteria:**
+        - **Practical hands-on coding value** (40%)
+        - **Clarity and accessibility** (25%)
+        - **Depth and completeness** (20%)
+        - **Relevance and recency** (15%)
+
+        Thank you for helping us build the best collection of AI practitioner resources!

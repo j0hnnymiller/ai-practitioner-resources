@@ -1,0 +1,118 @@
+name: 💡 Feature Request
+description: Submit a new feature idea with detailed implementation prompt for AI development
+title: "Feature Request: [Brief Description]"
+labels: ["enhancement", "ai-implementation", "needs-review"]
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## 🎯 Feature Request
+
+        Thank you for contributing to our AI-first development project! This template helps you provide the detailed prompts needed for AI implementation.
+
+        **Remember**: We don't accept traditional pull requests. Instead, provide clear prompts that GitHub Copilot can use to implement your idea.
+
+  - type: textarea
+    id: feature-description
+    attributes:
+      label: 📝 Feature Description
+      description: What feature or improvement do you want to see? Be clear and concise.
+      placeholder: |
+        Example: "A dark mode toggle that allows users to switch between light and dark themes"
+    validations:
+      required: true
+
+  - type: textarea
+    id: implementation-prompt
+    attributes:
+      label: 🤖 Implementation Prompt
+      description: Write a detailed prompt as if you're instructing an AI developer. Be specific about requirements, behavior, styling, and functionality.
+      placeholder: |
+        Example: "Add a dark mode toggle to the web interface that saves user preference to localStorage, applies a dark theme with appropriate contrast ratios, and includes smooth transition animations. The toggle should be located in the header, use a moon/sun icon, and maintain accessibility standards with proper ARIA labels..."
+      value: |
+        ```
+        [Write your detailed implementation prompt here - be as specific as possible about what you want built and how it should work]
+        ```
+    validations:
+      required: true
+
+  - type: textarea
+    id: use-cases
+    attributes:
+      label: 🎯 Use Cases & Benefits
+      description: How would this benefit users? What problems does it solve?
+      placeholder: |
+        - Improves user experience by...
+        - Solves the problem of...
+        - Would be valuable for users who...
+        - Aligns with project goals by...
+    validations:
+      required: true
+
+  - type: textarea
+    id: examples-mockups
+    attributes:
+      label: 🎨 Examples & References (Optional)
+      description: Provide examples, mockups, screenshots, or links to similar implementations
+      placeholder: |
+        - Link to similar feature: [URL]
+        - Screenshot: [Attach or paste image]
+        - Mockup: [Description or image]
+        - Reference implementation: [URL]
+
+  - type: checkboxes
+    id: acceptance-criteria
+    attributes:
+      label: ✅ Acceptance Criteria
+      description: What would make this implementation successful? Check all that apply.
+      options:
+        - label: "**Functionality**: Core feature works as described"
+        - label: "**User Interface**: UI is intuitive and accessible"
+        - label: "**Performance**: Feature doesn't impact site performance"
+        - label: "**Responsive Design**: Works on mobile and desktop"
+        - label: "**Browser Compatibility**: Works across modern browsers"
+        - label: "**Data Persistence**: User preferences are saved appropriately"
+        - label: "**Documentation**: Feature is documented for users"
+
+  - type: textarea
+    id: acceptance-details
+    attributes:
+      label: 📋 Detailed Acceptance Criteria
+      description: Provide specific details for the items you checked above
+      placeholder: |
+        - Functionality: [Describe exactly what should work]
+        - User Interface: [Specify UI requirements]
+        - Performance: [Any performance requirements]
+        - etc...
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: 🚨 Priority Level
+      description: How important is this feature?
+      options:
+        - Low (Nice to have)
+        - Medium (Would improve user experience)
+        - High (Important for project goals)
+        - Critical (Essential functionality)
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: 📚 Additional Context
+      description: Any other context, research, or background information that would help with implementation
+      placeholder: Include any additional details, constraints, or considerations that would help the AI implement this feature effectively.
+
+  - type: markdown
+    attributes:
+      value: |
+        ---
+
+        ## 🤖 For Maintainers
+
+        **This issue will be assigned to GitHub Copilot for implementation if approved.**
+
+        Please ensure your prompt is detailed and clear enough for AI-driven development. The more specific you are, the better the implementation will be!

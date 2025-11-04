@@ -3,673 +3,180 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>AI Practitioner Resources</title>
-    <style>
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-      }
+    <title>🤖 AI Practitioner Resources</title>
 
-      body {
-        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        min-height: 100vh;
-        padding: 20px;
-      }
+    <!-- Favicon -->
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🤖</text></svg>"
+      type="image/svg+xml"
+    />
+    <link
+      rel="apple-touch-icon"
+      href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🤖</text></svg>"
+    />
+    <link
+      rel="shortcut icon"
+      href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🤖</text></svg>"
+      type="image/svg+xml"
+    />
 
-      .container {
-        max-width: 1200px;
-        margin: 0 auto;
-        background: white;
-        border-radius: 15px;
-        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-        overflow: hidden;
-      }
-
-      .header {
-        background: linear-gradient(135deg, #2c3e50, #3498db);
-        color: white;
-        padding: 30px;
-        text-align: center;
-      }
-
-      .header h1 {
-        font-size: 2.5em;
-        margin-bottom: 10px;
-      }
-
-      .header p {
-        font-size: 1.1em;
-        opacity: 0.9;
-      }
-
-      .filters {
-        display: flex;
-        gap: 10px;
-        margin: 20px;
-        flex-wrap: wrap;
-        justify-content: center;
-      }
-
-      .filter-btn {
-        background: #ecf0f1;
-        border: none;
-        padding: 10px 20px;
-        border-radius: 25px;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        font-weight: 500;
-      }
-
-      .filter-btn:hover,
-      .filter-btn.active {
-        background: #3498db;
-        color: white;
-      }
-
-      .stats {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 20px;
-        margin: 20px;
-      }
-
-      .stat-card {
-        background: #f8f9fa;
-        padding: 20px;
-        border-radius: 10px;
-        text-align: center;
-        border-left: 5px solid #3498db;
-      }
-
-      .stat-number {
-        font-size: 2em;
-        font-weight: bold;
-        color: #2c3e50;
-      }
-
-      .stat-label {
-        color: #7f8c8d;
-        font-size: 0.9em;
-        margin-top: 5px;
-      }
-
-      .resources-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-        gap: 20px;
-        padding: 20px;
-      }
-
-      .resource-card {
-        background: white;
-        border-radius: 10px;
-        padding: 20px;
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-        border-top: 4px solid #3498db;
-      }
-
-      .resource-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-      }
-
-      .resource-type {
-        display: inline-block;
-        padding: 5px 12px;
-        border-radius: 20px;
-        font-size: 0.8em;
-        font-weight: bold;
-        margin-bottom: 10px;
-      }
-
-      .type-book {
-        background: #e8f5e8;
-        color: #27ae60;
-      }
-      .type-article {
-        background: #e3f2fd;
-        color: #2196f3;
-      }
-      .type-blog {
-        background: #fff3e0;
-        color: #ff9800;
-      }
-      .type-podcast {
-        background: #f3e5f5;
-        color: #9c27b0;
-      }
-      .type-video {
-        background: #ffebee;
-        color: #f44336;
-      }
-      .type-course {
-        background: #e1f5fe;
-        color: #00bcd4;
-      }
-      .type-tool {
-        background: #f1f8e9;
-        color: #8bc34a;
-      }
-
-      .new-tag {
-        display: inline-block;
-        background: #e74c3c;
-        color: white;
-        font-size: 0.7em;
-        font-weight: bold;
-        padding: 2px 6px;
-        border-radius: 10px;
-        margin-left: 8px;
-        animation: pulse 2s infinite;
-      }
-
-      @keyframes pulse {
-        0% {
-          opacity: 1;
-        }
-        50% {
-          opacity: 0.7;
-        }
-        100% {
-          opacity: 1;
-        }
-      }
-
-      .resource-type-container {
-        display: flex;
-        align-items: center;
-        margin-bottom: 10px;
-      }
-
-      .resource-title {
-        font-size: 1.2em;
-        font-weight: bold;
-        color: #2c3e50;
-        margin-bottom: 10px;
-        line-height: 1.4;
-      }
-
-      .resource-source {
-        color: #7f8c8d;
-        font-size: 0.9em;
-        margin-bottom: 10px;
-      }
-
-      .resource-blurb {
-        color: #555;
-        font-size: 0.9em;
-        line-height: 1.4;
-        margin-bottom: 15px;
-        font-style: italic;
-      }
-
-      .resource-meta {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-      }
-
-      .score {
-        background: linear-gradient(135deg, #667eea, #764ba2);
-        color: white;
-        padding: 5px 10px;
-        border-radius: 15px;
-        font-weight: bold;
-      }
-
-      .weeks-badge {
-        background: #ecf0f1;
-        color: #34495e;
-        padding: 3px 8px;
-        border-radius: 10px;
-        font-size: 0.8em;
-      }
-
-      .loading {
-        text-align: center;
-        padding: 50px;
-        color: #7f8c8d;
-      }
-
-      .error {
-        background: #ffebee;
-        color: #c62828;
-        padding: 20px;
-        margin: 20px;
-        border-radius: 10px;
-        border-left: 5px solid #f44336;
-      }
-
-      /* Additional styles for new schema content */
-      .introduction h3,
-      .analysis h3,
-      .legend h3 {
-        color: #2c3e50;
-        margin-bottom: 15px;
-        font-size: 1.3em;
-      }
-
-      .legend .scoring-legend {
-        background: white;
-        padding: 20px;
-        border-radius: 8px;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-      }
-
-      .legend .score-ranges {
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-        margin: 15px 0;
-      }
-
-      .legend .score-range {
-        padding: 10px;
-        border-radius: 5px;
-        background: #f8f9fa;
-      }
-
-      .legend .score-range.excellent {
-        border-left: 4px solid #27ae60;
-      }
-
-      .legend .score-range.good {
-        border-left: 4px solid #f39c12;
-      }
-
-      .legend .score-range.fair {
-        border-left: 4px solid #e74c3c;
-      }
-
-      .legend .scoring-criteria ul {
-        margin: 10px 0;
-        padding-left: 20px;
-      }
-
-      .legend .scoring-criteria li {
-        margin: 5px 0;
-        line-height: 1.4;
-      }
-
-      .analysis-content {
-        line-height: 1.6;
-      }
-
-      .analysis-point {
-        margin: 15px 0;
-        padding: 12px;
-        background: #f8f9fa;
-        border-radius: 8px;
-        border-left: 4px solid #3498db;
-        font-size: 0.95em;
-      }
-
-      .analysis-point:first-child {
-        margin-top: 0;
-      }
-
-      .analysis-point:last-child {
-        margin-bottom: 0;
-      }
-
-      @media (max-width: 768px) {
-        .filters {
-          justify-content: flex-start;
-          overflow-x: auto;
-        }
-
-        .resources-grid {
-          grid-template-columns: 1fr;
-          padding: 10px;
-        }
-
-        .stats {
-          grid-template-columns: repeat(2, 1fr);
-        }
-
-        .introduction,
-        .legend,
-        .analysis {
-          margin: 10px !important;
-          padding: 15px !important;
-        }
-      }
-    </style>
+    <!-- Styles -->
+    <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
     <div class="container">
       <div class="header">
         <h1>🤖 AI Practitioner Resources</h1>
-        <p>
-          An AI curated collection of the best AI Assisted Software Development
+        <p class="header-subtitle">
+          An AI curated collection of the best AI assisted software development
           resources
         </p>
+        <div class="stats" id="stats"></div>
       </div>
 
       <div id="loading" class="loading">
         <h3>Loading resources...</h3>
       </div>
 
-      <div id="error" class="error" style="display: none"></div>
+      <div id="error" class="error"></div>
 
       <div id="content" style="display: none">
-        <div
-          id="introduction"
-          class="introduction"
-          style="
-            margin: 20px;
-            padding: 20px;
-            background: #f8f9fa;
-            border-radius: 10px;
-            line-height: 1.6;
-          "
-        ></div>
-
-        <div class="stats" id="stats"></div>
+        <div class="about-collection">
+          <h2>📊 About This Collection</h2>
+          <div id="introduction-preview"></div>
+          <div id="introduction-full" style="display: none"></div>
+          <a href="#" id="toggle-introduction" class="expand-link"
+            >... read more</a
+          >
+        </div>
 
         <div class="filters" id="filters"></div>
 
         <div class="resources-grid" id="resources"></div>
 
         <div
-          id="legend"
-          class="legend"
-          style="
-            margin: 20px;
-            padding: 20px;
-            background: #f8f9fa;
-            border-radius: 10px;
-          "
-        ></div>
-
-        <div
-          id="analysis"
-          class="analysis"
-          style="
-            margin: 20px;
-            padding: 20px;
-            background: #e8f4fd;
-            border-radius: 10px;
-            border-left: 5px solid #3498db;
-          "
-        ></div>
+          class="analysis-section"
+          id="analysis-section"
+          style="display: none"
+        >
+          <h2>📈 This Week's Analysis</h2>
+          <div id="analysis" class="analysis-content"></div>
+        </div>
       </div>
     </div>
 
-    <script>
-      // Configuration - Replace with your gist details
-      const GIST_CONFIG = {
-        // Option 1: Direct gist raw URL
-        url: "https://gist.githubusercontent.com/j0hnnymiller/1a9d84d165a170d6f62cc052db97b8bb/raw/resources.json",
+    <!-- Footer -->
+    <div class="footer">
+      <div class="footer-content">
+        <div class="footer-section">
+          <h3>About This Project</h3>
+          <p>
+            An AI-curated collection of the best resources for AI-assisted
+            software development. This is an open-source project that welcomes
+            contributions from the community.
+          </p>
+          <p>
+            <strong>Last Updated:</strong>
+            <span id="last-updated">October 30, 2025</span>
+          </p>
+          <p><strong>Open Source Project</strong></p>
+        </div>
 
-        // Option 2: GitHub API (for more control)
-        // apiUrl: 'https://api.github.com/gists/GIST_ID',
-        // filename: 'resources.json'
-      };
+        <div class="footer-section">
+          <h3>Repository Links</h3>
+          <ul>
+            <li>
+              <a
+                href="https://github.com/j0hnnymiller/ai-practitioner-resources"
+                target="_blank"
+                >🔗 View on GitHub</a
+              >
+            </li>
+            <li>
+              <a
+                href="https://github.com/j0hnnymiller/ai-practitioner-resources/issues"
+                target="_blank"
+                >🐛 Report Issues</a
+              >
+            </li>
+            <li>
+              <a
+                href="https://github.com/j0hnnymiller/ai-practitioner-resources/blob/main/CONTRIBUTORS.md"
+                target="_blank"
+                >🤝 Contributors Guide</a
+              >
+            </li>
+            <li>
+              <a
+                href="https://github.com/j0hnnymiller/ai-practitioner-resources/fork"
+                target="_blank"
+                >🍴 Fork This Project</a
+              >
+            </li>
+            <li><span class="methodology-link">📊 Methodology</span></li>
+          </ul>
+        </div>
 
-      let allResources = [];
-      let resourceData = {};
-      let currentFilter = "All";
+        <div class="footer-section">
+          <h3>How to Contribute</h3>
+          <ul>
+            <li>
+              <a
+                href="https://github.com/j0hnnymiller/ai-practitioner-resources/issues/new?template=feature-request.yml"
+                target="_blank"
+                >💡 Request a feature with detailed implementation prompt</a
+              >
+            </li>
+            <li>
+              <a
+                href="https://github.com/j0hnnymiller/ai-practitioner-resources/issues/new?template=resource-suggestion.yml"
+                target="_blank"
+                >📚 Suggest a new AI development resource</a
+              >
+            </li>
+            <li>
+              <a
+                href="https://github.com/j0hnnymiller/ai-practitioner-resources/issues/new?template=contributor-request.yml"
+                target="_blank"
+                >🤝 Request contributor access for code review</a
+              >
+            </li>
+            <li>
+              <a
+                href="https://github.com/j0hnnymiller/ai-practitioner-resources"
+                target="_blank"
+                >⭐ Star the repository on GitHub</a
+              >
+            </li>
+          </ul>
+        </div>
+      </div>
 
-      async function loadResources() {
-        try {
-          // Method 1: Direct raw URL (simpler)
-          if (GIST_CONFIG.url) {
-            const response = await fetch(GIST_CONFIG.url);
-            if (!response.ok) throw new Error(`HTTP ${response.status}`);
-            resourceData = await response.json();
-          }
+      <div class="footer-bottom">
+        Brought to you by the friendly folks at
+        <a href="http://codemag.com" target="_blank">
+          <img
+            src="images/CODE-Group-red.png"
+            alt="CODE"
+            style="height: 1em; vertical-align: baseline"
+          />
+        </a>
+      </div>
+    </div>
 
-          // Method 2: GitHub API (more robust)
-          else if (GIST_CONFIG.apiUrl) {
-            const response = await fetch(GIST_CONFIG.apiUrl);
-            if (!response.ok) throw new Error(`HTTP ${response.status}`);
-            const gistData = await response.json();
-            const fileContent = gistData.files[GIST_CONFIG.filename].content;
-            resourceData = JSON.parse(fileContent);
-          }
+    <!-- Methodology Modal -->
+    <div id="methodology-modal" class="methodology-modal">
+      <div class="methodology-content">
+        <span class="close">&times;</span>
+        <div id="legend" class="legend-content"></div>
+      </div>
+    </div>
 
-          // Extract resources array from new schema structure
-          allResources = resourceData.resources || resourceData;
-
-          document.getElementById("loading").style.display = "none";
-          document.getElementById("content").style.display = "block";
-
-          renderIntroduction();
-          renderStats();
-          renderFilters();
-          renderResources();
-          renderLegend();
-          renderAnalysis();
-        } catch (error) {
-          console.error("Error loading resources:", error);
-          document.getElementById("loading").style.display = "none";
-          const errorDiv = document.getElementById("error");
-          errorDiv.style.display = "block";
-          errorDiv.innerHTML = `
-                    <h3>Error loading resources</h3>
-                    <p>Please check the gist URL configuration. Current error: ${error.message}</p>
-                    <p><strong>To use this viewer:</strong></p>
-                    <ol>
-                        <li>Upload your resources.json to a GitHub gist</li>
-                        <li>Copy the raw URL of the JSON file</li>
-                        <li>Replace the GIST_CONFIG.url in this HTML file</li>
-                    </ol>
-                `;
-        }
-      }
-
-      function renderIntroduction() {
-        const introElement = document.getElementById("introduction");
-        if (resourceData.introduction) {
-          introElement.innerHTML = `<h3>📚 About This Collection</h3><p>${resourceData.introduction}</p>`;
-          introElement.style.display = "block";
-        } else {
-          introElement.style.display = "none";
-        }
-      }
-
-      function renderLegend() {
-        const legendElement = document.getElementById("legend");
-        if (resourceData.legend) {
-          legendElement.innerHTML = resourceData.legend;
-          legendElement.style.display = "block";
-        } else {
-          legendElement.style.display = "none";
-        }
-      }
-
-      function renderAnalysis() {
-        const analysisElement = document.getElementById("analysis");
-        if (resourceData.analysis) {
-          // Parse numbered points and wrap each in a div
-          let formattedAnalysis = resourceData.analysis;
-
-          // Split by numbered points pattern like (1), (2), etc.
-          const numberedPointRegex =
-            /(\(\d+\)[^()]*(?:\([^)]*\)[^()]*)*?)(?=\(\d+\)|$)/g;
-          const points = formattedAnalysis.match(numberedPointRegex);
-
-          if (points && points.length > 0) {
-            // Wrap each numbered point in a div
-            const wrappedPoints = points
-              .map(
-                (point) => `<div class="analysis-point">${point.trim()}</div>`
-              )
-              .join("");
-
-            // Get any text before the first numbered point
-            const beforePoints = formattedAnalysis.split(/\(\d+\)/)[0].trim();
-
-            formattedAnalysis = beforePoints
-              ? `${beforePoints} ${wrappedPoints}`
-              : wrappedPoints;
-          }
-
-          analysisElement.innerHTML = `<h3>📈 This Week's Analysis</h3><div class="analysis-content">${formattedAnalysis}</div>`;
-          analysisElement.style.display = "block";
-        } else {
-          analysisElement.style.display = "none";
-        }
-      }
-
-      function renderStats() {
-        const types = [...new Set(allResources.map((r) => r.type))];
-        const avgScore = Math.round(
-          allResources.reduce((sum, r) => sum + r.score, 0) /
-            allResources.length
-        );
-        const topScore = Math.max(...allResources.map((r) => r.score));
-
-        const statsHtml = `
-                <div class="stat-card">
-                    <div class="stat-number">${allResources.length}</div>
-                    <div class="stat-label">Total Resources</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number">${types.length}</div>
-                    <div class="stat-label">Resource Types</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number">${avgScore}</div>
-                    <div class="stat-label">Average Score</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number">${topScore}</div>
-                    <div class="stat-label">Highest Score</div>
-                </div>
-            `;
-
-        document.getElementById("stats").innerHTML = statsHtml;
-      }
-
-      function renderFilters() {
-        const types = ["All", ...new Set(allResources.map((r) => r.type))];
-
-        const filtersHtml = types
-          .map(
-            (type) => `
-                <button class="filter-btn ${
-                  type === currentFilter ? "active" : ""
-                }"
-                        onclick="filterResources('${type}')">
-                    ${type} ${
-              type === "All"
-                ? `(${allResources.length})`
-                : `(${allResources.filter((r) => r.type === type).length})`
-            }
-                </button>
-            `
-          )
-          .join("");
-
-        document.getElementById("filters").innerHTML = filtersHtml;
-      }
-
-      function filterResources(type) {
-        currentFilter = type;
-        renderFilters();
-        renderResources();
-      }
-
-      function renderResources() {
-        const filteredResources =
-          currentFilter === "All"
-            ? allResources
-            : allResources.filter((r) => r.type === currentFilter);
-
-        // Sort by score (highest first)
-        filteredResources.sort((a, b) => b.score - a.score);
-
-        const resourcesHtml = filteredResources
-          .map(
-            (resource) => `
-                <div class="resource-card">
-                    <div class="resource-type-container">
-                        <div class="resource-type type-${resource.type.toLowerCase()}">${
-              resource.type
-            }</div>
-                        ${
-                          resource.weeks_on_list === 1
-                            ? '<span class="new-tag">NEW</span>'
-                            : ""
-                        }
-                    </div>
-                    <div class="resource-title">${resource.title}</div>
-                    <div class="resource-source">
-                        <a href="${
-                          resource.source
-                        }" target="_blank" style="color: #3498db; text-decoration: none;">
-                            ${new URL(resource.source).hostname}
-                        </a>
-                    </div>
-                    ${
-                      resource.blurb
-                        ? `<div class="resource-blurb">${resource.blurb}</div>`
-                        : ""
-                    }
-                    <div class="resource-meta">
-                        <div class="score">${resource.score}</div>
-                        <div class="weeks-badge">${
-                          resource.weeks_on_list
-                        } week${resource.weeks_on_list !== 1 ? "s" : ""}</div>
-                    </div>
-                </div>
-            `
-          )
-          .join("");
-
-        document.getElementById("resources").innerHTML = resourcesHtml;
-      }
-
-      // Load resources when page loads
-      document.addEventListener("DOMContentLoaded", loadResources);
-
-      // For testing with local data (remove this in production)
-      if (GIST_CONFIG.url.includes("USERNAME/GIST_ID")) {
-        // Load local data for demonstration
-        setTimeout(() => {
-          fetch("./resources.json")
-            .then((response) => response.json())
-            .then((data) => {
-              // Handle both old array format and new object format
-              if (Array.isArray(data)) {
-                resourceData = { resources: data };
-                allResources = data;
-              } else {
-                resourceData = data;
-                allResources = data.resources || [];
-              }
-              document.getElementById("loading").style.display = "none";
-              document.getElementById("content").style.display = "block";
-              renderIntroduction();
-              renderStats();
-              renderFilters();
-              renderResources();
-              renderLegend();
-              renderAnalysis();
-            })
-            .catch((error) => {
-              // Show demo message if local file not found
-              document.getElementById("loading").style.display = "none";
-              const errorDiv = document.getElementById("error");
-              errorDiv.style.display = "block";
-              errorDiv.innerHTML = `
-                            <h3>Demo Mode</h3>
-                            <p>To use this with a GitHub gist:</p>
-                            <ol>
-                                <li>Upload your resources.json file to a GitHub gist</li>
-                                <li>Get the raw URL of the JSON file</li>
-                                <li>Replace GIST_CONFIG.url with your gist's raw URL</li>
-                            </ol>
-                            <p>Example: <code>https://gist.githubusercontent.com/yourusername/gistid/raw/resources.json</code></p>
-                        `;
-            });
-        }, 1000);
-      }
+    <!-- Main Application Script -->
+    <script type="module">
+      import { init } from "./src/app.js";
+      init();
     </script>
   </body>
 </html>

@@ -1,0 +1,188 @@
+name: ⚡ UI/UX Improvement
+description: Suggest improvements to user interface, user experience, or design
+title: "UI/UX: [Brief Description]"
+labels: ["ui/ux", "enhancement", "design", "needs-review"]
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## ⚡ UI/UX Improvement
+
+        Help us make the AI Practitioner Resources site more user-friendly! This template is for suggesting improvements to the user interface, user experience, or overall design.
+
+        **Types of Improvements:**
+        - Layout and visual design enhancements
+        - Navigation and usability improvements
+        - Accessibility improvements
+        - Mobile experience optimization
+        - Interactive features and animations
+
+  - type: textarea
+    id: current-experience
+    attributes:
+      label: 📱 Current User Experience
+      description: Describe the current state - what's the problem or limitation?
+      placeholder: |
+        - What currently happens when users...
+        - What makes the current experience frustrating or difficult?
+        - Which users are most affected by this?
+        - How does this impact the overall user journey?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposed-improvement
+    attributes:
+      label: ✨ Proposed Improvement
+      description: What specific UI/UX improvement are you suggesting?
+      placeholder: |
+        - What should change about the interface?
+        - How should users interact with this feature?
+        - What should the new experience feel like?
+        - What visual or interaction changes do you envision?
+    validations:
+      required: true
+
+  - type: textarea
+    id: implementation-prompt
+    attributes:
+      label: 🤖 Implementation Prompt
+      description: Write a detailed prompt for AI implementation, focusing on the UI/UX aspects
+      placeholder: |
+        Example: "Redesign the resource cards to include hover effects that reveal quick actions (bookmark, share, rate). Add smooth CSS transitions, ensure accessibility with proper focus states, and maintain the existing color scheme while improving visual hierarchy..."
+      value: |
+        ```
+        [Write your detailed UI/UX implementation prompt here - be specific about visual design, interactions, animations, and user experience goals]
+        ```
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: improvement-type
+    attributes:
+      label: 🎨 Type of Improvement
+      description: What type of UI/UX improvement is this? Check all that apply.
+      options:
+        - label: "**Visual Design**: Colors, typography, spacing, layout"
+        - label: "**Navigation**: Menu structure, breadcrumbs, site organization"
+        - label: "**Interactions**: Hover effects, animations, micro-interactions"
+        - label: "**Mobile Experience**: Responsive design, touch interactions"
+        - label: "**Accessibility**: Screen readers, keyboard navigation, contrast"
+        - label: "**Performance**: Faster loading, smoother animations"
+        - label: "**Information Architecture**: Content organization and hierarchy"
+        - label: "**User Flow**: Multi-step processes, form design"
+
+  - type: textarea
+    id: user-benefit
+    attributes:
+      label: 👥 User Benefit
+      description: How will this improvement benefit users?
+      placeholder: |
+        - Makes it easier for users to...
+        - Reduces friction when...
+        - Improves accessibility for...
+        - Creates a more engaging experience by...
+        - Helps users accomplish their goals by...
+    validations:
+      required: true
+
+  - type: textarea
+    id: visual-references
+    attributes:
+      label: 🎨 Visual References & Mockups
+      description: Provide examples, mockups, or references for the proposed design
+      placeholder: |
+        - Link to similar designs: [URL]
+        - Mockup or sketch: [Attach or describe]
+        - Reference websites: [Examples of good UX]
+        - Design inspiration: [Dribbble, Behance, etc.]
+        - Screenshots showing the problem: [Current state]
+
+  - type: checkboxes
+    id: design-considerations
+    attributes:
+      label: 🔍 Design Considerations
+      description: Important aspects to consider during implementation
+      options:
+        - label: "**Brand Consistency**: Maintains current visual identity"
+        - label: "**Accessibility**: Meets WCAG guidelines"
+        - label: "**Mobile First**: Designed for mobile, enhanced for desktop"
+        - label: "**Performance**: Optimized for fast loading"
+        - label: "**Browser Support**: Works across modern browsers"
+        - label: "**Scalability**: Design system can grow with the project"
+        - label: "**User Testing**: Would benefit from user feedback"
+        - label: "**Animation**: Smooth, purposeful transitions"
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: 🚨 Impact Level
+      description: How much would this improvement help users?
+      options:
+        - "Low - Nice visual enhancement"
+        - "Medium - Noticeable usability improvement"
+        - "High - Significant user experience enhancement"
+        - "Critical - Addresses major usability issue"
+    validations:
+      required: true
+
+  - type: textarea
+    id: success-metrics
+    attributes:
+      label: 📊 Success Metrics
+      description: How would we know this improvement is successful?
+      placeholder: |
+        - User behavior changes: [What should we see users doing differently?]
+        - Usability improvements: [Easier task completion, reduced confusion]
+        - Accessibility gains: [Better screen reader support, keyboard navigation]
+        - Engagement increases: [More time on site, higher interaction rates]
+        - Feedback improvements: [User satisfaction, reduced complaints]
+
+  - type: textarea
+    id: technical-considerations
+    attributes:
+      label: ⚙️ Technical Considerations
+      description: Any technical aspects to consider during implementation?
+      placeholder: |
+        - CSS frameworks or libraries to use
+        - Animation libraries (if needed)
+        - Responsive breakpoints
+        - Performance implications
+        - Browser compatibility requirements
+        - Accessibility testing tools
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: 📝 Additional Context
+      description: Any other context that would help with the design implementation?
+      placeholder: |
+        - User research or feedback you've seen
+        - Current pain points you've observed
+        - Related improvements that should be considered together
+        - Any constraints or limitations to be aware of
+
+  - type: markdown
+    attributes:
+      value: |
+        ---
+
+        ## 🎨 AI-Powered Design Implementation
+
+        **Our UI/UX improvement process:**
+        1. **Design Review**: Evaluate the proposal for user impact and feasibility
+        2. **Prompt Refinement**: Work with you to create detailed implementation prompts
+        3. **AI Implementation**: Use GitHub Copilot to implement the design changes
+        4. **Visual Testing**: Verify the implementation across devices and browsers
+        5. **User Feedback**: Monitor for user response and iterate if needed
+
+        ## 🚀 Design Philosophy
+
+        We aim for:
+        - **Accessibility First**: Inclusive design for all users
+        - **Performance Focused**: Fast, smooth experiences
+        - **Mobile Optimized**: Great experience on all devices
+        - **AI-Enhanced**: Leveraging AI tools for consistent, high-quality implementation
+
+        **Thank you for helping us create a better user experience for AI practitioners!**

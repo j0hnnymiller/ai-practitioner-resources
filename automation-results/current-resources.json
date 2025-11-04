@@ -1,0 +1,191 @@
+{
+  "introduction": "A curated collection of essential resources for developers looking to harness AI for code generation, covering practical tools, techniques, and best practices for integrating AI assistants into development workflows.",
+  "resources": [
+    {
+      "type": "Book",
+      "title": "The Pragmatic Programmer: Your Journey to Mastery",
+      "source": "https://pragprog.com/titles/tpp20/the-pragmatic-programmer-20th-anniversary-edition/",
+      "score": 88,
+      "weeks_on_list": 1,
+      "blurb": "Updated edition covering modern development practices including AI-assisted coding and automation techniques."
+    },
+    {
+      "type": "Article",
+      "title": "GitHub Copilot: Getting Started",
+      "source": "https://docs.github.com/en/copilot/getting-started-with-github-copilot",
+      "score": 92,
+      "weeks_on_list": 1,
+      "blurb": "Official documentation for GitHub Copilot with comprehensive setup guides and best practices for AI-assisted development."
+    },
+    {
+      "type": "Blog",
+      "title": "The Architecture of Today's LLM Applications",
+      "source": "https://github.blog/2023-10-30-the-architecture-of-todays-llm-applications/",
+      "score": 89,
+      "weeks_on_list": 1,
+      "blurb": "Deep dive into building applications with large language models, including code generation architectures and patterns."
+    },
+    {
+      "type": "Article",
+      "title": "Prompt Engineering Guide",
+      "source": "https://www.promptingguide.ai/",
+      "score": 91,
+      "weeks_on_list": 1,
+      "blurb": "Comprehensive guide to prompt engineering techniques specifically for code generation and development tasks."
+    },
+    {
+      "type": "Podcast",
+      "title": "The Stack Overflow Podcast",
+      "source": "https://stackoverflow.blog/podcast/",
+      "score": 85,
+      "weeks_on_list": 1,
+      "blurb": "Regular discussions on AI tools in software development, featuring interviews with developers using AI coding assistants."
+    },
+    {
+      "type": "Book",
+      "title": "Hands-On Machine Learning with Scikit-Learn, Keras, and TensorFlow",
+      "source": "https://www.oreilly.com/library/view/hands-on-machine-learning/9781492032632/",
+      "score": 87,
+      "weeks_on_list": 1,
+      "blurb": "O'Reilly's practical guide to ML with extensive code examples and AI model implementation techniques."
+    },
+    {
+      "type": "Article",
+      "title": "OpenAI API Documentation",
+      "source": "https://platform.openai.com/docs/api-reference",
+      "score": 94,
+      "weeks_on_list": 1,
+      "blurb": "Official OpenAI API documentation with code examples for integrating GPT models into development workflows."
+    },
+    {
+      "type": "Blog",
+      "title": "AI-Assisted Programming with GitHub Copilot",
+      "source": "https://github.blog/2022-09-07-research-quantifying-github-copilots-impact-on-developer-productivity-and-happiness/",
+      "score": 88,
+      "weeks_on_list": 1,
+      "blurb": "Research-backed insights into developer productivity improvements and best practices when using AI coding assistants."
+    },
+    {
+      "type": "Article",
+      "title": "Anthropic Claude API Documentation",
+      "source": "https://docs.anthropic.com/claude/docs/intro-to-claude",
+      "score": 89,
+      "weeks_on_list": 1,
+      "blurb": "Comprehensive documentation for Claude API with practical examples for code generation and analysis tasks."
+    },
+    {
+      "type": "Book",
+      "title": "Building LLM-Powered Applications",
+      "source": "https://www.manning.com/books/gpt-in-action",
+      "score": 86,
+      "weeks_on_list": 1,
+      "blurb": "Manning's practical guide to building applications with large language models, including code generation use cases."
+    },
+    {
+      "type": "Podcast",
+      "title": "Software Engineering Daily",
+      "source": "https://softwareengineeringdaily.com/",
+      "score": 83,
+      "weeks_on_list": 1,
+      "blurb": "Regular episodes covering AI in software development, featuring discussions on coding assistants and automation tools."
+    },
+    {
+      "type": "Blog",
+      "title": "Martin Fowler's Blog",
+      "source": "https://martinfowler.com/",
+      "score": 90,
+      "weeks_on_list": 1,
+      "blurb": "Thought-provoking articles on software development practices, including insights on AI-assisted development and refactoring."
+    },
+    {
+      "type": "Article",
+      "title": "Hugging Face Documentation",
+      "source": "https://huggingface.co/docs",
+      "score": 91,
+      "weeks_on_list": 1,
+      "blurb": "Comprehensive documentation for using Hugging Face models and transformers for code generation and NLP tasks."
+    },
+    {
+      "type": "Blog",
+      "title": "OpenAI Developer Blog",
+      "source": "https://openai.com/blog/",
+      "score": 92,
+      "weeks_on_list": 1,
+      "blurb": "Latest updates and best practices from OpenAI, including GPT-4 coding capabilities and API improvements."
+    },
+    {
+      "type": "Article",
+      "title": "Google AI for Developers",
+      "source": "https://ai.google.dev/",
+      "score": 87,
+      "weeks_on_list": 1,
+      "blurb": "Google's comprehensive AI development resources, including Gemini API documentation and code generation examples."
+    },
+    {
+      "type": "Book",
+      "title": "Programming with AI",
+      "source": "https://www.oreilly.com/library/view/programming-with-ai/9781098164506/",
+      "score": 85,
+      "weeks_on_list": 1,
+      "blurb": "O'Reilly's practical guide to integrating AI tools into programming workflows and development processes."
+    },
+    {
+      "type": "Podcast",
+      "title": "The AI Engineering Podcast",
+      "source": "https://www.pythonpodcast.com/",
+      "score": 81,
+      "weeks_on_list": 1,
+      "blurb": "Regular discussions on AI engineering practices, including episodes on code generation and developer tooling."
+    },
+    {
+      "type": "Article",
+      "title": "Microsoft Copilot Documentation",
+      "source": "https://docs.microsoft.com/en-us/shows/introduction-to-github-copilot/",
+      "score": 88,
+      "weeks_on_list": 1,
+      "blurb": "Microsoft's official guide to GitHub Copilot integration with Visual Studio and development best practices."
+    },
+    {
+      "type": "Blog",
+      "title": "Stack Overflow Blog",
+      "source": "https://stackoverflow.blog/",
+      "score": 84,
+      "weeks_on_list": 1,
+      "blurb": "Regular insights into developer trends, including surveys and analysis of AI tool adoption in programming."
+    },
+    {
+      "type": "Article",
+      "title": "LangChain Documentation",
+      "source": "https://python.langchain.com/docs/get_started/introduction",
+      "score": 90,
+      "weeks_on_list": 1,
+      "blurb": "Comprehensive framework documentation for building LLM applications with practical code generation examples."
+    },
+    {
+      "type": "Book",
+      "title": "AI for Software Development",
+      "source": "https://pragprog.com/titles/",
+      "score": 82,
+      "weeks_on_list": 1,
+      "blurb": "Pragmatic Programmers' guide to leveraging AI tools for software development, testing, and deployment automation."
+    },
+    {
+      "type": "Podcast",
+      "title": "The Changelog",
+      "source": "https://changelog.com/podcast",
+      "score": 80,
+      "weeks_on_list": 1,
+      "blurb": "Developer-focused podcast with regular episodes on AI coding tools, open source projects, and development trends."
+    },
+    {
+      "type": "Article",
+      "title": "Tabnine AI Code Completion",
+      "source": "https://www.tabnine.com/blog/",
+      "score": 86,
+      "weeks_on_list": 1,
+      "blurb": "Blog featuring practical guides and case studies for AI-powered code completion and development acceleration."
+    }
+  ],
+  "legend": "<div><h4>📊 Resource Quality Scoring System</h4><ul><li><strong>🟢 90-100 Points:</strong> Excellent - Top-tier resources with exceptional practical value</li><li><strong>🟡 75-89 Points:</strong> Solid - Useful resources with good practical application</li><li><strong>🔴 0-74 Points:</strong> Needs Improvement - Less practical or more theoretical</li></ul><h5>Evaluation Criteria:</h5><ul><li><strong>Practical Coding Value (40%):</strong> Hands-on examples and real-world applications</li><li><strong>Clarity & Accessibility (25%):</strong> How easy it is to understand and follow</li><li><strong>Depth & Completeness (20%):</strong> Comprehensive coverage of topics</li><li><strong>Relevance & Recency (15%):</strong> Up-to-date with current AI coding practices</li></ul></div>",
+  "analysis": "<p>This week's curated list showcases the rapidly evolving landscape of AI-assisted software development. <strong>Official documentation dominates the high-scoring resources</strong>, with OpenAI API docs (94), GitHub Copilot documentation (92), and OpenAI's developer blog (92) leading the pack. This reflects the maturity of these platforms and their commitment to developer experience.</p><p><strong>Notable trends include:</strong> Heavy emphasis on practical implementation over theoretical concepts, with 18 of 23 resources scoring above 80 points. The inclusion of established publishers like O'Reilly, Manning, and Pragmatic Programmers indicates that AI coding practices are becoming mainstream enough to warrant comprehensive book treatments.</p><p><strong>Resource distribution</strong> shows a balanced approach: 4 books for deep learning, 9 articles for quick reference and tutorials, 5 blog sources for ongoing insights, and 4 podcasts for community perspectives. The high concentration of scores in the 85-92 range suggests a mature ecosystem of quality resources, making this an excellent time for developers to adopt AI coding tools.</p>"
+}

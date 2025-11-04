@@ -1,0 +1,64 @@
+name: Weekly AI Resources Update
+
+on:
+  schedule:
+    # Run weekly on Mondays at 1:00 AM GMT
+    - cron: "0 1 * * 1"
+  workflow_dispatch: # Allow manual triggering
+
+env:
+  ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+  GIST_TOKEN: ${{ secrets.GIST_TOKEN }}
+  GIST_ID: ${{ secrets.GIST_ID }}
+
+permissions:
+  contents: read
+
+jobs:
+  update-resources:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Fetch Current Resources
+        id: fetch-current
+        run: node scripts/fetch-current-resources.js
+
+      - name: Generate New Resources
+        id: generate-new
+        run: node scripts/generate-resources.js
+
+      - name: Merge and Update Weeks
+        id: merge-resources
+        run: node scripts/merge-and-update.js
+
+      - name: Validate Schema
+        run: node scripts/validate-schema.js
+
+      - name: Update Gist
+        run: node scripts/update-gist.js
+
+      - name: Create Summary
+        run: node scripts/create-summary.js
+
+      - name: Upload Artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: automation-results
+          path: |
+            /tmp/current-resources.json
+            /tmp/new-resources.json
+            /tmp/merged-resources.json
+            /tmp/automation-summary.json
+          retention-days: 30

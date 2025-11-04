@@ -1,0 +1,134 @@
+name: ❓ Question
+description: Ask questions about the project, contribution process, or AI-first development
+title: "Question: [Brief Description]"
+labels: ["question", "discussion"]
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## ❓ Question
+
+        Have questions about our AI-first development approach, contribution process, or the project in general? We're here to help!
+
+        **Common Topics:**
+        - How the AI-first development process works
+        - Contributing without traditional pull requests
+        - Using GitHub Copilot for implementation
+        - Understanding our resource scoring system
+        - Getting started with AI-powered development tools
+
+  - type: textarea
+    id: question
+    attributes:
+      label: 🤔 Your Question
+      description: What would you like to know? Be as specific as possible.
+      placeholder: |
+        Example: "How does the AI implementation process work after an issue is approved? Does GitHub Copilot automatically create the code, or does a human developer work with it?"
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: question-category
+    attributes:
+      label: 📂 Question Category
+      description: What is your question related to? Check all that apply.
+      options:
+        - label: "**Project Philosophy**: Understanding the AI-first approach"
+        - label: "**Contribution Process**: How to contribute effectively"
+        - label: "**Technical Implementation**: How features are built"
+        - label: "**Resource Evaluation**: How resources are scored and selected"
+        - label: "**AI Tools**: Using GitHub Copilot and other AI development tools"
+        - label: "**Getting Started**: New to AI-powered development"
+        - label: "**Collaboration**: Human-AI collaboration best practices"
+        - label: "**Other**: Something else
+
+  - type: textarea
+    id: context
+    attributes:
+      label: 📚 Background Context
+      description: Provide any relevant background that might help us answer your question
+      placeholder: |
+        - Your experience level with AI development tools
+        - What you've already tried or researched
+        - Specific use case or scenario you're thinking about
+        - Any related documentation you've read
+
+  - type: dropdown
+    id: experience-level
+    attributes:
+      label: 🎯 Your Experience Level
+      description: How familiar are you with AI-assisted development?
+      options:
+        - "New to AI development tools"
+        - "Some experience with AI tools"
+        - "Regular user of AI development tools"
+        - "Experienced AI-first developer"
+        - "Prefer not to specify"
+
+  - type: checkboxes
+    id: ai-tools-used
+    attributes:
+      label: 🛠️ AI Tools You've Used
+      description: Which AI development tools have you used? (Optional - helps us tailor our answer)
+      options:
+        - label: "GitHub Copilot"
+        - label: "ChatGPT for coding"
+        - label: "Claude for development"
+        - label: "Cursor IDE"
+        - label: "Tabnine"
+        - label: "Amazon CodeWhisperer"
+        - label: "Other AI coding assistants"
+        - label: "None yet, but interested to learn"
+
+  - type: textarea
+    id: expected-outcome
+    attributes:
+      label: 🎯 What You're Hoping to Learn
+      description: What kind of answer or information would be most helpful?
+      placeholder: |
+        - Specific information you need
+        - Problem you're trying to solve
+        - Decision you're trying to make
+        - Goal you're working toward
+
+  - type: textarea
+    id: additional-info
+    attributes:
+      label: 📝 Additional Information
+      description: Anything else that might help us provide a better answer?
+      placeholder: |
+        - Links to relevant resources you've found
+        - Specific examples or scenarios
+        - Follow-up questions you might have
+        - How this relates to your work or projects
+
+  - type: markdown
+    attributes:
+      value: |
+        ---
+
+        ## 🤖 About Our AI-First Approach
+
+        This project serves as an **experiment in AI-first development** where:
+
+        - **Human contributors** provide high-level direction, creativity, and quality oversight
+        - **AI agents** (primarily GitHub Copilot) handle implementation details
+        - **Code reviews** focus on prompt quality and implementation outcomes
+        - **Community input** drives feature prioritization and resource curation
+
+        ## 💬 Response Expectations
+
+        - Most questions are answered within 24-48 hours
+        - Complex questions may require discussion with multiple contributors
+        - We love detailed questions - they help us improve our documentation!
+        - Your question might inspire new documentation or tutorials
+
+        ## 🔗 Helpful Resources
+
+        Before we respond, you might find answers in:
+        - [CONTRIBUTORS.md](../CONTRIBUTORS.md) - Contribution guidelines
+        - [README.md](../README.md) - Project overview
+        - Existing issues with the `question` label
+
+        **Thank you for helping us build a better AI-first development community!**
