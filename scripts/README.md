@@ -14,7 +14,7 @@ GITHUB_TOKEN=your_token node scripts/create-issues-from-templates.js
 ```
 
 **Requirements**:
-- Node.js v14 or later
+- Node.js v18 or later
 - GitHub Personal Access Token with `repo` scope
 - Environment variable: `GITHUB_TOKEN`
 

@@ -1,40 +1,52 @@
-# Dependencies
+# Node.js
 node_modules/
 
-# Temporary files
-/tmp/
-*.tmp
-
-# Environment variables
-.env
-.env.local
-
-# Test resources file
-resources.json
-
-# Test results
-tests/results/
-
 # Logs
+logs
 *.log
+*.log.*
 npm-debug.log*
-
-# OS files
 yarn-debug.log*
 yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
 
-# Editor directories and files
-.idea
-.vscode
+# Tests & coverage
+coverage/
+.nyc_output/
+.vitest/
+
+# Build outputs & caches
+.dist/
+dist/
+build/
+.tmp/
+tmp/
+.temp/
+.vite/
+.cache/
+.parcel-cache/
+.eslintcache
+.stylelintcache
+node_modules/.cache/
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Editor & IDE files
+.vscode/
+!.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/tasks.json
+.idea/
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
 
-# OS
+# OS metadata
 .DS_Store
 Thumbs.db
-
-# Backup files
-*-backup.html
