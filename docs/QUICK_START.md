@@ -10,11 +10,11 @@ This is a quick reference guide for creating issues. For full documentation, see
 4. Select `dry_run: false`
 5. Click **"Run workflow"** button
 
-✅ Done! All 10 issues will be created.
+✅ Done! One issue will be created for each available template (up to 10 if all templates are present).
 
 ## 📝 What Gets Created
 
-10 comprehensive issues for:
+Up to 10 comprehensive issues for:
 
 1. ✅ **Testing Framework** - Jest + Playwright implementation
 2. 🔗 **Footer Link** - Add GitHub repository link
