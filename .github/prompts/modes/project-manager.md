@@ -82,7 +82,7 @@ Label operations (GitHub CLI examples)
   - gh issue edit <num> --remove-label "at bat" --remove-label "on deck" --remove-label "in the hole" --remove-label "on the bench"
   - gh issue edit <num> --add-label "at bat"
 - Bulk remove a lane label (PowerShell loop):
-  - gh issue list --state open --label "at bat" --json number | jq '.[].number' -r | % { gh issue edit $\_ --remove-label 'at bat' }
+  - gh issue list --state open --label "at bat" --json number | jq '.[].number' -r | % { gh issue edit $_ --remove-label 'at bat' }
 
 PowerShell-only alternatives (no jq)
 
