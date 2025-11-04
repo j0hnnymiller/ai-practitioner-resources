@@ -3,6 +3,7 @@
 ## Project Overview
 
 This is a curated collection of AI-powered development resources featuring:
+
 - **Static HTML web viewer** (`index.html`) for displaying resources
 - **Node.js automation scripts** for weekly resource generation and gist management
 - **GitHub Actions workflows** for automated updates
@@ -53,6 +54,7 @@ npm install
 ### Running Scripts
 
 Individual automation scripts:
+
 ```bash
 npm run fetch-current    # Fetch current resources from gist
 npm run generate          # Generate new resources with AI
@@ -63,6 +65,7 @@ npm run create-summary    # Generate automation summary
 ```
 
 Complete automation workflow:
+
 ```bash
 npm run run-automation
 ```
@@ -78,6 +81,7 @@ npm run run-automation
 ### Validation
 
 Always validate JSON against schema before committing:
+
 ```bash
 npm run validate
 ```
@@ -138,6 +142,7 @@ npm run validate
 ### Environment Variables
 
 Scripts require these environment variables:
+
 - `OPENAI_API_KEY` - OpenAI API key for GPT-4
 - `GITHUB_GIST_TOKEN` - GitHub PAT with gist scope
 - `GIST_ID` - Target GitHub Gist ID
@@ -207,6 +212,14 @@ Scripts require these environment variables:
 3. Test prompt changes with actual API calls
 4. Document any scoring framework changes
 
+### Chat modes
+
+- Project Manager mode: `.github/prompts/modes/project-manager.md`
+  - Purpose: prioritize issues using four labels (at bat, on deck, in the hole, on the bench), with a hard cap of three items in each of the first three lanes and a requirement that active items are independent and can be implemented simultaneously.
+  - Rebalancing is close-only: when issues close, immediately rebalance lanes and update labels; do not reshuffle on open/label edits.
+  - Approval gate: only issues labeled "implementation ready" can enter the active pipeline (in the hole → on deck → at bat); unapproved issues remain on the bench.
+  - Lane exclusivity: every open issue must have exactly one lane label; other non-lane labels (bug, enhancement, documentation, etc.) may also be present.
+
 ## Troubleshooting
 
 ### Common Issues
@@ -241,3 +254,12 @@ Scripts require these environment variables:
 - **Consistent formatting**: Follow existing code style
 - **Error messages**: Descriptive and actionable
 - **Documentation**: Update docs when changing functionality
+
+## Current pull requests (auto-updated manually)
+
+As of 2025-11-03, there are no open pull requests.
+
+Notes:
+
+- This project is issue-driven and typically avoids traditional PRs; when PRs exist, they are usually automation- or refactor-oriented.
+- Refresh this list by running: gh pr list --state open --json number,title,url
