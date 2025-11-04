@@ -180,7 +180,7 @@ Approval/assignment quick commands (replace placeholders)
 - Move to "at bat" (<num>, <approver>, <copilot-operator>):
   - gh issue edit <num> --remove-label "on deck" --remove-label "in the hole" --remove-label "on the bench"
   - gh issue edit <num> --add-label "at bat"
-  - gh issue edit <num> --add-assignee <copilot-operator>,<approver>
+  - gh issue edit <num> --add-assignee <copilot-operator> --add-assignee <approver>
 
 Assignment rules
 
