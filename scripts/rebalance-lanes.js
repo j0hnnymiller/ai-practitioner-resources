@@ -11,7 +11,6 @@
 const fetch = require("node-fetch");
 
 const LANES = ["at bat", "on deck", "in the hole", "on the bench"];
-const ACTIVE_LANES = ["at bat", "on deck", "in the hole"];
 
 function toLabelSet(labels) {
   return new Set(
