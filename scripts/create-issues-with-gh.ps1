@@ -72,7 +72,7 @@ function Test-IssueExists {
     param([string]$Title)
 
     try {
-        $existingIssues = gh issue list --search "in:title `"$Title`"" --json number, title, state | ConvertFrom-Json
+        $existingIssues = gh issue list --search "in:title `"$Title`"" --json number,title,state | ConvertFrom-Json
         $exactMatch = $existingIssues | Where-Object { $_.title -eq $Title -and $_.state -eq "open" }
         return $exactMatch
     }
