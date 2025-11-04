@@ -21,7 +21,7 @@ ai-practitioner-resources/
 ├── .github/
 │   ├── workflows/                # GitHub Actions automation
 │   ├── prompts/                  # AI generation prompts
-│   ├── instructions/             # Project-specific instructions
+│   ├── copilot-instructions.md   # Project-specific instructions
 │   └── ISSUE_TEMPLATE/           # Issue templates
 ├── scripts/                      # Automation Node.js scripts
 │   ├── fetch-current-resources.js
