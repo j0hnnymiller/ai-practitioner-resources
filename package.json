@@ -20,11 +20,12 @@
     "test-lifecycle-dry": "DRY_RUN=true node scripts/test-issue-lifecycle.js"
   },
   "dependencies": {
-    "node-fetch": "^2.7.0",
     "ajv": "^8.12.0",
-    "ajv-formats": "^2.1.1"
+    "ajv-formats": "^2.1.1",
+    "node-fetch": "^2.7.0"
   },
   "devDependencies": {
+    "mermaid": "^11.12.1",
     "vitest": "^1.6.0"
   },
   "engines": {

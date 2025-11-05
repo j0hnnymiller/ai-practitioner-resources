@@ -4,8 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Issue Lifecycle State Machine - Interactive Diagram</title>
-    <script src="https://cdn.jsdelivr.net/npm/mermaid@latest/dist/mermaid.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/panzoom@9.4.0/dist/panzoom.min.js"></script>
+    <script src="./mermaid.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -527,13 +526,17 @@ stateDiagram-v2
             securityLevel: 'loose'
         });
 
-        let panzoomInstance = null;
+        let currentZoom = 1;
+        let currentX = 0;
+        let currentY = 0;
+        let isDragging = false;
+        let startX = 0;
+        let startY = 0;
 
         async function initializeDiagram() {
             const renderSpinner = document.getElementById('renderSpinner');
             const renderStatus = document.getElementById('renderStatus');
             const mermaidWrapper = document.getElementById('mermaidWrapper');
-            const diagramContainer = document.getElementById('diagramContainer');
 
             renderSpinner.classList.add('active');
             renderStatus.textContent = 'Rendering diagram...';
@@ -545,7 +548,6 @@ stateDiagram-v2
                 // Wait a bit for SVG to be rendered
                 await new Promise(resolve => setTimeout(resolve, 500));
 
-                // Initialize PanZoom on the SVG
                 const svg = mermaidWrapper.querySelector('svg');
                 if (svg) {
                     // Ensure SVG is visible and properly sized
@@ -554,64 +556,13 @@ stateDiagram-v2
                     svg.removeAttribute('height');
                     svg.style.width = 'auto';
                     svg.style.height = 'auto';
-                    
-                    // Initialize panzoom on the mermaid div, not the SVG
-                    panzoomInstance = panzoom(svg, {
-                        maxZoom: 5,
-                        minZoom: 0.3,
-                        smoothScroll: true,
-                        beforeMouseDown: (e) => {
-                            const isText = e.target.tagName === 'text' || e.target.tagName === 'tspan';
-                            return e.button === 0 && !isText;
-                        },
-                        onTouch: () => true
-                    });
-
-                    // Center the diagram on load
-                    setTimeout(() => {
-                        panzoomInstance.reset({ animate: false });
-                    }, 100);
-
-                    // Add visual feedback for panning
-                    let isPanning = false;
-                    panzoomInstance.on('pan', () => {
-                        if (!isPanning) {
-                            isPanning = true;
-                            mermaidWrapper.classList.add('panning');
-                        }
-                    });
-
-                    // Mouse wheel zoom with Ctrl
-                    mermaidWrapper.addEventListener('wheel', (e) => {
-                        if (e.ctrlKey || e.metaKey) {
-                            e.preventDefault();
-                            const direction = e.deltaY > 0 ? 0.85 : 1.15;
-                            const x = e.clientX - mermaidWrapper.getBoundingClientRect().left;
-                            const y = e.clientY - mermaidWrapper.getBoundingClientRect().top;
-                            panzoomInstance.zoomBy(direction, { x, y, animate: true });
-                            updateZoomLevel();
-                        }
-                    }, { passive: false });
-
-                    // Track panning state
-                    document.addEventListener('mouseup', () => {
-                        isPanning = false;
-                        mermaidWrapper.classList.remove('panning');
-                    });
-
-                    document.addEventListener('mouseleave', () => {
-                        isPanning = false;
-                        mermaidWrapper.classList.remove('panning');
-                    });
-
-                    // Store initial transform for reset
-                    window.initialTransform = panzoomInstance.getTransform();
 
                     renderStatus.textContent = '✅ Diagram loaded successfully!';
                     renderSpinner.classList.remove('active');
 
                     // Setup event listeners
                     setupControls();
+                    setupPanZoom(mermaidWrapper);
                 } else {
                     throw new Error('SVG not found');
                 }
@@ -622,35 +573,96 @@ stateDiagram-v2
             }
         }
 
-        function setupControls() {
-            // Zoom In Button
-            document.getElementById('zoomInBtn').addEventListener('click', () => {
-                if (panzoomInstance) {
-                    panzoomInstance.zoomBy(1.2, { animate: true });
+        function setupPanZoom(wrapper) {
+            const svg = wrapper.querySelector('svg');
+            
+            // Mouse drag for panning
+            wrapper.addEventListener('mousedown', (e) => {
+                if (e.button === 0) { // Left mouse button
+                    isDragging = true;
+                    startX = e.clientX - currentX;
+                    startY = e.clientY - currentY;
+                    wrapper.classList.add('panning');
+                    e.preventDefault();
+                }
+            });
+
+            document.addEventListener('mousemove', (e) => {
+                if (isDragging) {
+                    currentX = e.clientX - startX;
+                    currentY = e.clientY - startY;
+                    updateTransform(svg);
+                }
+            });
+
+            document.addEventListener('mouseup', () => {
+                if (isDragging) {
+                    isDragging = false;
+                    wrapper.classList.remove('panning');
+                }
+            });
+
+            // Mouse wheel zoom with Ctrl
+            wrapper.addEventListener('wheel', (e) => {
+                if (e.ctrlKey || e.metaKey) {
+                    e.preventDefault();
+                    const delta = e.deltaY > 0 ? 0.9 : 1.1;
+                    currentZoom *= delta;
+                    currentZoom = Math.max(0.3, Math.min(5, currentZoom));
+                    updateTransform(svg);
                     updateZoomLevel();
                 }
+            }, { passive: false });
+        }
+
+        function updateTransform(svg) {
+            if (svg) {
+                svg.style.transform = `translate(${currentX}px, ${currentY}px) scale(${currentZoom})`;
+                svg.style.transformOrigin = 'top left';
+            }
+        }
+
+        function setupControls() {
+            const mermaidWrapper = document.getElementById('mermaidWrapper');
+            const svg = mermaidWrapper.querySelector('svg');
+
+            // Zoom In Button
+            document.getElementById('zoomInBtn').addEventListener('click', () => {
+                currentZoom *= 1.2;
+                currentZoom = Math.min(5, currentZoom);
+                updateTransform(svg);
+                updateZoomLevel();
             });
 
             // Zoom Out Button
             document.getElementById('zoomOutBtn').addEventListener('click', () => {
-                if (panzoomInstance) {
-                    panzoomInstance.zoomBy(0.8, { animate: true });
-                    updateZoomLevel();
-                }
+                currentZoom *= 0.8;
+                currentZoom = Math.max(0.3, currentZoom);
+                updateTransform(svg);
+                updateZoomLevel();
             });
 
             // Reset Button
             document.getElementById('resetBtn').addEventListener('click', () => {
-                if (panzoomInstance) {
-                    panzoomInstance.reset({ animate: true });
-                    updateZoomLevel();
-                }
+                currentZoom = 1;
+                currentX = 0;
+                currentY = 0;
+                updateTransform(svg);
+                updateZoomLevel();
             });
 
             // Fit Button
             document.getElementById('fitBtn').addEventListener('click', () => {
-                if (panzoomInstance) {
-                    panzoomInstance.zoomToFit({ animate: true });
+                const wrapperRect = mermaidWrapper.getBoundingClientRect();
+                const svgRect = svg.getBoundingClientRect();
+                
+                if (svgRect.width > 0 && svgRect.height > 0) {
+                    const scaleX = (wrapperRect.width - 40) / (svgRect.width / currentZoom);
+                    const scaleY = (wrapperRect.height - 40) / (svgRect.height / currentZoom);
+                    currentZoom = Math.min(scaleX, scaleY, 1);
+                    currentX = 20;
+                    currentY = 20;
+                    updateTransform(svg);
                     updateZoomLevel();
                 }
             });
@@ -667,28 +679,11 @@ stateDiagram-v2
                     }
                 }
             });
-
-            // Update zoom on scroll
-            const diagramContainer = document.getElementById('diagramContainer');
-            diagramContainer.addEventListener('wheel', (e) => {
-                if (e.ctrlKey || e.metaKey) {
-                    e.preventDefault();
-                    updateZoomLevel();
-                }
-            });
-
-            // Periodic zoom level updates
-            setInterval(() => {
-                updateZoomLevel();
-            }, 200);
         }
 
         function updateZoomLevel() {
-            if (panzoomInstance) {
-                const transform = panzoomInstance.getTransform();
-                const percentage = Math.round(transform.scale * 100);
-                document.getElementById('zoomLevel').textContent = percentage + '%';
-            }
+            const percentage = Math.round(currentZoom * 100);
+            document.getElementById('zoomLevel').textContent = percentage + '%';
         }
 
         // Initialize on page load
