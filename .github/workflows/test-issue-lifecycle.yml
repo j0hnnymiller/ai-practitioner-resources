@@ -1,0 +1,79 @@
+name: Test Issue Lifecycle
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Run in dry-run mode (no real issues created)'
+        required: false
+        type: boolean
+        default: false
+      cleanup:
+        description: 'Cleanup test issues after completion'
+        required: false
+        type: boolean
+        default: true
+      delay_ms:
+        description: 'Delay in milliseconds between operations'
+        required: false
+        type: number
+        default: 2000
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  test-lifecycle:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm ci --omit=dev
+
+      - name: Run Issue Lifecycle Tests
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          DRY_RUN: ${{ inputs.dry_run }}
+          CLEANUP_AFTER: ${{ inputs.cleanup }}
+          DELAY_MS: ${{ inputs.delay_ms }}
+        run: node scripts/test-issue-lifecycle.js
+
+      - name: Upload Test Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: issue-lifecycle-test-report
+          path: automation-results/issue-lifecycle-test-*.md
+          retention-days: 30
+
+      - name: Comment Results on Trigger Issue
+        if: github.event.issue
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const reports = fs.readdirSync('automation-results')
+              .filter(f => f.startsWith('issue-lifecycle-test-'))
+              .sort()
+              .reverse();
+            
+            if (reports.length > 0) {
+              const reportPath = `automation-results/${reports[0]}`;
+              const reportContent = fs.readFileSync(reportPath, 'utf8');
+              
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: `## Issue Lifecycle Test Results\n\n${reportContent}`
+              });
+            }
