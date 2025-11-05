@@ -1,0 +1,108 @@
+name: Handle Copilot Review Changes
+
+on:
+  pull_request_review:
+    types: [submitted]
+
+permissions:
+  pull-requests: write
+  issues: write
+  contents: read
+
+jobs:
+  handle_changes_requested:
+    runs-on: ubuntu-latest
+    if: github.event.review.state == 'changes_requested'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Extract session ID from PR
+        id: extract_session
+        uses: actions/github-script@v7
+        with:
+          script: |
+            // Get PR comments to find session ID
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+
+            // Look for session ID in comments
+            let sessionId = null;
+            for (const comment of comments) {
+              const match = comment.body.match(/copilot-issue-\d+-pr-\d+/);
+              if (match) {
+                sessionId = match[0];
+                break;
+              }
+            }
+
+            // Fallback: construct from PR metadata
+            if (!sessionId && context.payload.pull_request.head.ref.includes('copilot')) {
+              const issueMatch = context.payload.pull_request.head.ref.match(/issue-(\d+)/);
+              if (issueMatch) {
+                sessionId = `copilot-issue-${issueMatch[1]}-pr-${context.issue.number}`;
+              }
+            }
+
+            core.setOutput('session_id', sessionId || '');
+            console.log(`Session ID: ${sessionId}`);
+
+      - name: Post restoration instructions
+        if: steps.extract_session.outputs.session_id != ''
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const reviewComment = context.payload.review.body || '(No detailed comments)';
+            const sessionId = '${{ steps.extract_session.outputs.session_id }}';
+
+            const response = `## 🔄 Changes Requested - Session Ready for Restoration\n\n**Reviewer**: @${context.actor}\n**Session ID**: \`${sessionId}\`\n\n### Review Feedback Summary\n${reviewComment}\n\n### Next Steps for Copilot\n1. Session state has been saved and is ready for restoration\n2. Use the session ID above to restore implementation context\n3. Address the requested changes\n4. Push updates to this branch\n\n### Restoration Command\n\`\`\`\ncopilot restore-session ${sessionId}\n\`\`\`\n\nThe implementation context including:\n- Original issue details\n- Current branch state\n- File changes made\n- Commit history\n\n...will be available for review-driven iteration.\n\n---\n*Waiting for Copilot to address changes using restored session context.*`;
+
+            await github.rest.issues.createComment({owner: context.repo.owner, repo: context.repo.repo, issue_number: context.issue.number, body: response});
+
+      - name: Update session with review feedback
+        if: steps.extract_session.outputs.session_id != ''
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const sessionId = '${{ steps.extract_session.outputs.session_id }}';
+            const sessionFile = `.github/sessions/${sessionId}.json`;
+
+            if (fs.existsSync(sessionFile)) {
+              const session = JSON.parse(fs.readFileSync(sessionFile, 'utf8'));
+
+              // Update with review info
+              session.reviewState.changesRequested = true;
+              session.reviewState.reviewComments.push({
+                reviewer: context.actor,
+                comment: context.payload.review.body || '(See PR review)',
+                state: context.payload.review.state,
+                timestamp: new Date().toISOString()
+              });
+
+              // Save updated session
+              fs.writeFileSync(sessionFile, JSON.stringify(session, null, 2));
+
+              // Commit update
+              exec('git config user.name "github-actions[bot]"');
+              exec('git config user.email "github-actions[bot]@users.noreply.github.com"');
+              exec(`git add ${sessionFile}`);
+              exec(`git commit -m "session: update with review feedback for ${sessionId}"`);
+              exec(`git push origin ${{ github.head_ref }}`);
+            }
+
+      - name: Add label for Copilot attention
+        uses: actions/github-script@v7
+        with:
+          script: |
+            // Add label to indicate PR needs Copilot attention
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              labels: ['copilot-review-changes']
+            });
