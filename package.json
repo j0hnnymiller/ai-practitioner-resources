@@ -11,11 +11,13 @@
     "update-gist": "node scripts/update-gist.js",
     "create-summary": "node scripts/create-summary.js",
     "migrate-lanes": "node scripts/migrate-lanes-to-project-status.js",
-  "intake-review": "node scripts/review-existing-issues.js",
+    "intake-review": "node scripts/review-existing-issues.js",
     "pm-review-local": "node scripts/pm-review-local.js",
     "run-automation": "npm run fetch-current && npm run generate && npm run merge && npm run validate && npm run update-gist && npm run create-summary",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "test-lifecycle": "node scripts/test-issue-lifecycle.js",
+    "test-lifecycle-dry": "DRY_RUN=true node scripts/test-issue-lifecycle.js"
   },
   "dependencies": {
     "node-fetch": "^2.7.0",
