@@ -1,6 +1,7 @@
 name: Handle Copilot Review Changes
 
 on:
+  workflow_dispatch:
   pull_request_review:
     types: [submitted]
 

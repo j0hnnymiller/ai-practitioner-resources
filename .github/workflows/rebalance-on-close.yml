@@ -1,6 +1,7 @@
-name: Rebalance Project Status on issue close
+name: Rebalance on Close
 
 on:
+  workflow_dispatch:
   issues:
     types: [closed]
 

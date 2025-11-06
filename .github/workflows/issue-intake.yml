@@ -1,6 +1,7 @@
-name: Issue intake on open
+name: Issue Intake
 
 on:
+  workflow_dispatch:
   issues:
     types: [opened]
 
