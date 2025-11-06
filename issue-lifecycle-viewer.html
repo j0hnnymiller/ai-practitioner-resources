@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Issue Lifecycle State Machine - Interactive Diagram</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@latest/dist/mermaid.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/panzoom@9.4.0/dist/panzoom.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto Mono', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            max-height: 100vh;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.95;
+        }
+
+        .controls-bar {
+            background: #f8f9fa;
+            padding: 15px 30px;
+            border-bottom: 2px solid #e9ecef;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+            flex-shrink: 0;
+        }
+
+        .control-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .control-label {
+            font-weight: 600;
+            color: #495057;
+            font-size: 0.9em;
+        }
+
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9em;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        button:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .zoom-controls {
+            display: flex;
+            gap: 5px;
+        }
+
+        .zoom-display {
+            min-width: 70px;
+            text-align: center;
+            padding: 8px 12px;
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            font-size: 0.9em;
+            font-weight: 500;
+            color: #495057;
+        }
+
+        .diagram-wrapper {
+            flex: 1;
+            overflow: hidden;
+            position: relative;
+            background: white;
+        }
+
+        .diagram-container {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            position: relative;
+            background: white;
+        }
+
+        .mermaid-wrapper {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            overflow: hidden;
+            padding: 0;
+            margin: 0;
+            touch-action: none;
+            cursor: grab;
+            background: white;
+        }
+
+        .mermaid-wrapper.panning {
+            cursor: grabbing;
+        }
+
+        .mermaid {
+            position: absolute;
+            top: 0;
+            left: 0;
+            transform-origin: top left;
+        }
+
+        .mermaid svg {
+            display: block;
+        }
+
+        .info-panel {
+            background: #e7f3ff;
+            border-left: 4px solid #2196f3;
+            padding: 15px 30px;
+            font-size: 0.95em;
+            color: #1565c0;
+            flex-shrink: 0;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .info-panel strong {
+            color: #0d47a1;
+        }
+
+        .status-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            background: #c8e6c9;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 500;
+            color: #2e7d32;
+        }
+
+        .status-indicator::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: #4caf50;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        .spinner {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top: 3px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .spinner.active {
+            display: inline-block;
+        }
+
+        .help-text {
+            font-size: 0.85em;
+            color: #6c757d;
+            font-style: italic;
+            margin-top: 10px;
+            line-height: 1.5;
+        }
+
+        /* Touch-friendly styles */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .controls-bar {
+                padding: 10px 15px;
+                gap: 10px;
+            }
+
+            button {
+                padding: 6px 12px;
+                font-size: 0.85em;
+            }
+        }
+
+        /* Panzoom specific */
+        .panzoom-container {
+            touch-action: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🎯 Issue Lifecycle State Machine</h1>
+            <p>Interactive State Diagram with Panning & Zooming</p>
+        </div>
+
+        <!-- Controls Bar -->
+        <div class="controls-bar">
+            <div class="control-group">
+                <span class="control-label">📐 View Control:</span>
+                <button id="zoomInBtn" title="Zoom In (Ctrl + Plus)">
+                    <span>🔍+</span>
+                </button>
+                <button id="zoomOutBtn" title="Zoom Out (Ctrl + Minus)">
+                    <span>🔍−</span>
+                </button>
+                <div class="zoom-display" id="zoomLevel">100%</div>
+                <button id="resetBtn" title="Reset View">
+                    <span>↺</span>
+                    Reset
+                </button>
+                <button id="fitBtn" title="Fit to Screen">
+                    <span>⬜</span>
+                    Fit
+                </button>
+            </div>
+
+            <div class="control-group" style="margin-left: auto;">
+                <span class="control-label">📊 Status:</span>
+                <div class="status-indicator">
+                    <span id="renderStatus">Rendering diagram...</span>
+                    <span class="spinner" id="renderSpinner"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Diagram Container -->
+        <div class="diagram-wrapper">
+            <div class="diagram-container" id="diagramContainer">
+                <div class="mermaid-wrapper" id="mermaidWrapper">
+                    <div class="mermaid" id="mermaidDiagram">
+stateDiagram-v2
+    [*] --> Issue_Created: User creates issue\nwith template
+
+    %% Initial State
+    Issue_Created: Issue Created
+
+    %% First Gate: Triage
+    Issue_Created --> Auto_Validation: Issue created
+    Auto_Validation: Auto Validation - Gate
+
+    Auto_Validation --> Validation_Failed: Validation fails
+    Validation_Failed: Validation Failed
+    Validation_Failed --> Needs_Details: Request details
+    Needs_Details: Needs Details
+    Needs_Details --> Auto_Validation: User updates
+    Needs_Details --> Auto_Abandoned: No response - 30d
+    Auto_Abandoned: Auto Abandoned
+    Auto_Abandoned --> [*]
+
+    Auto_Validation --> Backlog: Pass validation
+    Backlog: Backlog
+
+    %% Triage Stage
+    Backlog --> PM_Triage: To triage
+    PM_Triage: PM Review - Manual
+
+    PM_Triage --> Triage_Rejected: Reject
+    Triage_Rejected: Triage Rejected - Out of Scope
+    Triage_Rejected --> Closed_Rejected: Close
+    Closed_Rejected: Issue Rejected
+    Closed_Rejected --> [*]
+
+    PM_Triage --> Assigned_Lane: Assign lane
+    Assigned_Lane: Lane Assigned
+
+    %% Lane Assignment Logic
+    Assigned_Lane --> On_Bench: Low priority
+    On_Bench: On The Bench
+
+    Assigned_Lane --> In_Hole: With dependencies
+    In_Hole: In The Hole
+
+    Assigned_Lane --> On_Deck: Next in line
+    On_Deck: On The Deck
+
+    Assigned_Lane --> At_Bat: Ready now
+    At_Bat: At Bat
+
+    %% Bench Lane Flow
+    On_Bench --> Bench_Check: Monitor
+    Bench_Check: Bench - Waiting
+    Bench_Check --> Rebalance_Bench: Rebalance trigger
+    Rebalance_Bench: Rebalance
+    Rebalance_Bench --> In_Hole
+
+    %% In The Hole Flow
+    In_Hole --> Hole_Check: Monitor
+    Hole_Check: Hole - Waiting
+    Hole_Check --> Rebalance_Hole: Rebalance trigger
+    Rebalance_Hole: Rebalance
+    Rebalance_Hole --> On_Deck
+
+    %% On The Deck Flow
+    On_Deck --> Deck_Check: Monitor
+    Deck_Check: Deck - Waiting
+    Deck_Check --> Rebalance_Deck: Rebalance trigger
+    Rebalance_Deck: Rebalance
+    Rebalance_Deck --> At_Bat
+
+    %% At Bat Implementation
+    At_Bat --> AC_Check: Verify AC
+    AC_Check: At Bat - AC Check
+    AC_Check --> Dev_Assigned: AC Ready
+    AC_Check --> Needs_Prep: AC Needed
+    Needs_Prep: Needs Preparation
+    Needs_Prep --> AC_Check
+    Dev_Assigned: Development Started
+
+    %% Implementation Flow
+    Dev_Assigned --> Dev_In_Progress: Create branch
+    Dev_In_Progress: In Development
+
+    Dev_In_Progress --> PR_Created: Create PR
+    PR_Created: PR Created
+
+    PR_Created --> Stage_1_PR_Format: Validate format
+    Stage_1_PR_Format: Stage 1 - PR Format Check
+
+    Stage_1_PR_Format --> Stage_1_Fail: Invalid
+    Stage_1_Fail: PR Format Failed
+    Stage_1_Fail --> Needs_PR_Update: Update PR
+    Needs_PR_Update: Needs PR Update
+    Needs_PR_Update --> Stage_1_PR_Format
+
+    Stage_1_PR_Format --> Stage_2_AI_Review: Valid - Start review
+    Stage_2_AI_Review: Stage 2 - Copilot Code Review
+
+    %% Multi-Round Review
+    Stage_2_AI_Review --> Review_R1: Begin review
+    Review_R1: AI Review - Round 1
+    Review_R1 --> Check_R1: Evaluate
+    Check_R1: Review Decision R1
+    Check_R1 --> AI_Comments_R1: Issues found
+    Check_R1 --> AI_Approved_R1: No issues
+    AI_Comments_R1: AI Review - Issues Found
+    AI_Comments_R1 --> Auto_Fix_Attempt: Auto fix
+    Auto_Fix_Attempt: Auto-Fix Attempt - R1 of 3
+    Auto_Fix_Attempt --> Re_Review_R1: Re-review
+    Re_Review_R1: Stage 2 - Code Review - R2 of 3
+    Re_Review_R1 --> Check_R2: Evaluate
+    Check_R2: Review Decision R2
+    Check_R2 --> AI_Comments_R2: Issues found
+    Check_R2 --> AI_Approved_R2: No issues
+
+    AI_Comments_R2: AI Review - Issues Found
+    AI_Comments_R2 --> Auto_Fix_Attempt_2: Auto fix
+    Auto_Fix_Attempt_2: Auto-Fix Attempt - R2 of 3
+    Auto_Fix_Attempt_2 --> Re_Review_R2: Re-review
+    Re_Review_R2: Stage 2 - Code Review - R3 of 3
+    Re_Review_R2 --> Check_R3: Evaluate
+    Check_R3: Review Decision R3
+    Check_R3 --> AI_Comments_R3: Issues remain
+    Check_R3 --> AI_Approved_R3: No issues
+
+    AI_Comments_R3: AI Review - Issues Found
+    AI_Comments_R3 --> Escalation_Decision: Escalate after R3
+    Escalation_Decision: Escalation Logic
+    Escalation_Decision --> Auto_Assign_Maintainer: Assign to human
+    Auto_Assign_Maintainer: Assigned to Maintainer
+    Auto_Assign_Maintainer --> Stage_5_Escalated
+
+    AI_Approved_R2 --> Stage_3_Acceptance
+    AI_Approved_R1 --> Stage_3_Acceptance
+    AI_Approved_R3 --> Stage_3_Acceptance
+
+    %% Stage 3: Acceptance Criteria
+    Stage_3_Acceptance: Stage 3 - Acceptance Criteria
+    Stage_3_Acceptance --> AC_Check: Verify
+    AC_Check: AC Check
+    AC_Check --> AC_Failed: Not met
+    AC_Check --> Stage_4_CI_CD: Met
+    AC_Failed: AC Failed
+    AC_Failed --> AC_Needs_Update: Update
+    AC_Needs_Update: Needs AC Update
+    AC_Needs_Update --> AC_Check
+
+    %% Stage 4: CI/CD
+    Stage_4_CI_CD: Stage 4 - CI/CD Checks
+    Stage_4_CI_CD --> CI_Check: Run tests
+    CI_Check: CI Check
+    CI_Check --> CI_Failed: Failed
+    CI_Check --> Stage_5_Human: Passed
+    CI_Failed: CI/CD Failed
+    CI_Failed --> CI_Needs_Fix: Fix
+    CI_Needs_Fix: Needs CI/CD Fix
+    CI_Needs_Fix --> CI_Check
+
+    %% Stage 5: Human Approval
+    Stage_5_Human: Stage 5 - Human Approval - Manual
+    Stage_5_Escalated: Stage 5 - Human Approval - Escalated
+
+    Stage_5_Human --> Maintainer_Review: Begin review
+    Maintainer_Review: Maintainer Review
+    Maintainer_Review --> Review_Decision: Decide
+    Review_Decision: Approval Decision
+    Review_Decision --> Approval_Rejected: Request changes
+    Review_Decision --> Stage_6_Merge: Approve
+
+    Stage_5_Escalated --> Maintainer_Review_Esc: Review escalated
+    Maintainer_Review_Esc: Maintainer Review - Escalated
+    Maintainer_Review_Esc --> Review_Decision_Esc: Decide
+    Review_Decision_Esc: Escalation Approval Decision
+    Review_Decision_Esc --> Approval_Rejected_Esc: Reject
+    Review_Decision_Esc --> Stage_6_Merge: Approve
+
+    Approval_Rejected: Changes Requested
+    Approval_Rejected --> Dev_Updates: Developer updates
+    Dev_Updates: Awaiting Updates
+    Dev_Updates --> Maintainer_Review
+
+    Approval_Rejected_Esc: Rejected by Maintainer
+    Approval_Rejected_Esc --> PR_Closed_Rejected: Close PR
+    PR_Closed_Rejected: PR Rejected
+    PR_Closed_Rejected --> Closed_Failed: Redesign needed
+    Closed_Failed: Issue Rejected - Design
+    Closed_Failed --> [*]
+
+    %% Stage 6: Merge
+    Stage_6_Merge: Stage 6 - Merge to Main
+    Stage_6_Merge --> Auto_Merge: Merge
+    Auto_Merge: Merging...
+    Auto_Merge --> Merged_Success: Merged
+    Merged_Success: PR Merged
+    Merged_Success --> Issue_Complete: Complete
+    Issue_Complete: Issue Complete
+
+    %% Close Issue
+    Issue_Complete --> Close_Issue: Close
+    Close_Issue: Issue Closed - Completed
+    Close_Issue --> [*]
+
+    %% Alternative: Manual Close
+    At_Bat --> Manual_Close_Check: Manual close?
+    Manual_Close_Check: Manual Close Check
+    Manual_Close_Check --> Manual_Completed: Close manually
+    Manual_Completed: Issue Closed - Manual
+    Manual_Completed --> [*]
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Info Panel -->
+        <div class="info-panel">
+            <strong>💡 Tip:</strong> Use your mouse to pan (click & drag), scroll wheel or buttons to zoom. Press <strong>Ctrl++</strong> to zoom in, <strong>Ctrl+Minus</strong> to zoom out.
+            <div class="help-text">
+                ↕️ Drag to pan | 🔍 Scroll to zoom | Double-click to center | <strong>40+ states</strong> | <strong>7 gates</strong> | <strong>10+ paths</strong>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Mermaid
+        mermaid.initialize({ 
+            startOnLoad: true, 
+            theme: 'default',
+            securityLevel: 'loose'
+        });
+
+        let panzoomInstance = null;
+
+        async function initializeDiagram() {
+            const renderSpinner = document.getElementById('renderSpinner');
+            const renderStatus = document.getElementById('renderStatus');
+            const mermaidWrapper = document.getElementById('mermaidWrapper');
+            const diagramContainer = document.getElementById('diagramContainer');
+
+            renderSpinner.classList.add('active');
+            renderStatus.textContent = 'Rendering diagram...';
+
+            try {
+                // Render the Mermaid diagram
+                await mermaid.contentLoaded();
+                
+                // Wait a bit for SVG to be rendered
+                await new Promise(resolve => setTimeout(resolve, 500));
+
+                // Initialize PanZoom on the SVG
+                const svg = mermaidWrapper.querySelector('svg');
+                if (svg) {
+                    // Ensure SVG is visible and properly sized
+                    svg.style.display = 'block';
+                    svg.removeAttribute('width');
+                    svg.removeAttribute('height');
+                    svg.style.width = 'auto';
+                    svg.style.height = 'auto';
+                    
+                    // Initialize panzoom on the SVG element
+                    panzoomInstance = panzoom(svg, {
+                        maxZoom: 5,
+                        minZoom: 0.3,
+                        smoothScroll: true,
+                        beforeMouseDown: (e) => {
+                            const isText = e.target.tagName === 'text' || e.target.tagName === 'tspan';
+                            return e.button === 0 && !isText;
+                        },
+                        onTouch: () => true
+                    });
+
+                    // Center the diagram on load
+                    setTimeout(() => {
+                        panzoomInstance.reset({ animate: false });
+                    }, 100);
+
+                    // Add visual feedback for panning
+                    let isPanning = false;
+                    panzoomInstance.on('pan', () => {
+                        if (!isPanning) {
+                            isPanning = true;
+                            mermaidWrapper.classList.add('panning');
+                        }
+                    });
+
+                    // Mouse wheel zoom with Ctrl
+                    mermaidWrapper.addEventListener('wheel', (e) => {
+                        if (e.ctrlKey || e.metaKey) {
+                            e.preventDefault();
+                            const direction = e.deltaY > 0 ? 0.85 : 1.15;
+                            const x = e.clientX - mermaidWrapper.getBoundingClientRect().left;
+                            const y = e.clientY - mermaidWrapper.getBoundingClientRect().top;
+                            panzoomInstance.zoomBy(direction, { x, y, animate: true });
+                            updateZoomLevel();
+                        }
+                    }, { passive: false });
+
+                    // Track panning state
+                    document.addEventListener('mouseup', () => {
+                        isPanning = false;
+                        mermaidWrapper.classList.remove('panning');
+                    });
+
+                    document.addEventListener('mouseleave', () => {
+                        isPanning = false;
+                        mermaidWrapper.classList.remove('panning');
+                    });
+
+                    // Store initial transform for reset
+                    window.initialTransform = panzoomInstance.getTransform();
+
+                    renderStatus.textContent = '✅ Diagram loaded successfully!';
+                    renderSpinner.classList.remove('active');
+
+                    // Setup event listeners
+                    setupControls();
+                } else {
+                    throw new Error('SVG not found');
+                }
+            } catch (error) {
+                console.error('Error rendering diagram:', error);
+                renderStatus.textContent = '❌ Error rendering diagram';
+                renderSpinner.classList.remove('active');
+            }
+        }
+
+        function setupControls() {
+            // Zoom In Button
+            document.getElementById('zoomInBtn').addEventListener('click', () => {
+                if (panzoomInstance) {
+                    panzoomInstance.zoomBy(1.2, { animate: true });
+                    updateZoomLevel();
+                }
+            });
+
+            // Zoom Out Button
+            document.getElementById('zoomOutBtn').addEventListener('click', () => {
+                if (panzoomInstance) {
+                    panzoomInstance.zoomBy(0.8, { animate: true });
+                    updateZoomLevel();
+                }
+            });
+
+            // Reset Button
+            document.getElementById('resetBtn').addEventListener('click', () => {
+                if (panzoomInstance) {
+                    panzoomInstance.reset({ animate: true });
+                    updateZoomLevel();
+                }
+            });
+
+            // Fit Button
+            document.getElementById('fitBtn').addEventListener('click', () => {
+                if (panzoomInstance) {
+                    panzoomInstance.zoomToFit({ animate: true });
+                    updateZoomLevel();
+                }
+            });
+
+            // Keyboard shortcuts
+            document.addEventListener('keydown', (e) => {
+                if (e.ctrlKey || e.metaKey) {
+                    if (e.key === '+' || e.key === '=') {
+                        e.preventDefault();
+                        document.getElementById('zoomInBtn').click();
+                    } else if (e.key === '-') {
+                        e.preventDefault();
+                        document.getElementById('zoomOutBtn').click();
+                    }
+                }
+            });
+
+            // Update zoom on scroll
+            const diagramContainer = document.getElementById('diagramContainer');
+            diagramContainer.addEventListener('wheel', (e) => {
+                if (e.ctrlKey || e.metaKey) {
+                    e.preventDefault();
+                    updateZoomLevel();
+                }
+            });
+
+            // Periodic zoom level updates
+            setInterval(() => {
+                updateZoomLevel();
+            }, 200);
+        }
+
+        function updateZoomLevel() {
+            if (panzoomInstance) {
+                const transform = panzoomInstance.getTransform();
+                const percentage = Math.round(transform.scale * 100);
+                document.getElementById('zoomLevel').textContent = percentage + '%';
+            }
+        }
+
+        // Initialize on page load
+        window.addEventListener('load', () => {
+            initializeDiagram();
+        });
+
+        // Fallback if load event doesn't work
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializeDiagram);
+        } else {
+            setTimeout(initializeDiagram, 100);
+        }
+    </script>
+</body>
+</html>
