@@ -91,9 +91,16 @@ function readPMGuidance() {
 }
 
 function readPMPrompt() {
-  // Prefer dedicated PM review prompt, fallback to mode guidance
-  const preferred = path.resolve(process.cwd(), ".github/prompts/pm-review.md");
-  if (fs.existsSync(preferred)) return fs.readFileSync(preferred, "utf8");
+  // Priority order: AI assistant mode > dedicated PM review > project manager mode
+  const aiAssistant = path.resolve(
+    process.cwd(),
+    ".github/prompts/modes/ai-assistant-pm.md"
+  );
+  if (fs.existsSync(aiAssistant)) return fs.readFileSync(aiAssistant, "utf8");
+
+  const dedicated = path.resolve(process.cwd(), ".github/prompts/pm-review.md");
+  if (fs.existsSync(dedicated)) return fs.readFileSync(dedicated, "utf8");
+
   return readPMGuidance();
 }
 
@@ -207,53 +214,58 @@ async function generatePMReview({ title, body, labelsText, url }) {
 }
 
 async function main() {
-  const repoFull = env("GITHUB_REPOSITORY");
-  const [owner, repo] = repoFull.split("/");
-  const event = loadEvent();
-  const number = event?.issue?.number;
-  if (!number) throw new Error("Issue number not found in event payload");
+  try {
+    const repoFull = env("GITHUB_REPOSITORY");
+    const [owner, repo] = repoFull.split("/");
+    const event = loadEvent();
+    const number = event?.issue?.number;
+    if (!number) throw new Error("Issue number not found in event payload");
 
-  const issue = await getIssue(owner, repo, number);
-  const labelsText = (issue.labels || [])
-    .map((l) => (typeof l === "string" ? l : l.name))
-    .filter(Boolean)
-    .join(", ");
+    const issue = await getIssue(owner, repo, number);
+    const labelsText = (issue.labels || [])
+      .map((l) => (typeof l === "string" ? l : l.name))
+      .filter(Boolean)
+      .join(", ");
 
-  const { skipped, content, result } = await generatePMReview({
-    title: issue.title,
-    body: issue.body,
-    labelsText,
-    url: issue.html_url,
-  });
+    const { skipped, content, result } = await generatePMReview({
+      title: issue.title,
+      body: issue.body,
+      labelsText,
+      url: issue.html_url,
+    });
 
-  const header = `Copilot PM review — automated checklist assessment`;
-  const footer = skipped
-    ? "\n\n_(Set ANTHROPIC_API_KEY to enable AI review.)_"
-    : "\n\n_(Authored by Copilot — Project Manager mode)_";
-  const body = `### ${header}\n\n${content}${footer}`;
-  await addComment(owner, repo, number, body);
+    const header = `Copilot PM review — automated checklist assessment`;
+    const footer = skipped
+      ? "\n\n_(Set ANTHROPIC_API_KEY to enable AI review.)_"
+      : "\n\n_(Authored by Copilot — Project Manager mode)_";
+    const body = `### ${header}\n\n${content}${footer}`;
+    await addComment(owner, repo, number, body);
 
-  // Apply labels per AI decision
-  if (!skipped && result && typeof result === "object") {
-    await applyLabelsFromResult(owner, repo, number, result, issue.labels);
+    // Apply labels per AI decision
+    if (!skipped && result && typeof result === "object") {
+      await applyLabelsFromResult(owner, repo, number, result, issue.labels);
 
-    // Apply assignment if ready and author is a contributor
-    if (result.ready === true && issue.user && issue.user.login) {
-      const isAuthorContributor = await isContributor(
-        owner,
-        repo,
-        issue.user.login
-      );
-      if (isAuthorContributor) {
-        await assignIssue(owner, repo, number, [issue.user.login]);
+      // Apply assignment if ready and author is a contributor
+      if (result.ready === true && issue.user && issue.user.login) {
+        const isAuthorContributor = await isContributor(
+          owner,
+          repo,
+          issue.user.login
+        );
+        if (isAuthorContributor) {
+          await assignIssue(owner, repo, number, [issue.user.login]);
+        }
       }
     }
+    console.log(
+      `#${number} PM review ${
+        skipped ? "skipped (missing key)" : "posted and labels applied"
+      }.`
+    );
+  } catch (error) {
+    console.error(error);
+    process.exitCode = 1;
   }
-  console.log(
-    `#${number} PM review ${
-      skipped ? "skipped (missing key)" : "posted and labels applied"
-    }.`
-  );
 }
 
 async function listLabels(owner, repo) {
@@ -314,37 +326,13 @@ async function applyLabelsFromResult(
 ) {
   const current = toNameSet(existingLabels);
 
+  // Apply exactly what the AI returned - no business logic here
   const adds = new Set(
     Array.isArray(result?.labels?.add) ? result.labels.add : []
   );
   const removes = new Set(
     Array.isArray(result?.labels?.remove) ? result.labels.remove : []
   );
-
-  // Derived labels from fields
-  if (result?.size && ["small", "medium", "large"].includes(result.size)) {
-    adds.add(`size:${result.size}`);
-  }
-  if (Number.isFinite(result?.priorityScore)) {
-    const score = Math.max(0, Math.min(100, Math.round(result.priorityScore)));
-    adds.add(`priority:${score}`);
-  }
-  if (result?.independence && ["high", "low"].includes(result.independence)) {
-    adds.add(`independence:${result.independence}`);
-    if (result.independence === "high") adds.add("independent");
-  }
-  if (
-    result?.riskLevel &&
-    ["low", "medium", "high"].includes(result.riskLevel)
-  ) {
-    adds.add(`risk:${result.riskLevel}`);
-  }
-
-  // Enforce rule: issues that need work must NOT have needs-approval
-  if (result?.ready === false) {
-    removes.add("needs-approval");
-    adds.add("needs-clarification");
-  }
 
   // Ensure labels exist before setting
   const finalAdds = Array.from(adds).filter((n) => !current.has(n));

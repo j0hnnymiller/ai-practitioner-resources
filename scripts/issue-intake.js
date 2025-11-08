@@ -187,15 +187,12 @@ async function main() {
   const number = event?.issue?.number;
   if (!number) throw new Error("Issue number not found in event payload");
 
-  // Do not pre-create or force 'needs-approval'; PM review will decide labels.
-
   // Fetch current issue
   const issue = await getIssue(owner, repo, number);
   const labelSet = toNameSet(issue.labels);
 
-  const hasImplementationReady = [...labelSet].some(
-    (n) => n.toLowerCase() === "implementation ready"
-  );
+  // Detect test issues by **TI** prefix in title
+  const isTestIssue = issue.title && issue.title.includes("**TI**");
 
   // Optionally manage Project item/Status here (default off when Project workflows handle it)
   const manageProject = /^(1|true|yes)$/i.test(
@@ -203,11 +200,18 @@ async function main() {
   );
   if (manageProject) {
     const projectOwner = process.env.PROJECT_OWNER || owner;
-    const projectNumber = Number(process.env.PROJECT_NUMBER || 1);
+    // Route to test project (3) if **TI** in title, otherwise production (1)
+    const projectNumber = isTestIssue
+      ? 3
+      : Number(process.env.PROJECT_NUMBER || 1);
     const statusFieldName = process.env.PROJECT_STATUS_FIELD_NAME || "Status";
     const laneMapRaw = process.env.LANE_STATUS_MAP || "";
     const laneMap = laneMapRaw ? JSON.parse(laneMapRaw) : null;
     const benchName = laneMap?.["on the bench"] || "on the bench";
+
+    console.log(
+      `${isTestIssue ? "🧪 Test issue detected" : "📋 Production issue"} - routing to project #${projectNumber}`
+    );
 
     const project = await getProject(projectOwner, projectNumber);
     const statusField = findStatusField(project, statusFieldName);
@@ -247,3 +251,4 @@ main().catch((err) => {
   console.error(err);
   process.exitCode = 1;
 });
+                                                        
