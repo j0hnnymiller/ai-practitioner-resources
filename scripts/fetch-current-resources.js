@@ -126,6 +126,7 @@ async function fetchCurrentResources() {
 // Main execution
 async function main() {
   console.log("🚀 Fetch Current Resources Script\n");
+  await verifyGistToken();
   await fetchCurrentResources();
   console.log("\n✨ Done!\n");
 }
