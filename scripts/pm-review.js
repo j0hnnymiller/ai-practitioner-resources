@@ -90,6 +90,80 @@ function readPMGuidance() {
   }
 }
 
+async function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function callAnthropicWithRetry(url, payload, apiKey, maxRetries = 3) {
+  let lastError = null;
+
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      const res = await fetch(url, {
+        method: "POST",
+        headers: {
+          "x-api-key": apiKey,
+          "anthropic-version": "2023-06-01",
+          "content-type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) {
+        const text = await res.text();
+        const status = res.status;
+
+        // Don't retry on client errors (4xx) except rate limits (429)
+        if (status >= 400 && status < 500 && status !== 429) {
+          throw new Error(
+            `Anthropic API ${status} ${res.statusText}: ${text}`
+          );
+        }
+
+        // Retry on server errors (5xx) and rate limits (429)
+        lastError = new Error(
+          `Anthropic API ${status} ${res.statusText}: ${text}`
+        );
+
+        if (attempt < maxRetries) {
+          const backoffMs = Math.min(1000 * Math.pow(2, attempt - 1), 10000);
+          console.warn(
+            `Anthropic API error (attempt ${attempt}/${maxRetries}), retrying in ${backoffMs}ms...`
+          );
+          await sleep(backoffMs);
+          continue;
+        }
+        throw lastError;
+      }
+
+      return await res.json();
+    } catch (error) {
+      lastError = error;
+
+      // Don't retry on network errors that are likely permanent
+      if (
+        error.code === "ENOTFOUND" ||
+        error.code === "ECONNREFUSED" ||
+        error.message.includes("4")
+      ) {
+        throw error;
+      }
+
+      if (attempt < maxRetries) {
+        const backoffMs = Math.min(1000 * Math.pow(2, attempt - 1), 10000);
+        console.warn(
+          `Network error (attempt ${attempt}/${maxRetries}), retrying in ${backoffMs}ms: ${error.message}`
+        );
+        await sleep(backoffMs);
+        continue;
+      }
+      throw lastError;
+    }
+  }
+
+  throw lastError;
+}
+
 function readPMPrompt() {
   // Priority order: AI assistant mode > dedicated PM review > project manager mode
   const aiAssistant = path.resolve(
@@ -137,20 +211,11 @@ async function generatePMReview({ title, body, labelsText, url }) {
     messages: [{ role: "user", content: [{ type: "text", text: user }] }],
   };
 
-  const res1 = await fetch("https://api.anthropic.com/v1/messages", {
-    method: "POST",
-    headers: {
-      "x-api-key": apiKey,
-      "anthropic-version": "2023-06-01",
-      "content-type": "application/json",
-    },
-    body: JSON.stringify(payload1),
-  });
-  if (!res1.ok) {
-    const text = await res1.text();
-    throw new Error(`Anthropic API ${res1.status} ${res1.statusText}: ${text}`);
-  }
-  const data1 = await res1.json();
+  const data1 = await callAnthropicWithRetry(
+    "https://api.anthropic.com/v1/messages",
+    payload1,
+    apiKey
+  );
   const contentBlocks1 = data1?.content || [];
   const jsonText = contentBlocks1
     .map((b) => b?.text || "")
@@ -190,20 +255,11 @@ async function generatePMReview({ title, body, labelsText, url }) {
       },
     ],
   };
-  const res2 = await fetch("https://api.anthropic.com/v1/messages", {
-    method: "POST",
-    headers: {
-      "x-api-key": apiKey,
-      "anthropic-version": "2023-06-01",
-      "content-type": "application/json",
-    },
-    body: JSON.stringify(payload2),
-  });
-  if (!res2.ok) {
-    const text = await res2.text();
-    throw new Error(`Anthropic API ${res2.status} ${res2.statusText}: ${text}`);
-  }
-  const data2 = await res2.json();
+  const data2 = await callAnthropicWithRetry(
+    "https://api.anthropic.com/v1/messages",
+    payload2,
+    apiKey
+  );
   const contentBlocks2 = data2?.content || [];
   const content = contentBlocks2
     .map((b) => b?.text || "")
