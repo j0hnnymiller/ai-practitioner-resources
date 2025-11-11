@@ -93,23 +93,45 @@ Large issue handling
 
 Issue template conformance
 
-- **Analyze the issue body** to determine if it follows the appropriate template structure:
-  - Bug reports should include: bug description, steps to reproduce, expected behavior, actual behavior, environment
-  - Feature requests should include: feature description, implementation prompt, use cases, acceptance criteria
-  - UI/UX improvements should include: current state, proposed improvement, user benefit, design considerations
-  - Refactors should include: current implementation, proposed changes, benefits, risks
-- **If the issue body is poorly formatted or missing key sections:** set `reformattedBody` to a properly structured version that conforms to the template
+- **Analyze the issue body** to determine the issue type from content and labels, then apply the appropriate template structure:
+  - **Bug reports** (label: bug) - should include: bug description, steps to reproduce, expected behavior, actual behavior, environment, severity
+  - **Feature requests** (label: enhancement or feature) - should include: feature description, implementation prompt, use cases & benefits, acceptance criteria
+  - **Ideas** (label: idea) - should include: idea description, use cases, potential benefits, considerations
+  - **UI/UX improvements** - should include: current state, proposed improvement, user benefit, design considerations
+  - **Refactors** (label: refactor) - should include: current implementation, proposed changes, benefits, risks
+  
+- **If the issue body is poorly formatted or missing key sections:** set `reformattedBody` to a properly structured version that conforms to the correct template for that issue type
+
 - **Include all existing information** from the original body, just reorganized into proper template sections
+
 - **For missing required sections:** Provide helpful placeholder text that:
-  - Uses actual context from the issue (e.g., if issue mentions "data corruption on save", suggest steps like "1. Open the application 2. Enter data into form 3. Click Save button 4. Observe data corruption")
+  - Uses actual context from the issue (e.g., if issue mentions "integrate with calendar", suggest implementation like "Add calendar integration using Google Calendar API or similar")
   - Infers reasonable values based on the issue type and description
-  - Uses bracketed suggestions like `[Suggested: Critical - data loss is occurring]` or `[Based on description, likely: Chrome/Firefox/Safari on Desktop]`
+  - Uses bracketed suggestions like `[Suggested: Add calendar sync functionality with OAuth authentication]` or `[Based on description, could include: two-way sync, event notifications, conflict resolution]`
   - Helps the author understand what information is needed without leaving empty brackets
-- **For bug reports specifically:**
+
+- **Template-specific reformatting guidelines:**
+  
+  **For Bug Reports:**
   - Infer severity from keywords (crash/corruption/data loss = Critical; broken feature = High; visual issue = Medium/Low)
   - Suggest environment based on project type (web app = browser/OS; script = Node version/OS)
   - Provide example steps to reproduce based on the description
   - Add note at top: `> **Note:** This issue has been automatically reformatted to match the bug report template. Please review and update the suggested values below.`
+  
+  **For Feature Requests/Enhancements:**
+  - Extract feature description from existing text
+  - Generate implementation prompt with suggested technical approach
+  - Infer use cases from the description
+  - Provide acceptance criteria checkboxes with relevant items checked
+  - Add note at top: `> **Note:** This issue has been automatically reformatted to match the feature request template. Please review and expand the implementation prompt with more details.`
+  
+  **For Ideas:**
+  - Convert description into structured format
+  - Suggest potential implementation approaches
+  - Identify benefits and use cases
+  - Note considerations or challenges
+  - Add note at top: `> **Note:** This issue has been automatically reformatted. Please review and add more details about your idea.`
+
 - **If the body is already well-formatted:** set `reformattedBody` to null
 
 Notes
