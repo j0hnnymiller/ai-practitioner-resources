@@ -14,7 +14,7 @@ Requirements:
 | `fetch-current-resources.js`         | Download current resources JSON from the configured Gist            |
 | `generate-resources.js`              | Generate a new set of resources using the OpenAI API                |
 | `merge-and-update.js`                | Merge current and new resources, update `weeks_on_list`             |
-| `validate-schema.js`                 | Validate resources JSON against `schema.json` using Ajv             |
+| `validate-schema.js`                 | Validate resources JSON against `resources.schema.json` using Ajv             |
 | `update-gist.js`                     | Push current and timestamped resources to the target Gist           |
 | `create-summary.js`                  | Produce an automation summary with stats and insights               |
 | `create-issues-from-templates.js`    | Create GitHub issues from all templates in `.github/ISSUE_TEMPLATE` |

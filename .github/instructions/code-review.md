@@ -22,7 +22,7 @@ The project is a modern, modular web application for curating and displaying AI-
 ai-practitioner-resources/
 ├── index.html                    # Minimal HTML structure (187 lines)
 ├── styles.css                    # Extracted stylesheets (554 lines)
-├── schema.json                   # Resource data validation schema
+├── resources.schema.json                   # Resource data validation schema
 ├── package.json                  # Node.js dependencies and scripts
 ├── src/
 │   ├── app.js                   # Main application coordinator
@@ -124,7 +124,7 @@ ai-practitioner-resources/
 
 **✅ Resource Data:**
 
-- All resources must validate against `schema.json`
+- All resources must validate against `resources.schema.json`
 - HTML allowed in: introduction, analysis, legend fields
 - All required schema fields must be present
 - Score range: 60-100 (lower bounds indicate insufficient coverage)
@@ -353,7 +353,7 @@ main();
 
 1. **Backward compatibility** - Does it break existing data?
 2. **Validation** - Can validate with Ajv?
-3. **Documentation** - Updated `schema.json` comments?
+3. **Documentation** - Updated `resources.schema.json` comments?
 4. **Migration** - Is there a migration path if needed?
 
 ## Red Flags
@@ -405,6 +405,6 @@ main();
 
 - `src/README.md` - Comprehensive module documentation
 - `REFACTORING_SUMMARY.md` - Architecture overview and decisions
-- `schema.json` - Resource data validation rules
+- `resources.schema.json` - Resource data validation rules
 - `tests/example.test.js` - Testing examples for all module types
 - `.github/copilot-instructions.md` - Project-wide guidelines

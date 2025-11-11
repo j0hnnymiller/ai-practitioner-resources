@@ -17,7 +17,7 @@ The project uses a **GitHub Gist** as the data backend, with the web viewer fetc
 ```
 ai-practitioner-resources/
 ├── index.html                    # Main web viewer (static HTML/CSS/JS)
-├── schema.json                   # JSON schema for resource validation
+├── resources.schema.json         # JSON schema for resource validation
 ├── package.json                  # Node.js dependencies and scripts
 ├── .github/
 │   ├── workflows/                # GitHub Actions automation
@@ -106,7 +106,7 @@ npm run validate
 
 ### JSON
 
-- **Schema compliance**: All resource JSON must validate against `schema.json`
+- **Schema compliance**: All resource JSON must validate against `resources.schema.json`
 - **HTML in text fields**: Introduction, analysis, and legend support HTML formatting
 - **Required fields**: All fields defined in schema are required
 - **Score range**: Resource scores must be 60-100
@@ -186,7 +186,7 @@ Scripts require these environment variables:
 
 ### Adding a New Resource Type
 
-1. Update `schema.json` to include new type in enum
+1. Update `resources.schema.json` to include new type in enum
 2. Add type-specific styling in index.html if needed
 3. Test with `npm run validate`
 4. Update documentation if needed
@@ -208,7 +208,7 @@ Scripts require these environment variables:
 ### Modifying AI Prompts
 
 1. Prompts are in `.github/prompts/`
-2. Ensure generated output matches `schema.json`
+2. Ensure generated output matches `resources.schema.json`
 3. Test prompt changes with actual API calls
 4. Document any scoring framework changes
 
@@ -224,7 +224,7 @@ Scripts require these environment variables:
 
 ### Common Issues
 
-1. **JSON validation fails**: Check schema.json for required fields and data types
+1. **JSON validation fails**: Check resources.schema.json for required fields and data types
 2. **Gist update fails**: Verify GITHUB_GIST_TOKEN has gist scope
 3. **Local viewer doesn't load**: Check GIST_CONFIG URL and CORS settings
 4. **AI generation fails**: Verify OPENAI_API_KEY and API rate limits

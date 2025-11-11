@@ -4,7 +4,7 @@
  * Validate generated resources against JSON schema
  *
  * This script validates the merged resources JSON file against
- * the schema.json file to ensure data integrity before updating the gist.
+ * the resources.schema.json file to ensure data integrity before updating the gist.
  */
 
 const Ajv = require("ajv");
@@ -21,7 +21,7 @@ try {
 }
 
 // File paths
-const SCHEMA_PATH = path.join(__dirname, "..", "schema.json");
+const SCHEMA_PATH = path.join(__dirname, "..", "resources.schema.json");
 
 /**
  * Validate resources against schema

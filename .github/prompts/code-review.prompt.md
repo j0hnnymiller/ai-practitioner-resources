@@ -301,5 +301,5 @@ The AI Practitioner Resources project is a modern web application for curating A
 - **Standards**: `.github/instructions/code-review.md` - Code quality guidelines
 - **Tests**: `tests/example.test.js` - Testing patterns for all module types
 - **Automation**: `scripts/README.md` - Automation script patterns
-- **Schema**: `schema.json` - Resource validation rules
+- **Schema**: `resources.schema.json` - Resource validation rules
 - **Refactoring**: `REFACTORING_SUMMARY.md` - Architecture decisions

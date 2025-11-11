@@ -130,7 +130,9 @@ Effects               Mockable               Presentation
 
 ### Standards
 
-- `schema.json` - Data validation rules
+- `index.html` - Static web viewer
+- `resources.schema.json` - Data validation rules
+- `scripts/` - Automation scripts
 - `.github/copilot-instructions.md` - Project guidelines
 
 ---

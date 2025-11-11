@@ -35,7 +35,7 @@ Visit the live viewer at: **https://j0hnnymiller.github.io/ai-practitioner-resou
 ```
 ai-practitioner-resources/
 ├── index.html                          # Main web viewer
-├── schema.json                         # JSON schema for validation
+├── resources.schema.json                         # JSON schema for validation
 ├── package.json                        # Node.js dependencies
 ├── .github/
 │   ├── workflows/
@@ -224,7 +224,7 @@ const GIST_CONFIG = {
 
 ### Schema Validation
 
-Validate your JSON against `schema.json` to ensure compatibility:
+Validate your JSON against `resources.schema.json` to ensure compatibility:
 
 - All required fields present
 - Correct data types and formats

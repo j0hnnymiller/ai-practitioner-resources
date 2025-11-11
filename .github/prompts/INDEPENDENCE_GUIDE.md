@@ -78,7 +78,7 @@ function checkFileIndependence(issue1, issue2) {
 | **Shared Libraries** | `scripts/lib/*.js` | Low - affects multiple scripts |
 | **Workflows** | `.github/workflows/*.yml` | High - isolated workflows |
 | **Prompts** | `.github/prompts/*.md` | High - content only |
-| **Schema** | `schema.json` | Low - affects validation everywhere |
+| **Schema** | `resources.schema.json` | Low - affects validation everywhere |
 | **Configuration** | `package.json`, `.gitignore` | Low - global impact |
 
 **Examples:**
@@ -94,7 +94,7 @@ function checkFileIndependence(issue1, issue2) {
 - **Reason:** Isolated components
 
 ❌ **Dependent:**
-- Issue A: Add new field to `schema.json`
+- Issue A: Add new field to `resources.schema.json`
 - Issue B: Update validation in `scripts/validate-schema.js`
 - **Reason:** Schema changes affect validation logic
 

@@ -243,28 +243,36 @@ async function generatePMReview({ title, body, labelsText, url }) {
     // Normalize: ensure required fields exist
     // If size is large but needsSplit is missing, auto-set it
     if (parsed.size === "large" && parsed.needsSplit === undefined) {
-      console.log("⚠️  size:large detected but needsSplit is undefined. Auto-setting to true.");
+      console.log(
+        "⚠️  size:large detected but needsSplit is undefined. Auto-setting to true."
+      );
       parsed.needsSplit = true;
     }
-    
+
     // Ensure needsSplit field exists (default to false if missing and size is not large)
     if (parsed.needsSplit === undefined) {
       parsed.needsSplit = false;
     }
-    
+
     // Ensure subIssues field exists (default to empty array if missing)
     if (!Array.isArray(parsed.subIssues)) {
       parsed.subIssues = [];
     }
-    
+
     // If needsSplit is true but no subIssues provided, this is an error - log warning and disable splitting
     if (parsed.needsSplit === true && parsed.subIssues.length === 0) {
-      console.log("⚠️  WARNING: needsSplit is true but subIssues array is empty!");
-      console.log("    AI did not provide sub-issue breakdown. Disabling automatic splitting.");
-      console.log("    The human-readable comment should contain splitting recommendations.");
+      console.log(
+        "⚠️  WARNING: needsSplit is true but subIssues array is empty!"
+      );
+      console.log(
+        "    AI did not provide sub-issue breakdown. Disabling automatic splitting."
+      );
+      console.log(
+        "    The human-readable comment should contain splitting recommendations."
+      );
       parsed.needsSplit = false;
     }
-    
+
     // Ensure reformattedBody field exists (default to null if missing)
     if (parsed.reformattedBody === undefined) {
       parsed.reformattedBody = null;

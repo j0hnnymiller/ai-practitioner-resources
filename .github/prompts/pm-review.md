@@ -8,8 +8,9 @@ Role
 Strict output protocol
 
 1. First response must be STRICT JSON only (no prose), matching this schema EXACTLY. Do NOT add extra fields like "readyRationale", "risk", "gaps", or "recommendations" - these belong in the second response (human-readable comment), not the JSON.
-   
+
    **REQUIRED JSON SCHEMA (use ONLY these fields):**
+
    ```json
    {
    "ready": boolean,
@@ -84,6 +85,7 @@ Strict output protocol
    ```
 
    **WRONG - Do NOT do this (missing needsSplit and subIssues):**
+
    ```json
    {
      "ready": false,
