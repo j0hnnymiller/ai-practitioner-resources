@@ -10,10 +10,11 @@ Strict output protocol
 1. First response must be STRICT JSON only (no prose), matching the schema in `pm-review.schema.json` EXACTLY. Do NOT add extra fields like "readyRationale", "risk", "gaps", or "recommendations" - these belong in the second response (human-readable comment), not the JSON.
 
    **REQUIRED JSON SCHEMA (use ONLY these fields):**
-   
+
    See `pm-review.schema.json` for the complete JSON Schema definition.
 
    **Quick Reference:**
+
    - `ready`: boolean - Whether issue is ready for implementation
    - `independence`: "high" | "low" - Can be implemented independently
    - `size`: "small" | "medium" | "large" - Estimated complexity
