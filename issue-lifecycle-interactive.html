@@ -552,7 +552,7 @@ stateDiagram-v2
                     }
                 }
                 // Without Ctrl, normal scrolling happens naturally
-            });
+            }, { passive: true });
 
             function applyZoom() {
                 const mermaid = wrapper.querySelector('.mermaid');

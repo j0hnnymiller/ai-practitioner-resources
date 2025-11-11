@@ -79,213 +79,102 @@
 
       <div class="diagram-container">
         <div class="mermaid">
-stateDiagram-v2
-    [*] --> Issue_Created: User creates issue\nwith template
-
-    %% Initial State
-    Issue_Created: Issue Created
-
-    %% First Gate: Triage
-    Issue_Created --> Auto_Validation: Issue created
-    Auto_Validation: Auto Validation - Gate
-
-    Auto_Validation --> Validation_Failed: Validation fails
-    Validation_Failed: Validation Failed
-    Validation_Failed --> Needs_Details: Request details
-    Needs_Details: Needs Details
-    Needs_Details --> Auto_Validation: User updates
-    Needs_Details --> Auto_Abandoned: No response - 30d
-    Auto_Abandoned: Auto Abandoned
-    Auto_Abandoned --> [*]
-
-    Auto_Validation --> Backlog: Pass validation
-    Backlog: Backlog
-
-    %% Triage Stage
-    Backlog --> PM_Triage: To triage
-    PM_Triage: PM Review - Manual
-
-    PM_Triage --> Triage_Rejected: Reject
-    Triage_Rejected: Triage Rejected - Out of Scope
-    Triage_Rejected --> Closed_Rejected: Close
-    Closed_Rejected: Issue Rejected
-    Closed_Rejected --> [*]
-
-    PM_Triage --> Assigned_Lane: Assign lane
-    Assigned_Lane: Lane Assigned
-
-    %% Lane Assignment Logic
-    Assigned_Lane --> On_Bench: Low priority
-    On_Bench: On The Bench
-
-    Assigned_Lane --> In_Hole: With dependencies
-    In_Hole: In The Hole
-
-    Assigned_Lane --> On_Deck: Next in line
-    On_Deck: On The Deck
-
-    Assigned_Lane --> At_Bat: Ready now
-    At_Bat: At Bat
-
-    %% Bench Lane Flow
-    On_Bench --> Bench_Check: Monitor
-    Bench_Check: Bench - Waiting
-    Bench_Check --> Rebalance_Bench: Rebalance trigger
-    Rebalance_Bench: Rebalance
-    Rebalance_Bench --> In_Hole
-
-    %% In The Hole Flow
-    In_Hole --> Hole_Check: Monitor
-    Hole_Check: Hole - Waiting
-    Hole_Check --> Rebalance_Hole: Rebalance trigger
-    Rebalance_Hole: Rebalance
-    Rebalance_Hole --> On_Deck
-
-    %% On The Deck Flow
-    On_Deck --> Deck_Check: Monitor
-    Deck_Check: Deck - Waiting
-    Deck_Check --> Rebalance_Deck: Rebalance trigger
-    Rebalance_Deck: Rebalance
-    Rebalance_Deck --> At_Bat
-
-    %% At Bat Implementation
-    At_Bat --> AC_Check: Verify AC
-    AC_Check: At Bat - AC Check
-    AC_Check --> Dev_Assigned: AC Ready
-    AC_Check --> Needs_Prep: AC Needed
-    Needs_Prep: Needs Preparation
-    Needs_Prep --> AC_Check
-    Dev_Assigned: Development Started
-
-    %% Implementation Flow
-    Dev_Assigned --> Dev_In_Progress: Create branch
-    Dev_In_Progress: In Development
-
-    Dev_In_Progress --> PR_Created: Create PR
-    PR_Created: PR Created
-
-    PR_Created --> Stage_1_PR_Format: Validate format
-    Stage_1_PR_Format: Stage 1 - PR Format Check
-
-    Stage_1_PR_Format --> Stage_1_Fail: Invalid
-    Stage_1_Fail: PR Format Failed
-    Stage_1_Fail --> Needs_PR_Update: Update PR
-    Needs_PR_Update: Needs PR Update
-    Needs_PR_Update --> Stage_1_PR_Format
-
-    Stage_1_PR_Format --> Stage_2_AI_Review: Valid - Start review
-    Stage_2_AI_Review: Stage 2 - Copilot Code Review
-
-    %% Multi-Round Review
-    Stage_2_AI_Review --> Review_R1: Begin review
-    Review_R1: AI Review - Round 1
-    Review_R1 --> Check_R1: Evaluate
-    Check_R1: Review Decision R1
-    Check_R1 --> AI_Comments_R1: Issues found
-    Check_R1 --> AI_Approved_R1: No issues
-    AI_Comments_R1: AI Review - Issues Found
-    AI_Comments_R1 --> Auto_Fix_Attempt: Auto fix
-    Auto_Fix_Attempt: Auto-Fix Attempt - R1 of 3
-    Auto_Fix_Attempt --> Re_Review_R1: Re-review
-    Re_Review_R1: Stage 2 - Code Review - R2 of 3
-    Re_Review_R1 --> Check_R2: Evaluate
-    Check_R2: Review Decision R2
-    Check_R2 --> AI_Comments_R2: Issues found
-    Check_R2 --> AI_Approved_R2: No issues
-
-    AI_Comments_R2: AI Review - Issues Found
-    AI_Comments_R2 --> Auto_Fix_Attempt_2: Auto fix
-    Auto_Fix_Attempt_2: Auto-Fix Attempt - R2 of 3
-    Auto_Fix_Attempt_2 --> Re_Review_R2: Re-review
-    Re_Review_R2: Stage 2 - Code Review - R3 of 3
-    Re_Review_R2 --> Check_R3: Evaluate
-    Check_R3: Review Decision R3
-    Check_R3 --> AI_Comments_R3: Issues remain
-    Check_R3 --> AI_Approved_R3: No issues
-
-    AI_Comments_R3: AI Review - Issues Found
-    AI_Comments_R3 --> Escalation_Decision: Escalate after R3
-    Escalation_Decision: Escalation Logic
-    Escalation_Decision --> Auto_Assign_Maintainer: Assign to human
-    Auto_Assign_Maintainer: Assigned to Maintainer
-    Auto_Assign_Maintainer --> Stage_5_Escalated
-
-    AI_Approved_R2 --> Stage_3_Acceptance
-    AI_Approved_R1 --> Stage_3_Acceptance
-    AI_Approved_R3 --> Stage_3_Acceptance
-
-    %% Stage 3: Acceptance Criteria
-    Stage_3_Acceptance: Stage 3 - Acceptance Criteria
-    Stage_3_Acceptance --> AC_Check: Verify
-    AC_Check: AC Check
-    AC_Check --> AC_Failed: Not met
-    AC_Check --> Stage_4_CI_CD: Met
-    AC_Failed: AC Failed
-    AC_Failed --> AC_Needs_Update: Update
-    AC_Needs_Update: Needs AC Update
-    AC_Needs_Update --> AC_Check
-
-    %% Stage 4: CI/CD
-    Stage_4_CI_CD: Stage 4 - CI/CD Checks
-    Stage_4_CI_CD --> CI_Check: Run tests
-    CI_Check: CI Check
-    CI_Check --> CI_Failed: Failed
-    CI_Check --> Stage_5_Human: Passed
-    CI_Failed: CI/CD Failed
-    CI_Failed --> CI_Needs_Fix: Fix
-    CI_Needs_Fix: Needs CI/CD Fix
-    CI_Needs_Fix --> CI_Check
-
-    %% Stage 5: Human Approval
-    Stage_5_Human: Stage 5 - Human Approval - Manual
-    Stage_5_Escalated: Stage 5 - Human Approval - Escalated
-
-    Stage_5_Human --> Maintainer_Review: Begin review
-    Maintainer_Review: Maintainer Review
-    Maintainer_Review --> Review_Decision: Decide
-    Review_Decision: Approval Decision
-    Review_Decision --> Approval_Rejected: Request changes
-    Review_Decision --> Stage_6_Merge: Approve
-
-    Stage_5_Escalated --> Maintainer_Review_Esc: Review escalated
-    Maintainer_Review_Esc: Maintainer Review - Escalated
-    Maintainer_Review_Esc --> Review_Decision_Esc: Decide
-    Review_Decision_Esc: Escalation Approval Decision
-    Review_Decision_Esc --> Approval_Rejected_Esc: Reject
-    Review_Decision_Esc --> Stage_6_Merge: Approve
-
-    Approval_Rejected: Changes Requested
-    Approval_Rejected --> Dev_Updates: Developer updates
-    Dev_Updates: Awaiting Updates
-    Dev_Updates --> Maintainer_Review
-
-    Approval_Rejected_Esc: Rejected by Maintainer
-    Approval_Rejected_Esc --> PR_Closed_Rejected: Close PR
-    PR_Closed_Rejected: PR Rejected
-    PR_Closed_Rejected --> Closed_Failed: Redesign needed
-    Closed_Failed: Issue Rejected - Design
-    Closed_Failed --> [*]
-
-    %% Stage 6: Merge
-    Stage_6_Merge: Stage 6 - Merge to Main
-    Stage_6_Merge --> Auto_Merge: Merge
-    Auto_Merge: Merging...
-    Auto_Merge --> Merged_Success: Merged
-    Merged_Success: PR Merged
-    Merged_Success --> Issue_Complete: Complete
-    Issue_Complete: Issue Complete
-
-    %% Close Issue
-    Issue_Complete --> Close_Issue: Close
-    Close_Issue: Issue Closed - Completed
-    Close_Issue --> [*]
-
-    %% Alternative: Manual Close
-    At_Bat --> Manual_Close_Check: Manual close?
-    Manual_Close_Check: Manual Close Check
-    Manual_Close_Check --> Manual_Completed: Close manually
-    Manual_Completed: Issue Closed - Manual
-    Manual_Completed --> [*]
+          stateDiagram-v2 [*] --> Issue_Created: User creates issue\nwith
+          template %% Initial State Issue_Created: Issue Created %% First Gate:
+          Triage Issue_Created --> Auto_Validation: Issue created
+          Auto_Validation: Auto Validation - Gate Auto_Validation -->
+          Validation_Failed: Validation fails Validation_Failed: Validation
+          Failed Validation_Failed --> Needs_Details: Request details
+          Needs_Details: Needs Details Needs_Details --> Auto_Validation: User
+          updates Needs_Details --> Auto_Abandoned: No response - 30d
+          Auto_Abandoned: Auto Abandoned Auto_Abandoned --> [*] Auto_Validation
+          --> Backlog: Pass validation Backlog: Backlog %% Triage Stage Backlog
+          --> PM_Triage: To triage PM_Triage: PM Review - Manual PM_Triage -->
+          Triage_Rejected: Reject Triage_Rejected: Triage Rejected - Out of
+          Scope Triage_Rejected --> Closed_Rejected: Close Closed_Rejected:
+          Issue Rejected Closed_Rejected --> [*] PM_Triage --> Assigned_Lane:
+          Assign lane Assigned_Lane: Lane Assigned %% Lane Assignment Logic
+          Assigned_Lane --> On_Bench: Low priority On_Bench: On The Bench
+          Assigned_Lane --> In_Hole: With dependencies In_Hole: In The Hole
+          Assigned_Lane --> On_Deck: Next in line On_Deck: On The Deck
+          Assigned_Lane --> At_Bat: Ready now At_Bat: At Bat %% Bench Lane Flow
+          On_Bench --> Bench_Check: Monitor Bench_Check: Bench - Waiting
+          Bench_Check --> Rebalance_Bench: Rebalance trigger Rebalance_Bench:
+          Rebalance Rebalance_Bench --> In_Hole %% In The Hole Flow In_Hole -->
+          Hole_Check: Monitor Hole_Check: Hole - Waiting Hole_Check -->
+          Rebalance_Hole: Rebalance trigger Rebalance_Hole: Rebalance
+          Rebalance_Hole --> On_Deck %% On The Deck Flow On_Deck --> Deck_Check:
+          Monitor Deck_Check: Deck - Waiting Deck_Check --> Rebalance_Deck:
+          Rebalance trigger Rebalance_Deck: Rebalance Rebalance_Deck --> At_Bat
+          %% At Bat Implementation At_Bat --> AC_Check: Verify AC AC_Check: At
+          Bat - AC Check AC_Check --> Dev_Assigned: AC Ready AC_Check -->
+          Needs_Prep: AC Needed Needs_Prep: Needs Preparation Needs_Prep -->
+          AC_Check Dev_Assigned: Development Started %% Implementation Flow
+          Dev_Assigned --> Dev_In_Progress: Create branch Dev_In_Progress: In
+          Development Dev_In_Progress --> PR_Created: Create PR PR_Created: PR
+          Created PR_Created --> Stage_1_PR_Format: Validate format
+          Stage_1_PR_Format: Stage 1 - PR Format Check Stage_1_PR_Format -->
+          Stage_1_Fail: Invalid Stage_1_Fail: PR Format Failed Stage_1_Fail -->
+          Needs_PR_Update: Update PR Needs_PR_Update: Needs PR Update
+          Needs_PR_Update --> Stage_1_PR_Format Stage_1_PR_Format -->
+          Stage_2_AI_Review: Valid - Start review Stage_2_AI_Review: Stage 2 -
+          Copilot Code Review %% Multi-Round Review Stage_2_AI_Review -->
+          Review_R1: Begin review Review_R1: AI Review - Round 1 Review_R1 -->
+          Check_R1: Evaluate Check_R1: Review Decision R1 Check_R1 -->
+          AI_Comments_R1: Issues found Check_R1 --> AI_Approved_R1: No issues
+          AI_Comments_R1: AI Review - Issues Found AI_Comments_R1 -->
+          Auto_Fix_Attempt: Auto fix Auto_Fix_Attempt: Auto-Fix Attempt - R1 of
+          3 Auto_Fix_Attempt --> Re_Review_R1: Re-review Re_Review_R1: Stage 2 -
+          Code Review - R2 of 3 Re_Review_R1 --> Check_R2: Evaluate Check_R2:
+          Review Decision R2 Check_R2 --> AI_Comments_R2: Issues found Check_R2
+          --> AI_Approved_R2: No issues AI_Comments_R2: AI Review - Issues Found
+          AI_Comments_R2 --> Auto_Fix_Attempt_2: Auto fix Auto_Fix_Attempt_2:
+          Auto-Fix Attempt - R2 of 3 Auto_Fix_Attempt_2 --> Re_Review_R2:
+          Re-review Re_Review_R2: Stage 2 - Code Review - R3 of 3 Re_Review_R2
+          --> Check_R3: Evaluate Check_R3: Review Decision R3 Check_R3 -->
+          AI_Comments_R3: Issues remain Check_R3 --> AI_Approved_R3: No issues
+          AI_Comments_R3: AI Review - Issues Found AI_Comments_R3 -->
+          Escalation_Decision: Escalate after R3 Escalation_Decision: Escalation
+          Logic Escalation_Decision --> Auto_Assign_Maintainer: Assign to human
+          Auto_Assign_Maintainer: Assigned to Maintainer Auto_Assign_Maintainer
+          --> Stage_5_Escalated AI_Approved_R2 --> Stage_3_Acceptance
+          AI_Approved_R1 --> Stage_3_Acceptance AI_Approved_R3 -->
+          Stage_3_Acceptance %% Stage 3: Acceptance Criteria Stage_3_Acceptance:
+          Stage 3 - Acceptance Criteria Stage_3_Acceptance --> AC_Check: Verify
+          AC_Check: AC Check AC_Check --> AC_Failed: Not met AC_Check -->
+          Stage_4_CI_CD: Met AC_Failed: AC Failed AC_Failed --> AC_Needs_Update:
+          Update AC_Needs_Update: Needs AC Update AC_Needs_Update --> AC_Check
+          %% Stage 4: CI/CD Stage_4_CI_CD: Stage 4 - CI/CD Checks Stage_4_CI_CD
+          --> CI_Check: Run tests CI_Check: CI Check CI_Check --> CI_Failed:
+          Failed CI_Check --> Stage_5_Human: Passed CI_Failed: CI/CD Failed
+          CI_Failed --> CI_Needs_Fix: Fix CI_Needs_Fix: Needs CI/CD Fix
+          CI_Needs_Fix --> CI_Check %% Stage 5: Human Approval Stage_5_Human:
+          Stage 5 - Human Approval - Manual Stage_5_Escalated: Stage 5 - Human
+          Approval - Escalated Stage_5_Human --> Maintainer_Review: Begin review
+          Maintainer_Review: Maintainer Review Maintainer_Review -->
+          Review_Decision: Decide Review_Decision: Approval Decision
+          Review_Decision --> Approval_Rejected: Request changes Review_Decision
+          --> Stage_6_Merge: Approve Stage_5_Escalated -->
+          Maintainer_Review_Esc: Review escalated Maintainer_Review_Esc:
+          Maintainer Review - Escalated Maintainer_Review_Esc -->
+          Review_Decision_Esc: Decide Review_Decision_Esc: Escalation Approval
+          Decision Review_Decision_Esc --> Approval_Rejected_Esc: Reject
+          Review_Decision_Esc --> Stage_6_Merge: Approve Approval_Rejected:
+          Changes Requested Approval_Rejected --> Dev_Updates: Developer updates
+          Dev_Updates: Awaiting Updates Dev_Updates --> Maintainer_Review
+          Approval_Rejected_Esc: Rejected by Maintainer Approval_Rejected_Esc
+          --> PR_Closed_Rejected: Close PR PR_Closed_Rejected: PR Rejected
+          PR_Closed_Rejected --> Closed_Failed: Redesign needed Closed_Failed:
+          Issue Rejected - Design Closed_Failed --> [*] %% Stage 6: Merge
+          Stage_6_Merge: Stage 6 - Merge to Main Stage_6_Merge --> Auto_Merge:
+          Merge Auto_Merge: Merging... Auto_Merge --> Merged_Success: Merged
+          Merged_Success: PR Merged Merged_Success --> Issue_Complete: Complete
+          Issue_Complete: Issue Complete %% Close Issue Issue_Complete -->
+          Close_Issue: Close Close_Issue: Issue Closed - Completed Close_Issue
+          --> [*] %% Alternative: Manual Close At_Bat --> Manual_Close_Check:
+          Manual close? Manual_Close_Check: Manual Close Check
+          Manual_Close_Check --> Manual_Completed: Close manually
+          Manual_Completed: Issue Closed - Manual Manual_Completed --> [*]
         </div>
       </div>
 
@@ -326,6 +215,7 @@ stateDiagram-v2
 
     <script>
       mermaid.initialize({ startOnLoad: true, theme: "default" });
+      mermaid.contentLoaded();
     </script>
   </body>
 </html>

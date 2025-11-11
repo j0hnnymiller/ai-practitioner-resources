@@ -512,7 +512,7 @@ stateDiagram-v2
 
         <!-- Info Panel -->
         <div class="info-panel">
-            <strong>💡 Tip:</strong> Use your mouse to pan (click & drag), scroll wheel or buttons to zoom. Press <strong>Ctrl++</strong> to zoom in, <strong>Ctrl+Minus</strong> to zoom out.
+            <strong>💡 Tip:</strong> Use your mouse to pan (click & drag), scroll wheel or buttons to zoom. Press <strong>Ctrl+Plus</strong> to zoom in, <strong>Ctrl+Minus</strong> to zoom out.
             <div class="help-text">
                 ↕️ Drag to pan | 🔍 Scroll to zoom | Double-click to center | <strong>40+ states</strong> | <strong>7 gates</strong> | <strong>10+ paths</strong>
             </div>
@@ -555,7 +555,7 @@ stateDiagram-v2
                     svg.style.width = 'auto';
                     svg.style.height = 'auto';
                     
-                    // Initialize panzoom on the SVG element
+                    // Initialize panzoom on the mermaid div, not the SVG
                     panzoomInstance = panzoom(svg, {
                         maxZoom: 5,
                         minZoom: 0.3,
