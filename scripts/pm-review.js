@@ -239,6 +239,14 @@ async function generatePMReview({ title, body, labelsText, url }) {
     // Extract JSON if wrapped in fences
     const match = jsonText.match(/\{[\s\S]*\}/);
     parsed = match ? JSON.parse(match[0]) : JSON.parse(jsonText);
+    
+    // Debug logging: output the parsed JSON structure
+    console.log("=== PM REVIEW JSON DEBUG ===");
+    console.log("Full parsed JSON:", JSON.stringify(parsed, null, 2));
+    console.log("needsSplit:", parsed.needsSplit);
+    console.log("subIssues array length:", Array.isArray(parsed.subIssues) ? parsed.subIssues.length : "not an array");
+    console.log("reformattedBody:", parsed.reformattedBody ? "present" : "null");
+    console.log("=== END DEBUG ===");
   } catch (e) {
     throw new Error(
       "Failed to parse PM review JSON: " + e.message + "\nText: " + jsonText
