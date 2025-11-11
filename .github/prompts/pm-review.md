@@ -17,15 +17,15 @@ Strict output protocol
    "parallelSafety": "safe" | "unsafe" | "unclear",
    "labels": { "add": string[], "remove": string[] },
    "assignees": string[], // if ready=true and author is contributor, include [author]. Otherwise empty.
-   "needsSplit": boolean, // true if size is large and should be split into sub-issues
-   "subIssues": [ // array of sub-issues (only if needsSplit=true)
+   "needsSplit": boolean, // true if size is large and should be split into sub-issues. When true, reformattedBody MUST be null.
+   "subIssues": [ // array of sub-issues (only if needsSplit=true). Empty array if needsSplit=false.
    {
-   "title": string, // title for the sub-issue
-   "body": string, // body/description for the sub-issue
-   "labels": string[] // labels to apply to the sub-issue
+   "title": string, // descriptive title for the sub-issue, include parent context
+   "body": string, // body/description for the sub-issue with acceptance criteria
+   "labels": string[] // labels to apply to the sub-issue (e.g., ["size:small", "enhancement", "implementation ready"])
    }
    ],
-   "reformattedBody": string | null // if issue body doesn't conform to template, provide properly formatted version. null if no reformatting needed.
+   "reformattedBody": string | null // if issue body doesn't conform to template, provide properly formatted version. null if no reformatting needed OR if needsSplit=true (splitting takes precedence).
    }
 
    **Important:** You will receive existing labels in the issue context. Review them carefully and:
@@ -86,46 +86,56 @@ Decision rubric (use as internal guidance)
 Large issue handling
 
 - **If size is "large":** set `needsSplit: true` and provide 2-5 sub-issues in the `subIssues` array.
+- **When `needsSplit: true`:** ALWAYS set `reformattedBody` to null - splitting takes precedence over reformatting.
 - Each sub-issue should be independently implementable with clear scope.
-- Sub-issues should reference the parent issue number in their body.
-- The parent issue will be labeled `needs-review` and remain on the bench until split is complete.
-- Sub-issues should have appropriate labels (size:small or size:medium, type labels, etc.).
+- Sub-issue titles should be descriptive and include the parent context (e.g., "2FA - TOTP Setup UI" not just "Setup UI").
+- Sub-issue bodies should include:
+  - Clear description of the specific component/feature
+  - Acceptance criteria specific to that sub-issue
+  - Reference to parent issue: `**Parent Issue:** #<number>`
+- The parent issue will be labeled `needs-review` and remain open for tracking until all sub-issues are complete.
+- Sub-issues should have appropriate labels (size:small or size:medium, type labels, independence:high, implementation ready, etc.).
 
 Issue template conformance
 
 - **Analyze the issue body** to determine the issue type from content and labels, then apply the appropriate template structure:
+
   - **Bug reports** (label: bug) - should include: bug description, steps to reproduce, expected behavior, actual behavior, environment, severity
   - **Feature requests** (label: enhancement or feature) - should include: feature description, implementation prompt, use cases & benefits, acceptance criteria
   - **Ideas** (label: idea) - should include: idea description, use cases, potential benefits, considerations
   - **UI/UX improvements** - should include: current state, proposed improvement, user benefit, design considerations
   - **Refactors** (label: refactor) - should include: current implementation, proposed changes, benefits, risks
-  
+
 - **If the issue body is poorly formatted or missing key sections:** set `reformattedBody` to a properly structured version that conforms to the correct template for that issue type
 
 - **Include all existing information** from the original body, just reorganized into proper template sections
 
 - **For missing required sections:** Provide helpful placeholder text that:
+
   - Uses actual context from the issue (e.g., if issue mentions "integrate with calendar", suggest implementation like "Add calendar integration using Google Calendar API or similar")
   - Infers reasonable values based on the issue type and description
   - Uses bracketed suggestions like `[Suggested: Add calendar sync functionality with OAuth authentication]` or `[Based on description, could include: two-way sync, event notifications, conflict resolution]`
   - Helps the author understand what information is needed without leaving empty brackets
 
 - **Template-specific reformatting guidelines:**
-  
+
   **For Bug Reports:**
+
   - Infer severity from keywords (crash/corruption/data loss = Critical; broken feature = High; visual issue = Medium/Low)
   - Suggest environment based on project type (web app = browser/OS; script = Node version/OS)
   - Provide example steps to reproduce based on the description
   - Add note at top: `> **Note:** This issue has been automatically reformatted to match the bug report template. Please review and update the suggested values below.`
-  
+
   **For Feature Requests/Enhancements:**
+
   - Extract feature description from existing text
   - Generate implementation prompt with suggested technical approach
   - Infer use cases from the description
   - Provide acceptance criteria checkboxes with relevant items checked
   - Add note at top: `> **Note:** This issue has been automatically reformatted to match the feature request template. Please review and expand the implementation prompt with more details.`
-  
+
   **For Ideas:**
+
   - Convert description into structured format
   - Suggest potential implementation approaches
   - Identify benefits and use cases
