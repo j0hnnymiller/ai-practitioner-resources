@@ -9,6 +9,7 @@ The test automation creates real GitHub issues and simulates their progression t
 ## Test Coverage
 
 ### Issue Types Tested
+
 - ✓ Bug reports
 - ✓ Feature requests
 - ✓ UI/UX improvements
@@ -17,6 +18,7 @@ The test automation creates real GitHub issues and simulates their progression t
 - ✓ Contributor requests
 
 ### States Tested
+
 - ✓ Issue Created
 - ✓ Auto Validation (pass/fail)
 - ✓ Backlog
@@ -27,6 +29,7 @@ The test automation creates real GitHub issues and simulates their progression t
 - ✓ Closure states
 
 ### Transitions Tested
+
 - ✓ Happy path (complete flow from creation to merge)
 - ✓ Validation failure → details needed → retry
 - ✓ PM rejection (triage rejected)
@@ -40,6 +43,7 @@ The test automation creates real GitHub issues and simulates their progression t
 - ✓ AI review escalation to human
 
 ### Gates Tested
+
 - ✓ Gate 1: Auto Validation
 - ✓ Gate 2: PM Triage (Manual)
 - ✓ Gate 3: PR Format Check (Stage 1)
@@ -51,44 +55,58 @@ The test automation creates real GitHub issues and simulates their progression t
 ## Test Scenarios
 
 ### 1. Happy Path
+
 Complete flow from issue creation through all gates to successful merge and closure.
 
 ### 2. Validation Failure
+
 Tests the validation failure → needs details → user updates → retry flow.
 
 ### 3. PM Rejection
+
 Tests triage rejection for out-of-scope issues.
 
 ### 4. Lane Progression
+
 Tests movement through all lanes: on bench → in hole → on deck → at bat.
 
 ### 5. PR Format Failure
+
 Tests PR format validation failure and correction.
 
 ### 6. AI Review Multiple Rounds
+
 Tests AI code review with multiple fix iterations (up to 3 rounds).
 
 ### 7. Acceptance Criteria Failure
+
 Tests AC check failure and subsequent fix.
 
 ### 8. CI/CD Failure
+
 Tests CI/CD pipeline failure and fix cycle.
 
 ### 9. Maintainer Requests Changes
+
 Tests human review feedback loop with change requests.
 
 ### 10. Manual Completion
+
 Tests manual issue closure without PR (e.g., documentation, discussion).
 
 ### 11. AI Review Escalation
+
 Tests escalation to human maintainer after 3 AI review rounds.
 
 ### 12. Different Issue Types
+
 Tests various issue types (UI/UX, resource, contributor) through lifecycle.
 
 ## Usage
 
 ### Prerequisites
+
+**Unix/Linux/macOS:**
 
 ```bash
 # Set GitHub token with appropriate permissions
@@ -99,18 +117,56 @@ export GITHUB_TOKEN="ghp_your_token_here"
 # - issues (read/write)
 ```
 
+**Windows PowerShell:**
+
+```powershell
+# Set GitHub token with appropriate permissions
+$env:GITHUB_TOKEN="ghp_your_token_here"
+
+# Token needs these permissions:
+# - repo (full control)
+# - issues (read/write)
+```
+
+**Windows Command Prompt:**
+
+```cmd
+REM Set GitHub token with appropriate permissions
+set GITHUB_TOKEN=ghp_your_token_here
+
+REM Token needs these permissions:
+REM - repo (full control)
+REM - issues (read/write)
+```
+
 ### Dry Run (Recommended First)
 
 Test without creating real issues:
+
+**Cross-platform (npm script):**
 
 ```bash
 npm run test-lifecycle-dry
 ```
 
-or
+**Alternative methods:**
+
+Unix/Linux/macOS:
 
 ```bash
 DRY_RUN=true node scripts/test-issue-lifecycle.js
+```
+
+Windows PowerShell:
+
+```powershell
+$env:DRY_RUN='true'; node scripts/test-issue-lifecycle.js
+```
+
+Windows Command Prompt:
+
+```cmd
+set DRY_RUN=true && node scripts/test-issue-lifecycle.js
 ```
 
 ### Live Run
@@ -129,33 +185,75 @@ node scripts/test-issue-lifecycle.js
 
 ### Environment Variables
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `GITHUB_TOKEN` | Required | GitHub personal access token |
-| `GITHUB_REPOSITORY` | `j0hnnymiller/ai-practitioner-resources` | Target repository |
-| `DRY_RUN` | `false` | Set to `true` to simulate without creating issues |
-| `CLEANUP_AFTER` | `true` | Set to `false` to keep test issues open |
-| `DELAY_MS` | `2000` | Delay in milliseconds between operations |
+| Variable            | Default                                  | Description                                       |
+| ------------------- | ---------------------------------------- | ------------------------------------------------- |
+| `GITHUB_TOKEN`      | Required                                 | GitHub personal access token                      |
+| `GITHUB_REPOSITORY` | `j0hnnymiller/ai-practitioner-resources` | Target repository                                 |
+| `DRY_RUN`           | `false`                                  | Set to `true` to simulate without creating issues |
+| `CLEANUP_AFTER`     | `true`                                   | Set to `false` to keep test issues open           |
+| `DELAY_MS`          | `2000`                                   | Delay in milliseconds between operations          |
 
 ### Examples
 
+**Cross-platform (using npm scripts with cross-env):**
+
 ```bash
 # Run in dry-run mode
-DRY_RUN=true npm run test-lifecycle
+npm run test-lifecycle-dry
+
+# Run live test
+npm run test-lifecycle
+```
+
+**Unix/Linux/macOS (direct command):**
+
+```bash
+# Run in dry-run mode
+DRY_RUN=true node scripts/test-issue-lifecycle.js
 
 # Run with custom delay
-DELAY_MS=5000 npm run test-lifecycle
+DELAY_MS=5000 node scripts/test-issue-lifecycle.js
 
 # Run without cleanup (keep issues open)
-CLEANUP_AFTER=false npm run test-lifecycle
+CLEANUP_AFTER=false node scripts/test-issue-lifecycle.js
 
 # Run against different repository
-GITHUB_REPOSITORY="owner/repo" npm run test-lifecycle
+GITHUB_REPOSITORY="owner/repo" node scripts/test-issue-lifecycle.js
+```
+
+**Windows PowerShell:**
+
+```powershell
+# Run in dry-run mode
+$env:DRY_RUN='true'; node scripts/test-issue-lifecycle.js
+
+# Run with custom delay
+$env:DELAY_MS='5000'; node scripts/test-issue-lifecycle.js
+
+# Run without cleanup (keep issues open)
+$env:CLEANUP_AFTER='false'; node scripts/test-issue-lifecycle.js
+
+# Run against different repository
+$env:GITHUB_REPOSITORY='owner/repo'; node scripts/test-issue-lifecycle.js
+
+# Multiple environment variables
+$env:DRY_RUN='true'; $env:DELAY_MS='5000'; node scripts/test-issue-lifecycle.js
+```
+
+**Windows Command Prompt:**
+
+```cmd
+REM Run in dry-run mode
+set DRY_RUN=true && node scripts/test-issue-lifecycle.js
+
+REM Run with custom delay
+set DELAY_MS=5000 && node scripts/test-issue-lifecycle.js
 ```
 
 ## Output
 
 The script generates:
+
 1. **Console output** with real-time progress
 2. **Test report** saved to `automation-results/issue-lifecycle-test-{timestamp}.md`
 3. **Summary statistics** showing passed/failed scenarios
@@ -213,12 +311,14 @@ By default, all created test issues are closed after test completion. Use `CLEAN
 ### Simulated Actions
 
 The script simulates:
+
 - PR creation and updates (via comments)
 - Review feedback (AI and human)
 - Gate checks (format, AC, CI/CD)
 - State transitions
 
 These are simulated because:
+
 1. Creating real PRs would require branches and code changes
 2. AI reviews require actual PR code to review
 3. CI/CD requires actual test runs
@@ -232,6 +332,7 @@ The script includes configurable delays (`DELAY_MS`) between API calls to avoid 
 ### Error Handling
 
 If a scenario fails:
+
 - The error is captured in the test results
 - Subsequent scenarios continue running
 - Final exit code reflects overall pass/fail status
@@ -244,28 +345,47 @@ You can run this as part of CI/CD to validate the issue lifecycle:
 - name: Test Issue Lifecycle
   env:
     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    DRY_RUN: 'false'
-    CLEANUP_AFTER: 'true'
+    DRY_RUN: "false"
+    CLEANUP_AFTER: "true"
   run: npm run test-lifecycle
 ```
 
 ## Troubleshooting
 
 ### "GITHUB_TOKEN not set"
-Ensure you've exported the token: `export GITHUB_TOKEN="ghp_..."`
+
+**Unix/Linux/macOS:** `export GITHUB_TOKEN="ghp_..."`
+**Windows PowerShell:** `$env:GITHUB_TOKEN="ghp_..."`
+**Windows Command Prompt:** `set GITHUB_TOKEN=ghp_...`
 
 ### "Permission denied"
+
 Token needs `repo` scope with full control
 
 ### "Rate limit exceeded"
+
 Increase `DELAY_MS` or wait for rate limit reset
 
 ### "Issue creation failed"
+
 Check repository permissions and token validity
+
+### "'DRY_RUN' is not recognized as an internal or external command"
+
+This error occurs on Windows when using Unix-style environment variable syntax.
+
+**Solutions:**
+
+1. Use the npm script (recommended): `npm run test-lifecycle-dry`
+2. Use PowerShell syntax: `$env:DRY_RUN='true'; node scripts/test-issue-lifecycle.js`
+3. Use Command Prompt syntax: `set DRY_RUN=true && node scripts/test-issue-lifecycle.js`
+
+The npm scripts now use `cross-env` for cross-platform compatibility.
 
 ## Future Enhancements
 
 Potential additions:
+
 - GraphQL API integration for Projects v2 testing
 - Real PR creation and merging (requires branch management)
 - Webhook simulation for automated workflows
