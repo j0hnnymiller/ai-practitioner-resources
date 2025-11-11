@@ -239,13 +239,49 @@ async function generatePMReview({ title, body, labelsText, url }) {
     // Extract JSON if wrapped in fences
     const match = jsonText.match(/\{[\s\S]*\}/);
     parsed = match ? JSON.parse(match[0]) : JSON.parse(jsonText);
+
+    // Normalize: ensure required fields exist
+    // If size is large but needsSplit is missing, auto-set it
+    if (parsed.size === "large" && parsed.needsSplit === undefined) {
+      console.log("⚠️  size:large detected but needsSplit is undefined. Auto-setting to true.");
+      parsed.needsSplit = true;
+    }
     
+    // Ensure needsSplit field exists (default to false if missing and size is not large)
+    if (parsed.needsSplit === undefined) {
+      parsed.needsSplit = false;
+    }
+    
+    // Ensure subIssues field exists (default to empty array if missing)
+    if (!Array.isArray(parsed.subIssues)) {
+      parsed.subIssues = [];
+    }
+    
+    // If needsSplit is true but no subIssues provided, this is an error - log warning and disable splitting
+    if (parsed.needsSplit === true && parsed.subIssues.length === 0) {
+      console.log("⚠️  WARNING: needsSplit is true but subIssues array is empty!");
+      console.log("    AI did not provide sub-issue breakdown. Disabling automatic splitting.");
+      console.log("    The human-readable comment should contain splitting recommendations.");
+      parsed.needsSplit = false;
+    }
+    
+    // Ensure reformattedBody field exists (default to null if missing)
+    if (parsed.reformattedBody === undefined) {
+      parsed.reformattedBody = null;
+    }
+
     // Debug logging: output the parsed JSON structure
     console.log("=== PM REVIEW JSON DEBUG ===");
     console.log("Full parsed JSON:", JSON.stringify(parsed, null, 2));
     console.log("needsSplit:", parsed.needsSplit);
-    console.log("subIssues array length:", Array.isArray(parsed.subIssues) ? parsed.subIssues.length : "not an array");
-    console.log("reformattedBody:", parsed.reformattedBody ? "present" : "null");
+    console.log(
+      "subIssues array length:",
+      Array.isArray(parsed.subIssues) ? parsed.subIssues.length : "not an array"
+    );
+    console.log(
+      "reformattedBody:",
+      parsed.reformattedBody ? "present" : "null"
+    );
     console.log("=== END DEBUG ===");
   } catch (e) {
     throw new Error(
