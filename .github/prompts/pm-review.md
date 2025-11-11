@@ -7,31 +7,24 @@ Role
 
 Strict output protocol
 
-1. First response must be STRICT JSON only (no prose), matching this schema EXACTLY. Do NOT add extra fields like "readyRationale", "risk", "gaps", or "recommendations" - these belong in the second response (human-readable comment), not the JSON.
+1. First response must be STRICT JSON only (no prose), matching the schema in `pm-review.schema.json` EXACTLY. Do NOT add extra fields like "readyRationale", "risk", "gaps", or "recommendations" - these belong in the second response (human-readable comment), not the JSON.
 
    **REQUIRED JSON SCHEMA (use ONLY these fields):**
+   
+   See `pm-review.schema.json` for the complete JSON Schema definition.
 
-   ```json
-   {
-   "ready": boolean,
-   "independence": "high" | "low",
-   "size": "small" | "medium" | "large",
-   "priorityScore": number, // 0-100 integer
-   "riskLevel": "low" | "medium" | "high",
-   "parallelSafety": "safe" | "unsafe" | "unclear",
-   "labels": { "add": string[], "remove": string[] },
-   "assignees": string[], // if ready=true and author is contributor, include [author]. Otherwise empty.
-   "needsSplit": boolean, // REQUIRED FIELD. true if size is large and should be split into sub-issues. When true, reformattedBody MUST be null.
-   "subIssues": [ // REQUIRED FIELD. array of sub-issues (only if needsSplit=true). Empty array [] if needsSplit=false.
-   {
-   "title": string, // descriptive title for the sub-issue, include parent context
-   "body": string, // body/description for the sub-issue with acceptance criteria
-   "labels": string[] // labels to apply to the sub-issue (e.g., ["size:small", "enhancement", "implementation ready"])
-   }
-   ],
-   "reformattedBody": string | null // REQUIRED FIELD. if issue body doesn't conform to template, provide properly formatted version. null if no reformatting needed OR if needsSplit=true (splitting takes precedence).
-   }
-   ```
+   **Quick Reference:**
+   - `ready`: boolean - Whether issue is ready for implementation
+   - `independence`: "high" | "low" - Can be implemented independently
+   - `size`: "small" | "medium" | "large" - Estimated complexity
+   - `priorityScore`: 0-100 integer - Derived from impact, urgency, risk
+   - `riskLevel`: "low" | "medium" | "high" - Implementation risk
+   - `parallelSafety`: "safe" | "unsafe" | "unclear" - Can proceed in parallel
+   - `labels`: { add: string[], remove: string[] } - Label management
+   - `assignees`: string[] - GitHub usernames to assign (author if ready & contributor)
+   - `needsSplit`: boolean - REQUIRED. true if large and needs sub-issues
+   - `subIssues`: array - REQUIRED. Sub-issue objects (empty [] if needsSplit=false)
+   - `reformattedBody`: string | null - REQUIRED. Formatted body or null
 
    **CRITICAL: When you determine an issue should be split**, you MUST set `needsSplit: true` in the JSON and provide the `subIssues` array. Do NOT only mention splitting in your comment - the automation requires the structured JSON data.
 
