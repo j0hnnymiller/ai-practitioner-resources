@@ -28,6 +28,39 @@ Strict output protocol
    "reformattedBody": string | null // if issue body doesn't conform to template, provide properly formatted version. null if no reformatting needed OR if needsSplit=true (splitting takes precedence).
    }
 
+   **CRITICAL: When you determine an issue should be split**, you MUST set `needsSplit: true` in the JSON and provide the `subIssues` array. Do NOT only mention splitting in your comment - the automation requires the structured JSON data.
+
+   **Example of correct JSON for an issue that needs splitting:**
+   ```json
+   {
+     "ready": false,
+     "independence": "low",
+     "size": "large",
+     "priorityScore": 75,
+     "riskLevel": "high",
+     "parallelSafety": "unsafe",
+     "labels": {
+       "add": ["size:large", "needs-review", "feature", "priority:75", "independence:low", "risk:high"],
+       "remove": []
+     },
+     "assignees": [],
+     "needsSplit": true,
+     "subIssues": [
+       {
+         "title": "Profile Images - Backend Upload API + Storage",
+         "body": "## Description\n\nImplement backend API endpoint for profile image uploads with storage integration.\n\n## Acceptance Criteria\n\n- [ ] POST /api/users/:id/profile-image endpoint created\n- [ ] File upload handling with multipart/form-data\n- [ ] Storage integration (S3/local) configured\n- [ ] Return uploaded image URL\n\n**Parent Issue:** #94",
+         "labels": ["size:small", "feature", "implementation ready", "independence:high"]
+       },
+       {
+         "title": "Profile Images - Frontend UI Component",
+         "body": "## Description\n\nCreate frontend UI component for profile image upload.\n\n## Acceptance Criteria\n\n- [ ] Image upload button in profile settings\n- [ ] Image preview before upload\n- [ ] Progress indicator during upload\n- [ ] Display current profile image\n\n**Parent Issue:** #94",
+         "labels": ["size:small", "feature", "implementation ready", "independence:high"]
+       }
+     ],
+     "reformattedBody": null
+   }
+   ```
+
    **Important:** You will receive existing labels in the issue context. Review them carefully and:
 
    - Only add labels that are not already present
@@ -85,8 +118,10 @@ Decision rubric (use as internal guidance)
 
 Large issue handling
 
-- **If size is "large":** set `needsSplit: true` and provide 2-5 sub-issues in the `subIssues` array.
+- **If size is "large" OR if issue requires multiple distinct components/features:** set `needsSplit: true` and provide 2-5 sub-issues in the `subIssues` array.
+- **MANDATORY: Set both fields in JSON** - `needsSplit: true` AND populate the `subIssues` array with actual sub-issue objects. Do NOT just mention splitting in your comment.
 - **When `needsSplit: true`:** ALWAYS set `reformattedBody` to null - splitting takes precedence over reformatting.
+- **Set `ready: false`** when needsSplit is true - the parent issue is not ready until split.
 - Each sub-issue should be independently implementable with clear scope.
 - Sub-issue titles should be descriptive and include the parent context (e.g., "2FA - TOTP Setup UI" not just "Setup UI").
 - Sub-issue bodies should include:
