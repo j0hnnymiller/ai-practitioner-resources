@@ -24,7 +24,8 @@ Strict output protocol
    "body": string, // body/description for the sub-issue
    "labels": string[] // labels to apply to the sub-issue
    }
-   ]
+   ],
+   "reformattedBody": string | null // if issue body doesn't conform to template, provide properly formatted version. null if no reformatting needed.
    }
 
    **Important:** You will receive existing labels in the issue context. Review them carefully and:
@@ -89,6 +90,27 @@ Large issue handling
 - Sub-issues should reference the parent issue number in their body.
 - The parent issue will be labeled `needs-review` and remain on the bench until split is complete.
 - Sub-issues should have appropriate labels (size:small or size:medium, type labels, etc.).
+
+Issue template conformance
+
+- **Analyze the issue body** to determine if it follows the appropriate template structure:
+  - Bug reports should include: bug description, steps to reproduce, expected behavior, actual behavior, environment
+  - Feature requests should include: feature description, implementation prompt, use cases, acceptance criteria
+  - UI/UX improvements should include: current state, proposed improvement, user benefit, design considerations
+  - Refactors should include: current implementation, proposed changes, benefits, risks
+- **If the issue body is poorly formatted or missing key sections:** set `reformattedBody` to a properly structured version that conforms to the template
+- **Include all existing information** from the original body, just reorganized into proper template sections
+- **For missing required sections:** Provide helpful placeholder text that:
+  - Uses actual context from the issue (e.g., if issue mentions "data corruption on save", suggest steps like "1. Open the application 2. Enter data into form 3. Click Save button 4. Observe data corruption")
+  - Infers reasonable values based on the issue type and description
+  - Uses bracketed suggestions like `[Suggested: Critical - data loss is occurring]` or `[Based on description, likely: Chrome/Firefox/Safari on Desktop]`
+  - Helps the author understand what information is needed without leaving empty brackets
+- **For bug reports specifically:**
+  - Infer severity from keywords (crash/corruption/data loss = Critical; broken feature = High; visual issue = Medium/Low)
+  - Suggest environment based on project type (web app = browser/OS; script = Node version/OS)
+  - Provide example steps to reproduce based on the description
+  - Add note at top: `> **Note:** This issue has been automatically reformatted to match the bug report template. Please review and update the suggested values below.`
+- **If the body is already well-formatted:** set `reformattedBody` to null
 
 Notes
 

@@ -86,6 +86,13 @@ async function assignIssue(owner, repo, number, assignees) {
   });
 }
 
+async function updateIssueBody(owner, repo, number, body) {
+  await ghFetch(`/repos/${owner}/${repo}/issues/${number}`, {
+    method: "PATCH",
+    body: JSON.stringify({ body }),
+  });
+}
+
 function readPMGuidance() {
   try {
     const file = path.resolve(
@@ -344,6 +351,20 @@ async function main() {
         const parentLabels = toNameSet(issue.labels);
         parentLabels.add("needs-review");
         await setIssueLabels(owner, repo, number, Array.from(parentLabels));
+      }
+
+      // Handle issue body reformatting if needed
+      if (
+        result.reformattedBody &&
+        typeof result.reformattedBody === "string" &&
+        result.reformattedBody.trim().length > 0
+      ) {
+        console.log(
+          `Issue #${number} body will be reformatted to conform to template.`
+        );
+        await updateIssueBody(owner, repo, number, result.reformattedBody);
+        const reformatComment = `The issue description has been automatically reformatted to conform to the appropriate template structure for better clarity and consistency.`;
+        await addComment(owner, repo, number, reformatComment);
       }
 
       // Apply assignment if ready and author is a contributor
