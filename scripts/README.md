@@ -14,7 +14,7 @@ Requirements:
 | `fetch-current-resources.js`         | Download current resources JSON from the configured Gist            |
 | `generate-resources.js`              | Generate a new set of resources using the OpenAI API                |
 | `merge-and-update.js`                | Merge current and new resources, update `weeks_on_list`             |
-| `validate-schema.js`                 | Validate resources JSON against `resources.schema.json` using Ajv             |
+| `validate-schema.js`                 | Validate resources JSON against `resources.schema.json` using Ajv   |
 | `update-gist.js`                     | Push current and timestamped resources to the target Gist           |
 | `create-summary.js`                  | Produce an automation summary with stats and insights               |
 | `create-issues-from-templates.js`    | Create GitHub issues from all templates in `.github/ISSUE_TEMPLATE` |
@@ -22,7 +22,7 @@ Requirements:
 | `issue-intake.js`                    | Process issue intake for prompts/modes (supports AI-first workflow) |
 | `rebalance-lanes.js`                 | Rebalance Project 1 Status per PM mode rules (Projects v2)          |
 | `migrate-lanes-to-project-status.js` | One-off: convert lane labels to Project 1 Status (Projects v2)      |
-| `review-existing-issues.js`          | Re-run intake for all open issues as if newly opened                 |
+| `review-existing-issues.js`          | Re-run intake for all open issues as if newly opened                |
 | `create-issues-with-gh.ps1`          | PowerShell helper to create issues using GitHub CLI                 |
 
 Convenience npm scripts are defined in `package.json`:
