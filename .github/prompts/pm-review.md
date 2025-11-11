@@ -7,7 +7,10 @@ Role
 
 Strict output protocol
 
-1. First response must be STRICT JSON only (no prose), matching this schema:
+1. First response must be STRICT JSON only (no prose), matching this schema EXACTLY. Do NOT add extra fields like "readyRationale", "risk", "gaps", or "recommendations" - these belong in the second response (human-readable comment), not the JSON.
+   
+   **REQUIRED JSON SCHEMA (use ONLY these fields):**
+   ```json
    {
    "ready": boolean,
    "independence": "high" | "low",
@@ -17,20 +20,22 @@ Strict output protocol
    "parallelSafety": "safe" | "unsafe" | "unclear",
    "labels": { "add": string[], "remove": string[] },
    "assignees": string[], // if ready=true and author is contributor, include [author]. Otherwise empty.
-   "needsSplit": boolean, // true if size is large and should be split into sub-issues. When true, reformattedBody MUST be null.
-   "subIssues": [ // array of sub-issues (only if needsSplit=true). Empty array if needsSplit=false.
+   "needsSplit": boolean, // REQUIRED FIELD. true if size is large and should be split into sub-issues. When true, reformattedBody MUST be null.
+   "subIssues": [ // REQUIRED FIELD. array of sub-issues (only if needsSplit=true). Empty array [] if needsSplit=false.
    {
    "title": string, // descriptive title for the sub-issue, include parent context
    "body": string, // body/description for the sub-issue with acceptance criteria
    "labels": string[] // labels to apply to the sub-issue (e.g., ["size:small", "enhancement", "implementation ready"])
    }
    ],
-   "reformattedBody": string | null // if issue body doesn't conform to template, provide properly formatted version. null if no reformatting needed OR if needsSplit=true (splitting takes precedence).
+   "reformattedBody": string | null // REQUIRED FIELD. if issue body doesn't conform to template, provide properly formatted version. null if no reformatting needed OR if needsSplit=true (splitting takes precedence).
    }
+   ```
 
    **CRITICAL: When you determine an issue should be split**, you MUST set `needsSplit: true` in the JSON and provide the `subIssues` array. Do NOT only mention splitting in your comment - the automation requires the structured JSON data.
 
    **Example of correct JSON for an issue that needs splitting:**
+
    ```json
    {
      "ready": false,
@@ -40,7 +45,14 @@ Strict output protocol
      "riskLevel": "high",
      "parallelSafety": "unsafe",
      "labels": {
-       "add": ["size:large", "needs-review", "feature", "priority:75", "independence:low", "risk:high"],
+       "add": [
+         "size:large",
+         "needs-review",
+         "feature",
+         "priority:75",
+         "independence:low",
+         "risk:high"
+       ],
        "remove": []
      },
      "assignees": [],
@@ -49,17 +61,43 @@ Strict output protocol
        {
          "title": "Profile Images - Backend Upload API + Storage",
          "body": "## Description\n\nImplement backend API endpoint for profile image uploads with storage integration.\n\n## Acceptance Criteria\n\n- [ ] POST /api/users/:id/profile-image endpoint created\n- [ ] File upload handling with multipart/form-data\n- [ ] Storage integration (S3/local) configured\n- [ ] Return uploaded image URL\n\n**Parent Issue:** #94",
-         "labels": ["size:small", "feature", "implementation ready", "independence:high"]
+         "labels": [
+           "size:small",
+           "feature",
+           "implementation ready",
+           "independence:high"
+         ]
        },
        {
          "title": "Profile Images - Frontend UI Component",
          "body": "## Description\n\nCreate frontend UI component for profile image upload.\n\n## Acceptance Criteria\n\n- [ ] Image upload button in profile settings\n- [ ] Image preview before upload\n- [ ] Progress indicator during upload\n- [ ] Display current profile image\n\n**Parent Issue:** #94",
-         "labels": ["size:small", "feature", "implementation ready", "independence:high"]
+         "labels": [
+           "size:small",
+           "feature",
+           "implementation ready",
+           "independence:high"
+         ]
        }
      ],
      "reformattedBody": null
    }
    ```
+
+   **WRONG - Do NOT do this (missing needsSplit and subIssues):**
+   ```json
+   {
+     "ready": false,
+     "size": "large",
+     "labels": { "add": ["size:large", "needs-clarification"], "remove": [] },
+     "gaps": ["Too large - needs breakdown"],
+     "recommendations": ["Split into sub-issues"]
+     // ❌ MISSING needsSplit field
+     // ❌ MISSING subIssues array
+     // ❌ EXTRA fields: gaps, recommendations (save these for the human comment)
+   }
+   ```
+
+   **Remember:** If `size: "large"`, you MUST include `needsSplit: true` and provide the `subIssues` array with actual sub-issue objects.
 
    **Important:** You will receive existing labels in the issue context. Review them carefully and:
 
