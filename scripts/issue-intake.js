@@ -250,10 +250,18 @@ async function main() {
     // If this is a test issue, remove it from the production project (if present)
     if (isTestIssue && projectNumber === 3) {
       const productionProjectNumber = Number(process.env.PROJECT_NUMBER || 1);
-      const productionProject = await getProject(projectOwner, productionProjectNumber);
-      const productionItemId = await getIssueProjectItemId(issue.node_id, productionProject.id);
+      const productionProject = await getProject(
+        projectOwner,
+        productionProjectNumber
+      );
+      const productionItemId = await getIssueProjectItemId(
+        issue.node_id,
+        productionProject.id
+      );
       if (productionItemId) {
-        console.log(`Removing test issue #${number} from production project #${productionProjectNumber}`);
+        console.log(
+          `Removing test issue #${number} from production project #${productionProjectNumber}`
+        );
         await removeIssueFromProject(productionProject.id, productionItemId);
       }
     }
