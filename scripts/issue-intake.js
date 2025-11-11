@@ -112,6 +112,17 @@ async function setProjectItemStatus(projectId, itemId, fieldId, optionId) {
   await ghGraphQL(m, { projectId, itemId, fieldId, optionId });
 }
 
+async function removeIssueFromProject(projectId, itemId) {
+  const m = `mutation($projectId:ID!,$itemId:ID!){ deleteProjectV2Item(input:{projectId:$projectId, itemId:$itemId}){ deletedItemId } }`;
+  await ghGraphQL(m, { projectId, itemId });
+}
+
+async function getAllIssueProjectItems(issueNodeId) {
+  const q = `query($id:ID!){ node(id:$id){ ... on Issue { projectItems(first:20){ nodes{ id project{ id number } } } } } }`;
+  const data = await ghGraphQL(q, { id: issueNodeId });
+  return data?.node?.projectItems?.nodes || [];
+}
+
 async function getIssue(owner, repo, number) {
   const res = await ghFetch(`/repos/${owner}/${repo}/issues/${number}`);
   return res.json();
@@ -235,6 +246,17 @@ async function main() {
       statusField.id,
       benchOptionId
     );
+
+    // If this is a test issue, remove it from the production project (if present)
+    if (isTestIssue && projectNumber === 3) {
+      const productionProjectNumber = Number(process.env.PROJECT_NUMBER || 1);
+      const productionProject = await getProject(projectOwner, productionProjectNumber);
+      const productionItemId = await getIssueProjectItemId(issue.node_id, productionProject.id);
+      if (productionItemId) {
+        console.log(`Removing test issue #${number} from production project #${productionProjectNumber}`);
+        await removeIssueFromProject(productionProject.id, productionItemId);
+      }
+    }
   } else {
     console.log(
       `Skipping Project item/Status management for #${number} (INTAKE_MANAGE_PROJECT not set)`
