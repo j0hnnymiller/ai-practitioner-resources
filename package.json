@@ -17,14 +17,15 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test-lifecycle": "node scripts/test-issue-lifecycle.js",
-    "test-lifecycle-dry": "DRY_RUN=true node scripts/test-issue-lifecycle.js"
+    "test-lifecycle-dry": "cross-env DRY_RUN=true node scripts/test-issue-lifecycle.js"
   },
   "dependencies": {
-    "node-fetch": "^2.7.0",
     "ajv": "^8.12.0",
-    "ajv-formats": "^2.1.1"
+    "ajv-formats": "^2.1.1",
+    "node-fetch": "^2.7.0"
   },
   "devDependencies": {
+    "cross-env": "^7.0.3",
     "vitest": "^1.6.0"
   },
   "engines": {
