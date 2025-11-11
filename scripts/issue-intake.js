@@ -191,8 +191,10 @@ async function main() {
   const issue = await getIssue(owner, repo, number);
   const labelSet = toNameSet(issue.labels);
 
-  // Detect test issues by **TI** prefix in title
-  const isTestIssue = issue.title && issue.title.includes("**TI**");
+  // Detect test issues by [TI] in title OR **TI** in body
+  const isTestIssue =
+    (issue.title && issue.title.includes("[TI]")) ||
+    (issue.body && issue.body.includes("**TI**"));
 
   // Optionally manage Project item/Status here (default off when Project workflows handle it)
   const manageProject = /^(1|true|yes)$/i.test(
@@ -210,7 +212,9 @@ async function main() {
     const benchName = laneMap?.["on the bench"] || "on the bench";
 
     console.log(
-      `${isTestIssue ? "🧪 Test issue detected" : "📋 Production issue"} - routing to project #${projectNumber}`
+      `${
+        isTestIssue ? "🧪 Test issue detected" : "📋 Production issue"
+      } - routing to project #${projectNumber}`
     );
 
     const project = await getProject(projectOwner, projectNumber);
@@ -251,4 +255,3 @@ main().catch((err) => {
   console.error(err);
   process.exitCode = 1;
 });
-                                                        
