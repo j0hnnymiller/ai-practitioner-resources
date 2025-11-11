@@ -30,6 +30,26 @@ if (!GIST_ID) {
   process.exit(1);
 }
 
+/* verify that the GIST_TOKEN is not expired */
+async function verifyGistToken() {
+  const response = await fetch("https://api.github.com/user", {
+    headers: {
+      Authorization: `token ${GIST_TOKEN}`,
+      Accept: "application/vnd.github.v3+json",
+      "User-Agent": "ai-practitioner-resources-automation",
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(
+      `GitHub API error: ${response.status} ${response.statusText}`
+    );
+  }
+
+  const user = await response.json();
+  console.log(`✅ GIST_TOKEN is valid for user: ${user.login}`);
+}
+
 /**
  * Fetch current resources from gist
  */
