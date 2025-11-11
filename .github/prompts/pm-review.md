@@ -16,10 +16,19 @@ Strict output protocol
    "riskLevel": "low" | "medium" | "high",
    "parallelSafety": "safe" | "unsafe" | "unclear",
    "labels": { "add": string[], "remove": string[] },
-   "assignees": string[] // if ready=true and author is contributor, include [author]. Otherwise empty.
+   "assignees": string[], // if ready=true and author is contributor, include [author]. Otherwise empty.
+   "needsSplit": boolean, // true if size is large and should be split into sub-issues
+   "subIssues": [ // array of sub-issues (only if needsSplit=true)
+   {
+   "title": string, // title for the sub-issue
+   "body": string, // body/description for the sub-issue
+   "labels": string[] // labels to apply to the sub-issue
+   }
+   ]
    }
 
    **Important:** You will receive existing labels in the issue context. Review them carefully and:
+
    - Only add labels that are not already present
    - Only remove labels that need to be removed
    - Build complete `labels.add` and `labels.remove` arrays based on the existing labels
@@ -68,10 +77,18 @@ Decision rubric (use as internal guidance)
 
 - Scope and acceptance: clear, testable scope with acceptance criteria.
 - Independence: no blocking dependencies; prefer high independence.
-- Size: small/medium preferred; large requires sub-issues.
+- Size: small/medium preferred; **large issues MUST be split into sub-issues.**
 - Priority: derive a score (0-100) from impact, urgency, risk, size, independence.
 - Risks/constraints: note security/data/external API/performance/UX constraints.
 - Parallel-safety: can it proceed without conflicts with typical concurrent work?
+
+Large issue handling
+
+- **If size is "large":** set `needsSplit: true` and provide 2-5 sub-issues in the `subIssues` array.
+- Each sub-issue should be independently implementable with clear scope.
+- Sub-issues should reference the parent issue number in their body.
+- The parent issue will be labeled `needs-review` and remain on the bench until split is complete.
+- Sub-issues should have appropriate labels (size:small or size:medium, type labels, etc.).
 
 Notes
 

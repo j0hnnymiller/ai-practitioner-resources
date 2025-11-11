@@ -54,6 +54,14 @@ async function addComment(owner, repo, number, body) {
   });
 }
 
+async function createIssue(owner, repo, title, body, labels) {
+  const res = await ghFetch(`/repos/${owner}/${repo}/issues`, {
+    method: "POST",
+    body: JSON.stringify({ title, body, labels }),
+  });
+  return res.json();
+}
+
 async function isContributor(owner, repo, username) {
   try {
     // Check if user is in the contributors list
@@ -115,9 +123,7 @@ async function callAnthropicWithRetry(url, payload, apiKey, maxRetries = 3) {
 
         // Don't retry on client errors (4xx) except rate limits (429)
         if (status >= 400 && status < 500 && status !== 429) {
-          throw new Error(
-            `Anthropic API ${status} ${res.statusText}: ${text}`
-          );
+          throw new Error(`Anthropic API ${status} ${res.statusText}: ${text}`);
         }
 
         // Retry on server errors (5xx) and rate limits (429)
@@ -300,6 +306,45 @@ async function main() {
     // Apply labels per AI decision
     if (!skipped && result && typeof result === "object") {
       await applyLabelsFromResult(owner, repo, number, result, issue.labels);
+
+      // Handle large issues that need to be split
+      if (
+        result.needsSplit === true &&
+        Array.isArray(result.subIssues) &&
+        result.subIssues.length > 0
+      ) {
+        console.log(
+          `Issue #${number} is too large and will be split into ${result.subIssues.length} sub-issues.`
+        );
+
+        const createdSubIssues = [];
+        for (const subIssue of result.subIssues) {
+          const subBody = `${subIssue.body}\n\n---\n\n**Parent Issue:** #${number}`;
+          const created = await createIssue(
+            owner,
+            repo,
+            subIssue.title,
+            subBody,
+            subIssue.labels || []
+          );
+          createdSubIssues.push(created);
+          console.log(`Created sub-issue #${created.number}: ${created.title}`);
+        }
+
+        // Add comment to parent issue with links to sub-issues
+        const subIssueLinks = createdSubIssues
+          .map((si) => `- #${si.number}: ${si.title}`)
+          .join("\n");
+        const splitComment =
+          `This issue has been split into the following sub-issues:\n\n${subIssueLinks}\n\n` +
+          `Please implement each sub-issue separately. This parent issue will remain open for tracking purposes and is labeled \`needs-review\`.`;
+        await addComment(owner, repo, number, splitComment);
+
+        // Ensure parent issue has needs-review label
+        const parentLabels = toNameSet(issue.labels);
+        parentLabels.add("needs-review");
+        await setIssueLabels(owner, repo, number, Array.from(parentLabels));
+      }
 
       // Apply assignment if ready and author is a contributor
       if (result.ready === true && issue.user && issue.user.login) {
