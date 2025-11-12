@@ -774,17 +774,14 @@ async function main() {
           `Please implement each sub-issue separately. This parent issue will remain open for tracking purposes and is labeled \`needs-review\`.`;
         await addComment(owner, repo, number, splitComment);
 
-        // Update parent issue body with task list
+        // Prepare task list to append to body (will be added during reformatting or at end)
         const taskListItems = createdSubIssues
           .map((si) => `- [ ] #${si.number}`)
           .join("\n");
-        const updatedBody = `${
-          issue.body || ""
-        }\n\n---\n\n## 📋 Sub-Issues\n\n${taskListItems}`;
-        await updateIssueBody(owner, repo, number, updatedBody);
-        console.log(
-          `Updated parent issue #${number} body with sub-issue task list`
-        );
+        const taskListSection = `\n\n---\n\n## 📋 Sub-Issues\n\n${taskListItems}`;
+        
+        // Store task list for later use
+        result._taskListSection = taskListSection;
 
         // Ensure parent issue has needs-review label
         const parentLabels = toNameSet(issue.labels);
@@ -801,9 +798,20 @@ async function main() {
         console.log(
           `Issue #${number} body will be reformatted to conform to template.`
         );
-        await updateIssueBody(owner, repo, number, result.reformattedBody);
+        // Append task list if available
+        let finalBody = result.reformattedBody;
+        if (result._taskListSection) {
+          finalBody += result._taskListSection;
+          console.log(`Appended sub-issue task list to reformatted body`);
+        }
+        await updateIssueBody(owner, repo, number, finalBody);
         const reformatComment = `The issue description has been automatically reformatted to conform to the appropriate template structure for better clarity and consistency.`;
         await addComment(owner, repo, number, reformatComment);
+      } else if (result._taskListSection) {
+        // No reformatting needed but we have a task list to add
+        const updatedBody = `${issue.body || ""}${result._taskListSection}`;
+        await updateIssueBody(owner, repo, number, updatedBody);
+        console.log(`Updated parent issue #${number} body with sub-issue task list`);
       }
 
       // Apply assignment if ready and author is a contributor
