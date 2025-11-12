@@ -260,11 +260,53 @@ function readIssueTemplate(issueType) {
   return fs.readFileSync(templatePath, "utf8");
 }
 
+function readProjectGuides() {
+  const guides = {};
+
+  // Read independence guide
+  const independencePath = path.resolve(
+    process.cwd(),
+    ".github/prompts/INDEPENDENCE_GUIDE.md"
+  );
+  if (fs.existsSync(independencePath)) {
+    guides.independence = fs.readFileSync(independencePath, "utf8");
+  }
+
+  // Read label validation guide
+  const labelPath = path.resolve(
+    process.cwd(),
+    ".github/prompts/LABEL_VALIDATION_GUIDE.md"
+  );
+  if (fs.existsSync(labelPath)) {
+    guides.labels = fs.readFileSync(labelPath, "utf8");
+  }
+
+  return guides;
+}
+
 function buildTemplateContext(issueType) {
   const template = readIssueTemplate(issueType);
   if (!template) return "";
 
   return `\n\n## Issue Template Reference\n\nThe following is the expected structure for a ${issueType} issue in this project. Use this as a reference when evaluating completeness and when providing reformattedBody:\n\n\`\`\`yaml\n${template}\n\`\`\`\n\nWhen reformatting, extract the field values from the YAML structure above and present them in clean Markdown format following the same logical organization.`;
+}
+
+function buildProjectGuidanceContext(guides) {
+  let context = "";
+
+  if (guides.independence) {
+    // Include first 100 lines of independence guide (covers key concepts and criteria)
+    const lines = guides.independence.split("\n").slice(0, 100);
+    context += `\n\n## Independence Assessment Guidelines\n\n${lines.join("\n")}\n\n[...remaining content omitted for brevity]`;
+  }
+
+  if (guides.labels) {
+    // Include first 80 lines of label validation guide (covers required labels and validation rules)
+    const lines = guides.labels.split("\n").slice(0, 80);
+    context += `\n\n## Label Validation Guidelines\n\n${lines.join("\n")}\n\n[...remaining content omitted for brevity]`;
+  }
+
+  return context;
 }
 
 async function generatePMReview({ title, body, labelsText, url }) {
@@ -290,9 +332,19 @@ async function generatePMReview({ title, body, labelsText, url }) {
   const issueType = detectIssueType(title, body, existingLabels);
   const templateContext = buildTemplateContext(issueType);
 
+  // Load project guidance documents
+  const guides = readProjectGuides();
+  const guidanceContext = buildProjectGuidanceContext(guides);
+
   console.log(`Detected issue type: ${issueType}`);
   if (templateContext) {
     console.log(`Loaded template: ${issueType}`);
+  }
+  if (guides.independence) {
+    console.log(`Loaded INDEPENDENCE_GUIDE.md`);
+  }
+  if (guides.labels) {
+    console.log(`Loaded LABEL_VALIDATION_GUIDE.md`);
   }
 
   // Use the prompt file verbatim as the system message to avoid drift
@@ -302,7 +354,7 @@ async function generatePMReview({ title, body, labelsText, url }) {
 
   const user = `Issue to review:\nTitle: ${title}\nURL: ${url}\nLabels: ${labelsText}\n\nBody:\n${
     body || "(no body)"
-  }${templateContext}`;
+  }${templateContext}${guidanceContext}`;
 
   // First call: request JSON only (Anthropic Messages API)
   const payload1 = {

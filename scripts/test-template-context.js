@@ -81,6 +81,48 @@ function buildTemplateContext(issueType) {
   return `\n\n## Issue Template Reference\n\nThe following is the expected structure for a ${issueType} issue in this project. Use this as a reference when evaluating completeness and when providing reformattedBody:\n\n\`\`\`yaml\n${template}\n\`\`\`\n\nWhen reformatting, extract the field values from the YAML structure above and present them in clean Markdown format following the same logical organization.`;
 }
 
+function readProjectGuides() {
+  const guides = {};
+
+  // Read independence guide
+  const independencePath = path.resolve(
+    process.cwd(),
+    ".github/prompts/INDEPENDENCE_GUIDE.md"
+  );
+  if (fs.existsSync(independencePath)) {
+    guides.independence = fs.readFileSync(independencePath, "utf8");
+  }
+
+  // Read label validation guide
+  const labelPath = path.resolve(
+    process.cwd(),
+    ".github/prompts/LABEL_VALIDATION_GUIDE.md"
+  );
+  if (fs.existsSync(labelPath)) {
+    guides.labels = fs.readFileSync(labelPath, "utf8");
+  }
+
+  return guides;
+}
+
+function buildProjectGuidanceContext(guides) {
+  let context = "";
+
+  if (guides.independence) {
+    // Include first 100 lines of independence guide (covers key concepts and criteria)
+    const lines = guides.independence.split("\n").slice(0, 100);
+    context += `\n\n## Independence Assessment Guidelines\n\n${lines.join("\n")}\n\n[...remaining content omitted for brevity]`;
+  }
+
+  if (guides.labels) {
+    // Include first 80 lines of label validation guide (covers required labels and validation rules)
+    const lines = guides.labels.split("\n").slice(0, 80);
+    context += `\n\n## Label Validation Guidelines\n\n${lines.join("\n")}\n\n[...remaining content omitted for brevity]`;
+  }
+
+  return context;
+}
+
 // Test cases
 const testCases = [
   {
@@ -111,6 +153,24 @@ const testCases = [
 
 console.log("=== Testing Template Context Loading ===\n");
 
+// Test guides loading
+const guides = readProjectGuides();
+console.log("Project Guides:");
+if (guides.independence) {
+  console.log(`✓ INDEPENDENCE_GUIDE.md loaded (${guides.independence.length} chars)`);
+} else {
+  console.log(`✗ INDEPENDENCE_GUIDE.md not found`);
+}
+if (guides.labels) {
+  console.log(`✓ LABEL_VALIDATION_GUIDE.md loaded (${guides.labels.length} chars)`);
+} else {
+  console.log(`✗ LABEL_VALIDATION_GUIDE.md not found`);
+}
+
+const guidanceContext = buildProjectGuidanceContext(guides);
+console.log(`Combined guidance context: ${guidanceContext.length} characters\n`);
+console.log("---\n");
+
 testCases.forEach((test) => {
   console.log(`Test: ${test.name}`);
   console.log(`Title: ${test.title}`);
@@ -130,4 +190,9 @@ testCases.forEach((test) => {
   console.log("---\n");
 });
 
-console.log("=== Test Complete ===");
+console.log("=== Total Context Size ===");
+const totalContext = guidanceContext + buildTemplateContext("bug");
+console.log(`Guidance + Bug Template: ${totalContext.length} characters`);
+console.log(`Estimated tokens: ~${Math.ceil(totalContext.length / 4)}`);
+
+console.log("\n=== Test Complete ===");
