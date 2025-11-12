@@ -774,6 +774,18 @@ async function main() {
           `Please implement each sub-issue separately. This parent issue will remain open for tracking purposes and is labeled \`needs-review\`.`;
         await addComment(owner, repo, number, splitComment);
 
+        // Update parent issue body with task list
+        const taskListItems = createdSubIssues
+          .map((si) => `- [ ] #${si.number}`)
+          .join("\n");
+        const updatedBody = `${
+          issue.body || ""
+        }\n\n---\n\n## 📋 Sub-Issues\n\n${taskListItems}`;
+        await updateIssueBody(owner, repo, number, updatedBody);
+        console.log(
+          `Updated parent issue #${number} body with sub-issue task list`
+        );
+
         // Ensure parent issue has needs-review label
         const parentLabels = toNameSet(issue.labels);
         parentLabels.add("needs-review");
