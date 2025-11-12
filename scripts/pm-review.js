@@ -387,7 +387,7 @@ function validatePMReviewSchema(parsed) {
     process.cwd(),
     ".github/prompts/pm-review.schema.json"
   );
-  
+
   if (!fs.existsSync(schemaPath)) {
     console.warn("⚠️  pm-review.schema.json not found, skipping validation");
     return { valid: true };
@@ -396,15 +396,15 @@ function validatePMReviewSchema(parsed) {
   const schema = JSON.parse(fs.readFileSync(schemaPath, "utf8"));
   const ajv = new Ajv({ allErrors: true, strict: false });
   const validate = ajv.compile(schema);
-  
+
   const valid = validate(parsed);
-  
+
   if (!valid) {
     console.warn("❌ Schema validation failed:");
     console.warn(JSON.stringify(validate.errors, null, 2));
     return { valid: false, errors: validate.errors };
   }
-  
+
   console.log("✅ Schema validation passed");
   return { valid: true };
 }
@@ -437,6 +437,27 @@ function stripExtraFields(parsed) {
 
   if (extraFields.length > 0) {
     console.warn(`⚠️  Stripped extra fields: ${extraFields.join(", ")}`);
+  }
+
+  // Normalize subIssues if AI returned array of strings instead of objects
+  if (
+    cleaned.subIssues &&
+    Array.isArray(cleaned.subIssues) &&
+    cleaned.subIssues.length > 0
+  ) {
+    if (typeof cleaned.subIssues[0] === "string") {
+      console.warn(
+        "⚠️  subIssues is array of strings, converting to objects..."
+      );
+      cleaned.subIssues = cleaned.subIssues.map((title, index) => ({
+        title: `[Split ${index + 1}/${cleaned.subIssues.length}] ${title}`,
+        body: `Sub-issue split from parent issue. Please add detailed acceptance criteria and implementation details.`,
+        labels: ["needs-clarification", "size:small"],
+      }));
+      console.log(
+        `✅ Converted ${cleaned.subIssues.length} string titles to sub-issue objects`
+      );
+    }
   }
 
   return cleaned;
