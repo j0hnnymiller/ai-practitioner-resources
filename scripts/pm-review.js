@@ -6,6 +6,7 @@
 const fs = require("fs");
 const path = require("path");
 const fetch = require("node-fetch");
+const Ajv = require("ajv");
 
 function env(name, required = true) {
   const v = process.env[name];
@@ -380,6 +381,67 @@ function buildProjectGuidanceContext(guides) {
   return context;
 }
 
+function validatePMReviewSchema(parsed) {
+  // Load and compile schema
+  const schemaPath = path.resolve(
+    process.cwd(),
+    ".github/prompts/pm-review.schema.json"
+  );
+  
+  if (!fs.existsSync(schemaPath)) {
+    console.warn("⚠️  pm-review.schema.json not found, skipping validation");
+    return { valid: true };
+  }
+
+  const schema = JSON.parse(fs.readFileSync(schemaPath, "utf8"));
+  const ajv = new Ajv({ allErrors: true, strict: false });
+  const validate = ajv.compile(schema);
+  
+  const valid = validate(parsed);
+  
+  if (!valid) {
+    console.warn("❌ Schema validation failed:");
+    console.warn(JSON.stringify(validate.errors, null, 2));
+    return { valid: false, errors: validate.errors };
+  }
+  
+  console.log("✅ Schema validation passed");
+  return { valid: true };
+}
+
+function stripExtraFields(parsed) {
+  const allowedFields = [
+    "ready",
+    "independence",
+    "size",
+    "priorityScore",
+    "riskLevel",
+    "parallelSafety",
+    "labels",
+    "assignees",
+    "needsSplit",
+    "subIssues",
+    "reformattedBody",
+  ];
+
+  const cleaned = {};
+  const extraFields = [];
+
+  Object.keys(parsed).forEach((key) => {
+    if (allowedFields.includes(key)) {
+      cleaned[key] = parsed[key];
+    } else {
+      extraFields.push(key);
+    }
+  });
+
+  if (extraFields.length > 0) {
+    console.warn(`⚠️  Stripped extra fields: ${extraFields.join(", ")}`);
+  }
+
+  return cleaned;
+}
+
 async function generatePMReview({ title, body, labelsText, url }) {
   // Check which API to use (prefer OpenAI if both are set)
   const openaiKey = env("OPENAI_API_KEY", false);
@@ -433,7 +495,14 @@ async function generatePMReview({ title, body, labelsText, url }) {
     guidance ||
     "(pm-review.md not found; include baseline: strict JSON then concise human review)";
 
-  const userContent = `Issue to review:\nTitle: ${title}\nURL: ${url}\nLabels: ${labelsText}\n\nBody:\n${
+  // Pre-frame the request with explicit JSON-only instruction (like generate-resources.js does)
+  const preFrame = `You are a project management AI reviewing GitHub issues. Respond with STRICT JSON matching the pm-review.schema.json schema EXACTLY - include ONLY the 11 required fields with no additional fields. After the JSON is validated, you will provide a separate human-readable comment.
+
+Required fields ONLY: ready, independence, size, priorityScore, riskLevel, parallelSafety, labels, assignees, needsSplit, subIssues, reformattedBody
+
+`;
+
+  const userContent = `${preFrame}Issue to review:\nTitle: ${title}\nURL: ${url}\nLabels: ${labelsText}\n\nBody:\n${
     body || "(no body)"
   }${templateContext}${guidanceContext}`;
 
@@ -447,7 +516,7 @@ async function generatePMReview({ title, body, labelsText, url }) {
         { role: "system", content: system },
         { role: "user", content: userContent },
       ],
-      max_tokens: 1500,
+      max_tokens: 2500,
       temperature: 0.1,
     };
 
@@ -462,7 +531,7 @@ async function generatePMReview({ title, body, labelsText, url }) {
     const payload1 = {
       model,
       system,
-      max_tokens: 1500,
+      max_tokens: 2500,
       temperature: 0.1,
       messages: [
         { role: "user", content: [{ type: "text", text: userContent }] },
@@ -486,6 +555,17 @@ async function generatePMReview({ title, body, labelsText, url }) {
     // Extract JSON if wrapped in fences
     const match = jsonText.match(/\{[\s\S]*\}/);
     parsed = match ? JSON.parse(match[0]) : JSON.parse(jsonText);
+
+    // Strip any extra fields not in schema
+    parsed = stripExtraFields(parsed);
+
+    // Validate against schema
+    const validation = validatePMReviewSchema(parsed);
+    if (!validation.valid) {
+      console.warn(
+        "Schema validation failed but continuing with normalization..."
+      );
+    }
 
     // Normalize: ensure required fields exist
     // If size is large but needsSplit is missing, auto-set it

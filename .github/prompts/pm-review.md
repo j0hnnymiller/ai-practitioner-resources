@@ -7,13 +7,13 @@ Role
 
 Strict output protocol
 
-1. First response must be STRICT JSON only (no prose), matching the schema in `pm-review.schema.json` EXACTLY. Do NOT add extra fields like "readyRationale", "risk", "gaps", or "recommendations" - these belong in the second response (human-readable comment), not the JSON.
+1. First response must be STRICT JSON only (no prose), matching the schema in `pm-review.schema.json` EXACTLY.
 
-   **REQUIRED JSON SCHEMA (use ONLY these fields):**
+   **REQUIRED JSON SCHEMA - Include EXACTLY these 11 fields (no additional fields):**
 
    See `pm-review.schema.json` for the complete JSON Schema definition.
 
-   **Quick Reference:**
+   **Required Fields (include all 11):**
 
    - `ready`: boolean - Whether issue is ready for implementation
    - `independence`: "high" | "low" - Can be implemented independently
