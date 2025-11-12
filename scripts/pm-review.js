@@ -191,6 +191,82 @@ function readPMPrompt() {
   return readPMGuidance();
 }
 
+function detectIssueType(title, body, existingLabels) {
+  // Check existing labels first
+  const labelTypes = {
+    bug: ["bug"],
+    feature: ["feature", "enhancement"],
+    "ui-ux": ["ui/ux", "design"],
+    idea: ["idea"],
+    refactor: ["refactor"],
+    documentation: ["documentation"],
+  };
+
+  for (const [type, labels] of Object.entries(labelTypes)) {
+    if (labels.some((l) => existingLabels.includes(l))) {
+      return type;
+    }
+  }
+
+  // Infer from title patterns
+  const titleLower = title.toLowerCase();
+  if (titleLower.includes("bug:") || titleLower.includes("[bug]")) return "bug";
+  if (titleLower.includes("feature:") || titleLower.includes("feat:"))
+    return "feature";
+  if (titleLower.includes("ui/ux:") || titleLower.includes("design:"))
+    return "ui-ux";
+
+  // Infer from body content
+  const bodyLower = (body || "").toLowerCase();
+  if (
+    bodyLower.includes("bug description") ||
+    bodyLower.includes("steps to reproduce") ||
+    bodyLower.includes("expected behavior")
+  )
+    return "bug";
+  if (
+    bodyLower.includes("feature description") ||
+    bodyLower.includes("implementation prompt")
+  )
+    return "feature";
+  if (
+    bodyLower.includes("current user experience") ||
+    bodyLower.includes("proposed improvement")
+  )
+    return "ui-ux";
+
+  // Default to feature for general enhancement requests
+  return "feature";
+}
+
+function readIssueTemplate(issueType) {
+  const templateMap = {
+    bug: "bug-report.yml",
+    feature: "feature-request.yml",
+    "ui-ux": "ui-ux-improvement.yml",
+  };
+
+  const templateFile = templateMap[issueType];
+  if (!templateFile) return null;
+
+  const templatePath = path.resolve(
+    process.cwd(),
+    ".github/ISSUE_TEMPLATE",
+    templateFile
+  );
+
+  if (!fs.existsSync(templatePath)) return null;
+
+  return fs.readFileSync(templatePath, "utf8");
+}
+
+function buildTemplateContext(issueType) {
+  const template = readIssueTemplate(issueType);
+  if (!template) return "";
+
+  return `\n\n## Issue Template Reference\n\nThe following is the expected structure for a ${issueType} issue in this project. Use this as a reference when evaluating completeness and when providing reformattedBody:\n\n\`\`\`yaml\n${template}\n\`\`\`\n\nWhen reformatting, extract the field values from the YAML structure above and present them in clean Markdown format following the same logical organization.`;
+}
+
 async function generatePMReview({ title, body, labelsText, url }) {
   const apiKey = env("ANTHROPIC_API_KEY", false);
   if (!apiKey) {
@@ -206,6 +282,19 @@ async function generatePMReview({ title, body, labelsText, url }) {
     process.env.PM_MODEL ||
     process.env.ANTHROPIC_MODEL ||
     "claude-4.5-sonnet-latest";
+
+  // Detect issue type and load appropriate template
+  const existingLabels = labelsText
+    ? labelsText.split(",").map((l) => l.trim())
+    : [];
+  const issueType = detectIssueType(title, body, existingLabels);
+  const templateContext = buildTemplateContext(issueType);
+
+  console.log(`Detected issue type: ${issueType}`);
+  if (templateContext) {
+    console.log(`Loaded template: ${issueType}`);
+  }
+
   // Use the prompt file verbatim as the system message to avoid drift
   const system =
     guidance ||
@@ -213,7 +302,7 @@ async function generatePMReview({ title, body, labelsText, url }) {
 
   const user = `Issue to review:\nTitle: ${title}\nURL: ${url}\nLabels: ${labelsText}\n\nBody:\n${
     body || "(no body)"
-  }`;
+  }${templateContext}`;
 
   // First call: request JSON only (Anthropic Messages API)
   const payload1 = {
