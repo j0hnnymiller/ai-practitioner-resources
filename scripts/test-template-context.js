@@ -111,13 +111,17 @@ function buildProjectGuidanceContext(guides) {
   if (guides.independence) {
     // Include first 100 lines of independence guide (covers key concepts and criteria)
     const lines = guides.independence.split("\n").slice(0, 100);
-    context += `\n\n## Independence Assessment Guidelines\n\n${lines.join("\n")}\n\n[...remaining content omitted for brevity]`;
+    context += `\n\n## Independence Assessment Guidelines\n\n${lines.join(
+      "\n"
+    )}\n\n[...remaining content omitted for brevity]`;
   }
 
   if (guides.labels) {
     // Include first 80 lines of label validation guide (covers required labels and validation rules)
     const lines = guides.labels.split("\n").slice(0, 80);
-    context += `\n\n## Label Validation Guidelines\n\n${lines.join("\n")}\n\n[...remaining content omitted for brevity]`;
+    context += `\n\n## Label Validation Guidelines\n\n${lines.join(
+      "\n"
+    )}\n\n[...remaining content omitted for brevity]`;
   }
 
   return context;
@@ -157,18 +161,24 @@ console.log("=== Testing Template Context Loading ===\n");
 const guides = readProjectGuides();
 console.log("Project Guides:");
 if (guides.independence) {
-  console.log(`✓ INDEPENDENCE_GUIDE.md loaded (${guides.independence.length} chars)`);
+  console.log(
+    `✓ INDEPENDENCE_GUIDE.md loaded (${guides.independence.length} chars)`
+  );
 } else {
   console.log(`✗ INDEPENDENCE_GUIDE.md not found`);
 }
 if (guides.labels) {
-  console.log(`✓ LABEL_VALIDATION_GUIDE.md loaded (${guides.labels.length} chars)`);
+  console.log(
+    `✓ LABEL_VALIDATION_GUIDE.md loaded (${guides.labels.length} chars)`
+  );
 } else {
   console.log(`✗ LABEL_VALIDATION_GUIDE.md not found`);
 }
 
 const guidanceContext = buildProjectGuidanceContext(guides);
-console.log(`Combined guidance context: ${guidanceContext.length} characters\n`);
+console.log(
+  `Combined guidance context: ${guidanceContext.length} characters\n`
+);
 console.log("---\n");
 
 testCases.forEach((test) => {

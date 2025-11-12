@@ -1,5 +1,5 @@
 // Copilot Project Manager review: analyze a newly opened issue and post a structured review comment.
-// - Uses Anthropic Claude via ANTHROPIC_API_KEY
+// - Supports Anthropic Claude (via ANTHROPIC_API_KEY) or OpenAI GPT-4 (via OPENAI_API_KEY)
 // - Reads issue context from GITHUB_EVENT_PATH and repository envs
 // - Posts a comment summarizing checklist findings and specific gaps
 
@@ -177,6 +177,73 @@ async function callAnthropicWithRetry(url, payload, apiKey, maxRetries = 3) {
   throw lastError;
 }
 
+async function callOpenAIWithRetry(url, payload, apiKey, maxRetries = 3) {
+  let lastError = null;
+
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      const res = await fetch(url, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) {
+        const text = await res.text();
+        const status = res.status;
+
+        // Don't retry on client errors (4xx) except rate limits (429)
+        if (status >= 400 && status < 500 && status !== 429) {
+          throw new Error(`OpenAI API ${status} ${res.statusText}: ${text}`);
+        }
+
+        // Retry on server errors (5xx) and rate limits (429)
+        lastError = new Error(
+          `OpenAI API ${status} ${res.statusText}: ${text}`
+        );
+
+        if (attempt < maxRetries) {
+          const backoffMs = Math.min(1000 * Math.pow(2, attempt - 1), 10000);
+          console.warn(
+            `OpenAI API error (attempt ${attempt}/${maxRetries}), retrying in ${backoffMs}ms...`
+          );
+          await sleep(backoffMs);
+          continue;
+        }
+        throw lastError;
+      }
+
+      return await res.json();
+    } catch (error) {
+      lastError = error;
+
+      // Don't retry on network errors that are likely permanent
+      if (
+        error.code === "ENOTFOUND" ||
+        error.code === "ECONNREFUSED" ||
+        error.message.includes("4")
+      ) {
+        throw error;
+      }
+
+      if (attempt < maxRetries) {
+        const backoffMs = Math.min(1000 * Math.pow(2, attempt - 1), 10000);
+        console.warn(
+          `Network error (attempt ${attempt}/${maxRetries}), retrying in ${backoffMs}ms: ${error.message}`
+        );
+        await sleep(backoffMs);
+        continue;
+      }
+      throw lastError;
+    }
+  }
+
+  throw lastError;
+}
+
 function readPMPrompt() {
   // Priority order: AI assistant mode > dedicated PM review > project manager mode
   const aiAssistant = path.resolve(
@@ -297,33 +364,47 @@ function buildProjectGuidanceContext(guides) {
   if (guides.independence) {
     // Include first 100 lines of independence guide (covers key concepts and criteria)
     const lines = guides.independence.split("\n").slice(0, 100);
-    context += `\n\n## Independence Assessment Guidelines\n\n${lines.join("\n")}\n\n[...remaining content omitted for brevity]`;
+    context += `\n\n## Independence Assessment Guidelines\n\n${lines.join(
+      "\n"
+    )}\n\n[...remaining content omitted for brevity]`;
   }
 
   if (guides.labels) {
     // Include first 80 lines of label validation guide (covers required labels and validation rules)
     const lines = guides.labels.split("\n").slice(0, 80);
-    context += `\n\n## Label Validation Guidelines\n\n${lines.join("\n")}\n\n[...remaining content omitted for brevity]`;
+    context += `\n\n## Label Validation Guidelines\n\n${lines.join(
+      "\n"
+    )}\n\n[...remaining content omitted for brevity]`;
   }
 
   return context;
 }
 
 async function generatePMReview({ title, body, labelsText, url }) {
-  const apiKey = env("ANTHROPIC_API_KEY", false);
-  if (!apiKey) {
+  // Check which API to use (prefer OpenAI if both are set)
+  const openaiKey = env("OPENAI_API_KEY", false);
+  const anthropicKey = env("ANTHROPIC_API_KEY", false);
+
+  if (!openaiKey && !anthropicKey) {
     return {
       skipped: true,
       content:
-        "Copilot PM review skipped: ANTHROPIC_API_KEY is not configured. Configure the secret and re-run to enable AI review.",
+        "Copilot PM review skipped: Neither OPENAI_API_KEY nor ANTHROPIC_API_KEY is configured. Configure one of these secrets and re-run to enable AI review.",
     };
   }
 
+  const useOpenAI = !!openaiKey;
+  const apiKey = useOpenAI ? openaiKey : anthropicKey;
+
   const guidance = readPMPrompt();
-  const model =
-    process.env.PM_MODEL ||
-    process.env.ANTHROPIC_MODEL ||
-    "claude-4.5-sonnet-latest";
+  const model = useOpenAI
+    ? process.env.PM_MODEL || "gpt-4o"
+    : process.env.PM_MODEL ||
+      process.env.ANTHROPIC_MODEL ||
+      "claude-4.5-sonnet-latest";
+
+  console.log(`Using AI provider: ${useOpenAI ? "OpenAI" : "Anthropic"}`);
+  console.log(`Model: ${model}`);
 
   // Detect issue type and load appropriate template
   const existingLabels = labelsText
@@ -352,29 +433,54 @@ async function generatePMReview({ title, body, labelsText, url }) {
     guidance ||
     "(pm-review.md not found; include baseline: strict JSON then concise human review)";
 
-  const user = `Issue to review:\nTitle: ${title}\nURL: ${url}\nLabels: ${labelsText}\n\nBody:\n${
+  const userContent = `Issue to review:\nTitle: ${title}\nURL: ${url}\nLabels: ${labelsText}\n\nBody:\n${
     body || "(no body)"
   }${templateContext}${guidanceContext}`;
 
-  // First call: request JSON only (Anthropic Messages API)
-  const payload1 = {
-    model,
-    system,
-    max_tokens: 1500,
-    temperature: 0.1,
-    messages: [{ role: "user", content: [{ type: "text", text: user }] }],
-  };
+  let data1, jsonText;
 
-  const data1 = await callAnthropicWithRetry(
-    "https://api.anthropic.com/v1/messages",
-    payload1,
-    apiKey
-  );
-  const contentBlocks1 = data1?.content || [];
-  const jsonText = contentBlocks1
-    .map((b) => b?.text || "")
-    .join("\n")
-    .trim();
+  if (useOpenAI) {
+    // OpenAI Chat Completions API
+    const payload1 = {
+      model,
+      messages: [
+        { role: "system", content: system },
+        { role: "user", content: userContent },
+      ],
+      max_tokens: 1500,
+      temperature: 0.1,
+    };
+
+    data1 = await callOpenAIWithRetry(
+      "https://api.openai.com/v1/chat/completions",
+      payload1,
+      apiKey
+    );
+    jsonText = data1?.choices?.[0]?.message?.content || "";
+  } else {
+    // Anthropic Messages API
+    const payload1 = {
+      model,
+      system,
+      max_tokens: 1500,
+      temperature: 0.1,
+      messages: [
+        { role: "user", content: [{ type: "text", text: userContent }] },
+      ],
+    };
+
+    data1 = await callAnthropicWithRetry(
+      "https://api.anthropic.com/v1/messages",
+      payload1,
+      apiKey
+    );
+    const contentBlocks1 = data1?.content || [];
+    jsonText = contentBlocks1
+      .map((b) => b?.text || "")
+      .join("\n")
+      .trim();
+  }
+
   let parsed = null;
   try {
     // Extract JSON if wrapped in fences
@@ -439,38 +545,65 @@ async function generatePMReview({ title, body, labelsText, url }) {
   }
 
   // Second call: human-friendly review text
-  const payload2 = {
-    model,
-    system,
-    max_tokens: 2000,
-    temperature: 0.8,
-    messages: [
-      { role: "user", content: [{ type: "text", text: user }] },
-      {
-        role: "assistant",
-        content: [{ type: "text", text: JSON.stringify(parsed) }],
-      },
-      {
-        role: "user",
-        content: [
-          {
-            type: "text",
-            text: "Now provide the concise report for the author (no JSON).",
-          },
-        ],
-      },
-    ],
-  };
-  const data2 = await callAnthropicWithRetry(
-    "https://api.anthropic.com/v1/messages",
-    payload2,
-    apiKey
-  );
-  const contentBlocks2 = data2?.content || [];
-  const content = contentBlocks2
-    .map((b) => b?.text || "")
-    .join("\n")
-    .trim();
+  let content;
+
+  if (useOpenAI) {
+    // OpenAI Chat Completions API
+    const payload2 = {
+      model,
+      messages: [
+        { role: "system", content: system },
+        { role: "user", content: userContent },
+        { role: "assistant", content: JSON.stringify(parsed) },
+        {
+          role: "user",
+          content: "Now provide the concise report for the author (no JSON).",
+        },
+      ],
+      max_tokens: 2000,
+      temperature: 0.8,
+    };
+    const data2 = await callOpenAIWithRetry(
+      "https://api.openai.com/v1/chat/completions",
+      payload2,
+      apiKey
+    );
+    content = data2?.choices?.[0]?.message?.content || "";
+  } else {
+    // Anthropic Messages API
+    const payload2 = {
+      model,
+      system,
+      max_tokens: 2000,
+      temperature: 0.8,
+      messages: [
+        { role: "user", content: [{ type: "text", text: userContent }] },
+        {
+          role: "assistant",
+          content: [{ type: "text", text: JSON.stringify(parsed) }],
+        },
+        {
+          role: "user",
+          content: [
+            {
+              type: "text",
+              text: "Now provide the concise report for the author (no JSON).",
+            },
+          ],
+        },
+      ],
+    };
+    const data2 = await callAnthropicWithRetry(
+      "https://api.anthropic.com/v1/messages",
+      payload2,
+      apiKey
+    );
+    const contentBlocks2 = data2?.content || [];
+    content = contentBlocks2
+      .map((b) => b?.text || "")
+      .join("\n")
+      .trim();
+  }
 
   return { skipped: false, content: content || "(No content)", result: parsed };
 }
@@ -498,7 +631,7 @@ async function main() {
 
     const header = `Copilot PM review — automated checklist assessment`;
     const footer = skipped
-      ? "\n\n_(Set ANTHROPIC_API_KEY to enable AI review.)_"
+      ? "\n\n_(Set OPENAI_API_KEY or ANTHROPIC_API_KEY to enable AI review.)_"
       : "\n\n_(Authored by Copilot — Project Manager mode)_";
     const body = `### ${header}\n\n${content}${footer}`;
     await addComment(owner, repo, number, body);
