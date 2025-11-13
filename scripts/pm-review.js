@@ -779,7 +779,7 @@ async function main() {
           .map((si) => `- [ ] #${si.number}`)
           .join("\n");
         const taskListSection = `\n\n---\n\n## 📋 Sub-Issues\n\n${taskListItems}`;
-        
+
         // Store task list for later use
         result._taskListSection = taskListSection;
 
@@ -811,7 +811,9 @@ async function main() {
         // No reformatting needed but we have a task list to add
         const updatedBody = `${issue.body || ""}${result._taskListSection}`;
         await updateIssueBody(owner, repo, number, updatedBody);
-        console.log(`Updated parent issue #${number} body with sub-issue task list`);
+        console.log(
+          `Updated parent issue #${number} body with sub-issue task list`
+        );
       }
 
       // Apply assignment if ready and author is a contributor
