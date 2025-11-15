@@ -8,13 +8,27 @@ description: Complete state machine diagram of issue lifecycle with all paths, g
 
 This document provides a comprehensive Mermaid state machine diagram showing the complete lifecycle of an issue from creation through closure, including all possible paths, automated gates, manual gates, and transition criteria.
 
+### 📝 Code Implementation References
+
+This state machine is implemented across multiple workflows and scripts:
+
+- **Workflows**: `.github/workflows/`
+  - `issue-intake.yml` - Initial validation and PM review trigger
+  - `rebalance-on-close.yml` - Lane rebalancing automation
+  - `ai-code-review.yml` - Multi-round PR review process
+  
+- **Scripts**: `scripts/`
+  - `issue-intake.js` - Auto validation, project assignment
+  - `pm-review.js` - PM triage, lane assignment, issue splitting
+  - `rebalance-lanes.js` - Automated lane management
+
 ---
 
 ## 📊 Complete State Machine Diagram
 
 ```mermaid
 stateDiagram-v2
-    [*] --> Issue_Created: User creates issue\nwith template
+    [*] --> Issue_Created: User creates issue\with template
 
     %% Initial State
     Issue_Created: Issue Created
@@ -228,107 +242,131 @@ stateDiagram-v2
 
 ### Initial States
 
-| State               | Label | Type  | Trigger            | Next                         |
-| ------------------- | ----- | ----- | ------------------ | ---------------------------- |
-| **Issue_Created**   | 🆕    | Entry | User creates issue | Auto_Validation              |
-| **Auto_Validation** | ⚠️    | Gate  | Issue submitted    | Validation_Failed or Backlog |
+> **Implementation**: `.github/workflows/issue-intake.yml` (lines 6-7: `on: issues: types: [opened]`)
+
+| State               | Label | Type  | Trigger            | Next                         | Code Reference |
+| ------------------- | ----- | ----- | ------------------ | ---------------------------- | -------------- |
+| **Issue_Created**   | 🆕    | Entry | User creates issue | Auto_Validation              | `issue-intake.yml:6-7` |
+| **Auto_Validation** | ⚠️    | Gate  | Issue submitted    | Validation_Failed or Backlog | `issue-intake.js:1-288` |
 
 ### Validation States
 
-| State                 | Label | Type         | Meaning                   | Exit Criteria                                         |
-| --------------------- | ----- | ------------ | ------------------------- | ----------------------------------------------------- |
-| **Validation_Failed** | ⚠️    | Intermediate | Missing required fields   | Needs_Details                                         |
-| **Needs_Details**     | 📝    | Waiting      | Awaiting user updates     | Auto_Validation (updated) or Auto_Abandoned (30 days) |
-| **Auto_Abandoned**    | ❌    | Terminal     | Auto-closed (no response) | End                                                   |
+> **Implementation**: `scripts/issue-intake.js` (lines 100-288: project management, label validation)
+
+| State                 | Label | Type         | Meaning                   | Exit Criteria                                         | Code Reference |
+| --------------------- | ----- | ------------ | ------------------------- | ----------------------------------------------------- | -------------- |
+| **Validation_Failed** | ⚠️    | Intermediate | Missing required fields   | Needs_Details                                         | Issue templates: `.github/ISSUE_TEMPLATE/*.yml` |
+| **Needs_Details**     | 📝    | Waiting      | Awaiting user updates     | Auto_Validation (updated) or Auto_Abandoned (30 days) | Manual process (no automation) |
+| **Auto_Abandoned**    | ❌    | Terminal     | Auto-closed (no response) | End                                                   | Not implemented (planned) |
 
 ### Backlog & Triage States
 
-| State               | Label | Type         | Meaning                        | Exit Criteria                         |
-| ------------------- | ----- | ------------ | ------------------------------ | ------------------------------------- |
-| **Backlog**         | 📦    | Intermediate | Validated, awaiting PM review  | PM_Triage                             |
-| **PM_Triage**       | 👤    | Manual Gate  | PM reviews for scope/viability | Triage_Rejected or Assigned_Lane      |
-| **Triage_Rejected** | ❌    | Terminal     | PM rejected issue              | Closed_Rejected                       |
-| **Assigned_Lane**   | 🏷️    | Routing      | PM assigns to lane             | On_Bench, In_Hole, On_Deck, or At_Bat |
+> **Implementation**: `scripts/pm-review.js` (lines 1-926: AI-powered PM review and triage)
+
+| State               | Label | Type         | Meaning                        | Exit Criteria                         | Code Reference |
+| ------------------- | ----- | ------------ | ------------------------------ | ------------------------------------- | -------------- |
+| **Backlog**         | 📦    | Intermediate | Validated, awaiting PM review  | PM_Triage                             | `issue-intake.js:200-250` (project add) |
+| **PM_Triage**       | 👤    | Manual Gate  | PM reviews for scope/viability | Triage_Rejected or Assigned_Lane      | `pm-review.js:710-840` (generatePMReview) |
+| **Triage_Rejected** | ❌    | Terminal     | PM rejected issue              | Closed_Rejected                       | `pm-review.js` (result.ready=false) |
+| **Assigned_Lane**   | 🏷️    | Routing      | PM assigns to lane             | On_Bench, In_Hole, On_Deck, or At_Bat | `pm-review.js:740-820` (label application) |
 
 ### Lane States
 
-| State        | Label | Type   | Meaning                            | Rebalance Trigger            |
-| ------------ | ----- | ------ | ---------------------------------- | ---------------------------- |
-| **On_Bench** | Queue | Queue  | Low priority, future consideration | PM rebalance (manual)        |
-| **In_Hole**  | Queue | Queue  | Next in pipeline                   | Dependencies resolved (auto) |
-| **On_Deck**  | Queue | Queue  | Ready next                         | Previous issue closes (auto) |
-| **At_Bat**   | ⚾    | Active | Currently being worked             | Implementation starts        |
+> **Implementation**: `scripts/rebalance-lanes.js` (lines 1-360: automated lane rebalancing with 3-item caps)
+
+| State        | Label | Type   | Meaning                            | Rebalance Trigger            | Code Reference |
+| ------------ | ----- | ------ | ---------------------------------- | ---------------------------- | -------------- |
+| **On_Bench** | Queue | Queue  | Low priority, future consideration | PM rebalance (manual)        | `rebalance-lanes.js:1-360` |
+| **In_Hole**  | Queue | Queue  | Next in pipeline                   | Dependencies resolved (auto) | `rebalance-lanes.js:200-280` |
+| **On_Deck**  | Queue | Queue  | Ready next                         | Previous issue closes (auto) | `rebalance-lanes.js:200-280` |
+| **At_Bat**   | ⚾    | Active | Currently being worked             | Implementation starts        | `rebalance-lanes.js:200-280` |
+
+**Rebalancing Logic**: `.github/workflows/rebalance-on-close.yml` triggers `rebalance-lanes.js` on issue close
 
 ### Development States
 
-| State               | Label | Type   | Meaning                         | Duration   |
-| ------------------- | ----- | ------ | ------------------------------- | ---------- |
-| **Dev_Assigned**    | 💻    | Active | Developer assigned, preparation | Variable   |
-| **Dev_In_Progress** | ⏳    | Active | Branch created, coding          | Variable   |
-| **PR_Created**      | 🔀    | Active | Pull request opened             | Continuous |
+> **Implementation**: Manual developer actions tracked via GitHub PR lifecycle
+
+| State               | Label | Type   | Meaning                         | Duration   | Code Reference |
+| ------------------- | ----- | ------ | ------------------------------- | ---------- | -------------- |
+| **Dev_Assigned**    | 💻    | Active | Developer assigned, preparation | Variable   | GitHub assignees API |
+| **Dev_In_Progress** | ⏳    | Active | Branch created, coding          | Variable   | Git branch creation |
+| **PR_Created**      | 🔀    | Active | Pull request opened             | Continuous | GitHub PR API |
 
 ### PR Validation States
 
-| State                 | Label | Type         | Criteria                       | Decision                     |
-| --------------------- | ----- | ------------ | ------------------------------ | ---------------------------- |
-| **Stage_1_PR_Format** | 📋    | Auto Gate    | Format check, field validation | Pass or Fail                 |
-| **Stage_1_Fail**      | ⚠️    | Intermediate | Invalid format, missing info   | Needs_PR_Update              |
-| **Needs_PR_Update**   | 📝    | Waiting      | Developer fixes PR             | Stage_1_PR_Format (re-check) |
+> **Implementation**: `.github/workflows/ai-code-review.yml` (lines 1-403: multi-stage PR validation)
+
+| State                 | Label | Type         | Criteria                       | Decision                     | Code Reference |
+| --------------------- | ----- | ------------ | ------------------------------ | ---------------------------- | -------------- |
+| **Stage_1_PR_Format** | 📋    | Auto Gate    | Format check, field validation | Pass or Fail                 | `ai-code-review.yml:70-120` |
+| **Stage_1_Fail**      | ⚠️    | Intermediate | Invalid format, missing info   | Needs_PR_Update              | `ai-code-review.yml:120-150` |
+| **Needs_PR_Update**   | 📝    | Waiting      | Developer fixes PR             | Stage_1_PR_Format (re-check) | Manual PR updates |
 
 ### AI Code Review States
 
-| State                    | Label | Type         | Round                       | Max Rounds           |
-| ------------------------ | ----- | ------------ | --------------------------- | -------------------- |
-| **Stage_2_AI_Review**    | 🤖    | Auto Gate    | Round 1 of 3                | 3                    |
-| **AI_Comments_R1/R2/R3** | 📌    | Intermediate | AI found issues             | Auto fix or escalate |
-| **Auto_Fix_Attempt**     | 🔧    | Intermediate | Implementing model fixes    | Re-review            |
-| **Re_Review_R1/R2/R3**   | 🔄    | Auto Gate    | Re-review after fixes       | Decision             |
-| **AI_Approved_R1/R2/R3** | ✅    | Intermediate | AI approved                 | Stage_3              |
-| **Escalation_Decision**  | ⚠️    | Decision     | After Round 3 issues remain | Assign to maintainer |
+> **Implementation**: `.github/workflows/ai-code-review.yml` (lines 70-403: 3-round AI review with auto-fix)
+
+| State                    | Label | Type         | Round                       | Max Rounds           | Code Reference |
+| ------------------------ | ----- | ------------ | --------------------------- | -------------------- | -------------- |
+| **Stage_2_AI_Review**    | 🤖    | Auto Gate    | Round 1 of 3                | 3                    | `ai-code-review.yml:150-250` |
+| **AI_Comments_R1/R2/R3** | 📌    | Intermediate | AI found issues             | Auto fix or escalate | `ai-code-review.yml:200-300` |
+| **Auto_Fix_Attempt**     | 🔧    | Intermediate | Implementing model fixes    | Re-review            | `ai-code-review.yml:250-350` |
+| **Re_Review_R1/R2/R3**   | 🔄    | Auto Gate    | Re-review after fixes       | Decision             | `ai-code-review.yml:250-350` |
+| **AI_Approved_R1/R2/R3** | ✅    | Intermediate | AI approved                 | Stage_3              | `ai-code-review.yml:350-380` |
+| **Escalation_Decision**  | ⚠️    | Decision     | After Round 3 issues remain | Assign to maintainer | `ai-code-review.yml:380-403` |
 
 ### Acceptance Criteria States
 
-| State                  | Label | Type         | Validation        | Decision           |
-| ---------------------- | ----- | ------------ | ----------------- | ------------------ |
-| **Stage_3_Acceptance** | 📋    | Auto Gate    | AC verification   | Pass or Fail       |
-| **AC_Failed**          | ❌    | Intermediate | AC not met        | Needs_AC_Update    |
-| **AC_Needs_Update**    | 📋    | Waiting      | Developer updates | Stage_3_Acceptance |
+> **Implementation**: `.github/workflows/ai-code-review.yml` (Stage 3 validation)
+
+| State                  | Label | Type         | Validation        | Decision           | Code Reference |
+| ---------------------- | ----- | ------------ | ----------------- | ------------------ | -------------- |
+| **Stage_3_Acceptance** | 📋    | Auto Gate    | AC verification   | Pass or Fail       | `ai-code-review.yml` (Stage 3) |
+| **AC_Failed**          | ❌    | Intermediate | AC not met        | Needs_AC_Update    | `ai-code-review.yml` (Stage 3) |
+| **AC_Needs_Update**    | 📋    | Waiting      | Developer updates | Stage_3_Acceptance | Manual updates |
 
 ### CI/CD States
 
-| State             | Label | Type         | Checks                | Decision      |
-| ----------------- | ----- | ------------ | --------------------- | ------------- |
-| **Stage_4_CI_CD** | 🧪    | Auto Gate    | Tests, linting, build | Pass or Fail  |
-| **CI_Failed**     | ❌    | Intermediate | CI/CD failed          | Needs_CI_Fix  |
-| **CI_Needs_Fix**  | 🔧    | Waiting      | Developer fixes       | Stage_4_CI_CD |
+> **Implementation**: `.github/workflows/ai-code-review.yml` (Stage 4: CI/CD checks)
+
+| State             | Label | Type         | Checks                | Decision      | Code Reference |
+| ----------------- | ----- | ------------ | --------------------- | ------------- | -------------- |
+| **Stage_4_CI_CD** | 🧪    | Auto Gate    | Tests, linting, build | Pass or Fail  | `ai-code-review.yml` (Stage 4) |
+| **CI_Failed**     | ❌    | Intermediate | CI/CD failed          | Needs_CI_Fix  | `ai-code-review.yml` (Stage 4) |
+| **CI_Needs_Fix**  | 🔧    | Waiting      | Developer fixes       | Stage_4_CI_CD | Manual fixes |
 
 ### Human Approval States
 
-| State                 | Label | Type         | Review Scope         | Decision                       |
-| --------------------- | ----- | ------------ | -------------------- | ------------------------------ |
-| **Stage_5_Human**     | 👤    | Manual Gate  | Architecture, design | Approve or Reject              |
-| **Stage_5_Escalated** | 👤    | Manual Gate  | Escalated AI issues  | Approve or Reject              |
-| **Maintainer_Review** | 👀    | Active       | Detailed review      | Approve/Reject/Request Changes |
-| **Approval_Rejected** | 📝    | Intermediate | Changes requested    | Dev_Updates                    |
-| **Dev_Updates**       | ⏳    | Waiting      | Developer updates    | Maintainer_Review              |
+> **Implementation**: `.github/workflows/ai-code-review.yml` (Stage 5: maintainer review)
+
+| State                 | Label | Type         | Review Scope         | Decision                       | Code Reference |
+| --------------------- | ----- | ------------ | -------------------- | ------------------------------ | -------------- |
+| **Stage_5_Human**     | 👤    | Manual Gate  | Architecture, design | Approve or Reject              | `ai-code-review.yml` (Stage 5) |
+| **Stage_5_Escalated** | 👤    | Manual Gate  | Escalated AI issues  | Approve or Reject              | `ai-code-review.yml:380-403` |
+| **Maintainer_Review** | 👀    | Active       | Detailed review      | Approve/Reject/Request Changes | GitHub PR review API |
+| **Approval_Rejected** | 📝    | Intermediate | Changes requested    | Dev_Updates                    | GitHub PR review API |
+| **Dev_Updates**       | ⏳    | Waiting      | Developer updates    | Maintainer_Review              | Manual updates |
 
 ### Merge & Completion States
 
-| State                | Label | Type        | Action        | Result          |
-| -------------------- | ----- | ----------- | ------------- | --------------- |
-| **Stage_6_Merge**    | 🎉    | Auto Action | Merge to main | Success or Fail |
-| **Merged_Success**   | 🎉    | Success     | PR merged     | Issue_Complete  |
-| **Issue_Complete**   | ✅    | Completion  | Link closed   | [*] End         |
-| **Closed_Completed** | 🏁    | Terminal    | Issue closed  | End             |
+> **Implementation**: `.github/workflows/ai-code-review.yml` (Stage 6: auto-merge) + GitHub native merge
+
+| State                | Label | Type        | Action        | Result          | Code Reference |
+| -------------------- | ----- | ----------- | ------------- | --------------- | -------------- |
+| **Stage_6_Merge**    | 🎉    | Auto Action | Merge to main | Success or Fail | `ai-code-review.yml` (Stage 6) |
+| **Merged_Success**   | 🎉    | Success     | PR merged     | Issue_Complete  | GitHub merge API |
+| **Issue_Complete**   | ✅    | Completion  | Link closed   | [*] End         | GitHub PR-issue linking |
+| **Closed_Completed** | 🏁    | Terminal    | Issue closed  | End             | GitHub issue close API |
 
 ### Rejection/Alternative End States
 
-| State                  | Label | Type     | Reason               | Result |
-| ---------------------- | ----- | -------- | -------------------- | ------ |
-| **Closed_Rejected**    | 🚫    | Terminal | Failed triage        | End    |
-| **Closed_Failed**      | 🚫    | Terminal | Failed design review | End    |
-| **PR_Closed_Rejected** | ❌    | Terminal | Maintainer rejected  | End    |
-| **Manual_Completed**   | 🏁    | Terminal | Manual completion    | End    |
+| State                  | Label | Type     | Reason               | Result | Code Reference |
+| ---------------------- | ----- | -------- | -------------------- | ------ | -------------- |
+| **Closed_Rejected**    | 🚫    | Terminal | Failed triage        | End    | `pm-review.js` (rejection logic) |
+| **Closed_Failed**      | 🚫    | Terminal | Failed design review | End    | Manual close |
+| **PR_Closed_Rejected** | ❌    | Terminal | Maintainer rejected  | End    | GitHub PR close API |
+| **Manual_Completed**   | 🏁    | Terminal | Manual completion    | End    | GitHub issue close API |
 
 ---
 
@@ -336,19 +374,26 @@ stateDiagram-v2
 
 ### Automated Gates (5 Total)
 
+> **Note**: All automated gates are implemented in `.github/workflows/` and `scripts/`
+
 ```
 Gate 1: Auto Validation
 ├─ Type: Automated
+├─ Implementation: scripts/issue-intake.js (lines 1-288)
+├─ Trigger: .github/workflows/issue-intake.yml (on: issues: opened)
 ├─ Input: New issue
 ├─ Checks:
-│  ├─ All required fields present
-│  ├─ Format valid
+│  ├─ All required fields present (issue templates)
+│  ├─ Format valid (template validation)
 │  ├─ Description quality threshold
 │  └─ No obvious spam
 └─ Outcomes: Pass → Backlog OR Fail → Needs_Details
+   Code: issue-intake.js:100-150 (validation logic)
 
 Gate 2: PR Format Check (Stage 1)
 ├─ Type: Automated
+├─ Implementation: .github/workflows/ai-code-review.yml (lines 70-120)
+├─ Trigger: on: pull_request: [opened, synchronize, reopened]
 ├─ Input: Pull request
 ├─ Checks:
 │  ├─ PR format valid
@@ -357,9 +402,12 @@ Gate 2: PR Format Check (Stage 1)
 │  ├─ Links to issue
 │  └─ No empty sections
 └─ Outcomes: Pass → Stage_2 OR Fail → Needs_PR_Update
+   Code: ai-code-review.yml:70-120 (review_check step)
 
 Gate 3: Copilot Code Review (Stage 2)
 ├─ Type: Automated (up to 3 rounds)
+├─ Implementation: .github/workflows/ai-code-review.yml (lines 150-380)
+├─ Trigger: After Stage 1 passes
 ├─ Input: PR code
 ├─ Review Dimensions:
 │  ├─ Architecture & design
@@ -372,22 +420,32 @@ Gate 3: Copilot Code Review (Stage 2)
 │  └─ Patterns & conventions
 ├─ Flow:
 │  ├─ Round 1: Review → Issues? → Auto-fix
+│  │   Code: ai-code-review.yml:150-250
 │  ├─ Round 2: Review → Issues? → Auto-fix
+│  │   Code: ai-code-review.yml:250-300
 │  ├─ Round 3: Review → Issues? → Escalate
+│  │   Code: ai-code-review.yml:300-380
 │  └─ All rounds: Approval? → Stage 3
 └─ Outcomes: Approved → Stage_3 OR Issues Remain → Escalate
+   Auto-fix: ai-code-review.yml:250-350 (auto-fix logic)
+   Escalation: ai-code-review.yml:380-403 (maintainer assignment)
 
 Gate 4: Acceptance Criteria (Stage 3)
 ├─ Type: Automated
+├─ Implementation: .github/workflows/ai-code-review.yml (Stage 3)
+├─ Trigger: After Stage 2 approval
 ├─ Input: PR code + acceptance criteria
 ├─ Checks:
 │  ├─ All AC items met
 │  ├─ No regression
 │  └─ Expected behavior verified
 └─ Outcomes: Pass → Stage_4 OR Fail → Needs_AC_Update
+   Code: ai-code-review.yml (Stage 3 validation)
 
 Gate 5: CI/CD Checks (Stage 4)
 ├─ Type: Automated
+├─ Implementation: .github/workflows/ai-code-review.yml (Stage 4)
+├─ Trigger: After Stage 3 passes
 ├─ Input: PR + test suite
 ├─ Checks:
 │  ├─ Unit tests pass
@@ -396,27 +454,40 @@ Gate 5: CI/CD Checks (Stage 4)
 │  ├─ Build succeeds
 │  └─ Security scans pass
 └─ Outcomes: Pass → Stage_5 OR Fail → Needs_CI_Fix
+   Code: ai-code-review.yml (Stage 4 CI/CD)
 ```
 
 ### Manual Gates (2 Total)
 
+> **Note**: Manual gates require human decision-making and approval
+
 ```
 Gate 1: PM Triage
 ├─ Type: Manual (by PM)
+├─ Implementation: scripts/pm-review.js (lines 710-840)
+├─ Trigger: .github/workflows/issue-intake.yml (Copilot PM review step)
+├─ AI-Assisted: Claude Sonnet 4 provides recommendations
 ├─ Input: Validated issue
 ├─ Assessment:
-│  ├─ In scope?
-│  ├─ Viable?
-│  ├─ Duplicate?
-│  ├─ Right priority?
-│  └─ Appropriate lane?
+│  ├─ In scope? (pm-review.js:500-600)
+│  ├─ Viable? (pm-review.js:600-650)
+│  ├─ Duplicate? (pm-review.js:650-700)
+│  ├─ Right priority? (pm-review.js:extractPriority)
+│  └─ Appropriate lane? (pm-review.js:740-780)
 ├─ Outcomes:
 │  ├─ Reject (Triage_Rejected)
+│  │   Code: pm-review.js:result.ready=false
 │  └─ Approve + Assign Lane (On_Bench/In_Hole/On_Deck/At_Bat)
+│      Code: pm-review.js:740-820 (applyLabelsFromResult)
 └─ Escalation: If unsure, discuss with team
+   Lane Assignment: pm-review.js:740-780 (label application)
+   Issue Splitting: pm-review.js:750-790 (needsSplit logic)
+   Sub-Issue Creation: pm-review.js:760-780 (createIssue calls)
 
 Gate 2: Human Code Review (Stage 5)
 ├─ Type: Manual (by maintainer)
+├─ Implementation: .github/workflows/ai-code-review.yml (Stage 5)
+├─ Trigger: After all automated gates pass OR escalation
 ├─ Input: PR that passed all automated gates
 ├─ Assessment:
 │  ├─ Architecture alignment?
@@ -427,9 +498,12 @@ Gate 2: Human Code Review (Stage 5)
 │  └─ Strategic fit?
 ├─ Outcomes:
 │  ├─ Approve → Stage_6 (Merge)
+│  │   Code: ai-code-review.yml (Stage 6 trigger)
 │  └─ Request Changes → Dev_Updates
-│     (if escalated PR: Reject → Closed_Failed)
+│  │   (if escalated PR: Reject → Closed_Failed)
+│  │   Code: GitHub PR review API
 └─ Authority: Final approval or rejection
+   Escalation Path: ai-code-review.yml:380-403 (auto-assign maintainer)
 ```
 
 ---
@@ -709,41 +783,57 @@ Architecture aligned?
 
 ### Automatic Transitions (No Human Intervention)
 
-| From                     | To                         |                Condition |     Time |
-| ------------------------ | -------------------------- | -----------------------: | -------: |
-| **Issue_Created**        | **Auto_Validation**        |                Immediate |    0 min |
-| **Validation_Failed**    | **Needs_Details**          |                Immediate |    0 min |
-| **Needs_Details**        | **Auto_Validation**        |      User submits update | Variable |
-| **Needs_Details**        | **Auto_Abandoned**         | 30 days with no response |  30 days |
-| **Backlog**              | **PM_Triage**              |                PM review |    Hours |
-| **Auto_Validation (✅)** | **Backlog**                |          All checks pass |    0 min |
-| **Stage_2_AI_Review**    | **AI_Comments**            |             Issues found |  Minutes |
-| **AI_Comments**          | **Auto_Fix_Attempt**       | Implementing model fixes |  Minutes |
-| **Auto_Fix_Attempt**     | **Re_Review**              |        Auto-fix complete |  Minutes |
-| **Stage_3_Acceptance**   | **AC_Failed**              |               AC not met |  Minutes |
-| **AC_Failed**            | **Needs_AC_Update**        |                Immediate |    0 min |
-| **Stage_4_CI_CD**        | **CI_Failed**              |                 CI fails |  Minutes |
-| **CI_Failed**            | **Needs_CI_Fix**           |                Immediate |    0 min |
-| **Escalation_Decision**  | **Auto_Assign_Maintainer** |        After 3 AI rounds |    0 min |
-| **Stage_6_Merge**        | **Auto_Merge**             |           All gates pass |    0 min |
-| **Merged_Success**       | **Issue_Complete**         |           Merge verified |    0 min |
-| **Issue_Complete**       | **Close_Issue**            |          Update complete |    0 min |
+> **Implementation**: Automated via GitHub Actions workflows and scripts
+
+| From                     | To                         |                Condition |     Time | Code Reference |
+| ------------------------ | -------------------------- | -----------------------: | -------: | -------------- |
+| **Issue_Created**        | **Auto_Validation**        |                Immediate |    0 min | `issue-intake.yml:6-7` (trigger) |
+| **Validation_Failed**    | **Needs_Details**          |                Immediate |    0 min | Issue templates |
+| **Needs_Details**        | **Auto_Validation**        |      User submits update | Variable | Re-trigger on edit |
+| **Needs_Details**        | **Auto_Abandoned**         | 30 days with no response |  30 days | Not implemented |
+| **Backlog**              | **PM_Triage**              |                PM review |    Hours | `issue-intake.yml:42-51` |
+| **Auto_Validation (✅)** | **Backlog**                |          All checks pass |    0 min | `issue-intake.js:200-250` |
+| **Stage_2_AI_Review**    | **AI_Comments**            |             Issues found |  Minutes | `ai-code-review.yml:200-300` |
+| **AI_Comments**          | **Auto_Fix_Attempt**       | Implementing model fixes |  Minutes | `ai-code-review.yml:250-350` |
+| **Auto_Fix_Attempt**     | **Re_Review**              |        Auto-fix complete |  Minutes | `ai-code-review.yml:300-380` |
+| **Stage_3_Acceptance**   | **AC_Failed**              |               AC not met |  Minutes | `ai-code-review.yml` (Stage 3) |
+| **AC_Failed**            | **Needs_AC_Update**        |                Immediate |    0 min | Workflow logic |
+| **Stage_4_CI_CD**        | **CI_Failed**              |                 CI fails |  Minutes | `ai-code-review.yml` (Stage 4) |
+| **CI_Failed**            | **Needs_CI_Fix**           |                Immediate |    0 min | Workflow logic |
+| **Escalation_Decision**  | **Auto_Assign_Maintainer** |        After 3 AI rounds |    0 min | `ai-code-review.yml:380-403` |
+| **Stage_6_Merge**        | **Auto_Merge**             |           All gates pass |    0 min | `ai-code-review.yml` (Stage 6) |
+| **Merged_Success**       | **Issue_Complete**         |           Merge verified |    0 min | GitHub PR-issue link |
+| **Issue_Complete**       | **Close_Issue**            |          Update complete |    0 min | GitHub automation |
+
+**Lane Rebalancing (Automatic)**: `rebalance-on-close.yml` triggers `rebalance-lanes.js` on issue close
+- From: **In_Hole** → To: **On_Deck** (when dependencies resolve)
+- From: **On_Deck** → To: **At_Bat** (when previous issue closes)
+- Code: `rebalance-lanes.js:200-280` (rebalancing algorithm)
+- Trigger: `.github/workflows/rebalance-on-close.yml:6-7` (on: issues: closed)
 
 ### Manual Transitions (Require Human Action)
 
-| From                    | To                    | Actor      | Condition          |          Time |
-| ----------------------- | --------------------- | ---------- | ------------------ | ------------: |
-| **Backlog**             | **PM_Triage**         | PM         | Review submitted   |    Hours-days |
-| **PM_Triage**           | **Triage_Rejected**   | PM         | Scope assessment   |    Hours-days |
-| **PM_Triage**           | **Assigned_Lane**     | PM         | Lane assignment    |    Hours-days |
-| **At_Bat**              | **Dev_Assigned**      | Dev Lead   | Developer assigned | Minutes-hours |
-| **Dev_Assigned**        | **Dev_In_Progress**   | Developer  | Branch created     |       Minutes |
-| **Dev_In_Progress**     | **PR_Created**        | Developer  | PR submitted       |    Hours-days |
-| **Needs_PR_Update**     | **Stage_1_PR_Format** | Developer  | PR format fixed    | Minutes-hours |
-| **Dev_Updates**         | **Maintainer_Review** | Developer  | PR updated         | Minutes-hours |
-| **Stage_5_Human**       | **Merged_Success**    | Maintainer | PR approved        | Minutes-hours |
-| **Maintainer_Decision** | **Approval_Rejected** | Maintainer | Changes requested  | Minutes-hours |
-| **Approval_Rejected**   | **Maintainer_Review** | Developer  | Updates submitted  | Minutes-hours |
+> **Note**: These transitions require explicit developer or maintainer actions
+
+| From                    | To                    | Actor      | Condition          |          Time | Code Reference |
+| ----------------------- | --------------------- | ---------- | ------------------ | ------------: | -------------- |
+| **Backlog**             | **PM_Triage**         | PM         | Review submitted   |    Hours-days | `pm-review.js:710-840` |
+| **PM_Triage**           | **Triage_Rejected**   | PM         | Scope assessment   |    Hours-days | `pm-review.js:result.ready=false` |
+| **PM_Triage**           | **Assigned_Lane**     | PM         | Lane assignment    |    Hours-days | `pm-review.js:740-820` |
+| **At_Bat**              | **Dev_Assigned**      | Dev Lead   | Developer assigned | Minutes-hours | GitHub assignees |
+| **Dev_Assigned**        | **Dev_In_Progress**   | Developer  | Branch created     |       Minutes | Git branch |
+| **Dev_In_Progress**     | **PR_Created**        | Developer  | PR submitted       |    Hours-days | GitHub PR |
+| **Needs_PR_Update**     | **Stage_1_PR_Format** | Developer  | PR format fixed    | Minutes-hours | Manual PR edit |
+| **Dev_Updates**         | **Maintainer_Review** | Developer  | PR updated         | Minutes-hours | Manual PR update |
+| **Stage_5_Human**       | **Merged_Success**    | Maintainer | PR approved        | Minutes-hours | GitHub PR review |
+| **Maintainer_Decision** | **Approval_Rejected** | Maintainer | Changes requested  | Minutes-hours | GitHub PR review |
+| **Approval_Rejected**   | **Maintainer_Review** | Developer  | Updates submitted  | Minutes-hours | Manual updates |
+
+**Issue Splitting (Semi-Automatic)**: PM review may split large issues
+- Trigger: `pm-review.js:result.needsSplit=true`
+- Creates: Multiple sub-issues with parent reference
+- Code: `pm-review.js:750-790` (sub-issue creation loop)
+- Task List: `pm-review.js:780-820` (appends checklist to parent)
 
 ---
 
@@ -755,6 +845,128 @@ Architecture aligned?
 | **1 Fix Iteration**      | Hours-Half Day | 2         | 1        | No         | 2            | 100%                      |
 | **2 Fix Iterations**     | Half Day       | 3         | 2        | No         | 2            | 100%                      |
 | **Escalation**           | Half Day-Day   | 3         | 2        | Yes        | 3            | 95%                       |
+
+---
+
+## 📦 Implementation File Reference
+
+### Primary Workflows (`.github/workflows/`)
+
+| File | Purpose | Key Lines | States Implemented |
+|------|---------|-----------|-------------------|
+| **issue-intake.yml** | Issue creation trigger and PM review | 1-51 | Issue_Created → Auto_Validation → PM_Triage |
+| **rebalance-on-close.yml** | Lane rebalancing on issue close | 1-37 | Lane transitions (In_Hole → On_Deck → At_Bat) |
+| **ai-code-review.yml** | Multi-stage PR review process | 1-403 | Stage_1 through Stage_6 (all PR gates) |
+
+### Core Scripts (`scripts/`)
+
+| File | Purpose | Key Functions | Lines |
+|------|---------|---------------|-------|
+| **issue-intake.js** | Initial issue validation and project setup | `getProject()`, `addIssueToProject()`, `setProjectItemStatus()` | 1-288 |
+| **pm-review.js** | AI-powered PM triage and analysis | `generatePMReview()`, `applyLabelsFromResult()`, `createIssue()` | 1-926 |
+| **rebalance-lanes.js** | Automated lane management with caps | `rebalanceLanes()`, `extractScore()`, `extractIndependence()` | 1-360 |
+
+### Supporting Files
+
+| File | Purpose | States/Gates Affected |
+|------|---------|----------------------|
+| `.github/ISSUE_TEMPLATE/*.yml` | Issue validation templates | Auto_Validation gate |
+| `.github/prompts/pm-review.md` | PM review system prompt | PM_Triage gate |
+| `.github/prompts/modes/project-manager.md` | Lane management rules | Lane assignment logic |
+
+### Key Implementation Details
+
+**Issue Intake Flow**:
+```
+issue-intake.yml (trigger)
+  ↓
+issue-intake.js:main() (lines 200-288)
+  ├─ addIssueToProject() (lines 150-200)
+  ├─ setProjectItemStatus() (lines 220-250)
+  └─ applyLabels() (lines 250-280)
+  ↓
+pm-review.js:main() (lines 710-840)
+  ├─ generatePMReview() (lines 500-700)
+  ├─ applyLabelsFromResult() (lines 740-820)
+  └─ Optional: splitLargeIssue() (lines 750-790)
+```
+
+**Lane Rebalancing Flow**:
+```
+rebalance-on-close.yml (trigger: issue closed)
+  ↓
+rebalance-lanes.js:main() (lines 280-360)
+  ├─ fetchAllIssues() (lines 100-150)
+  ├─ filterReadyIssues() (lines 150-200)
+  ├─ rankByCriteria() (lines 200-250)
+  │   ├─ extractScore() (lines 35-50)
+  │   ├─ extractIndependence() (lines 50-70)
+  │   └─ extractSize() (lines 70-90)
+  └─ assignToLanes() (lines 250-280)
+      └─ updateProjectStatus() (lines 220-250)
+```
+
+**PR Review Flow**:
+```
+ai-code-review.yml (trigger: PR opened/updated)
+  ↓
+Stage 1: PR Format Check (lines 70-120)
+  ├─ Get PR details
+  ├─ Validate format
+  └─ Check issue linking
+  ↓
+Stage 2: AI Code Review - Round 1 (lines 150-250)
+  ├─ Copilot analyzes code
+  ├─ Issues found? → Auto-fix attempt
+  └─ Round 2 (lines 250-300)
+      ├─ Re-review after fixes
+      └─ Round 3 (lines 300-380)
+          ├─ Final review
+          └─ Still issues? → Escalate (lines 380-403)
+  ↓
+Stage 3: Acceptance Criteria (Stage 3 section)
+  ├─ Verify AC met
+  └─ Check regression
+  ↓
+Stage 4: CI/CD Checks (Stage 4 section)
+  ├─ Run tests
+  ├─ Linting
+  └─ Build verification
+  ↓
+Stage 5: Human Review (Stage 5 section)
+  ├─ Maintainer approval gate
+  └─ Manual decision
+  ↓
+Stage 6: Auto-Merge (Stage 6 section)
+  └─ Merge to main
+```
+
+### Environment Variables Reference
+
+**Issue Intake** (`issue-intake.yml`):
+- `GITHUB_TOKEN` - GitHub API access
+- `TOKEN` / `PROJECTS_TOKEN` - Projects v2 API access (user-owned projects)
+- `ANTHROPIC_API_KEY` - Claude API for PM review
+- `PM_MODEL` - AI model selection (default: `claude-sonnet-4-20250514`)
+
+**Rebalancing** (`rebalance-on-close.yml`):
+- `GITHUB_TOKEN` - GitHub API access
+- `PROJECT_NUMBER` - Target project (default: 1)
+- `PROJECT_STATUS_FIELD_NAME` - Status field name (default: "Status")
+
+**AI Code Review** (`ai-code-review.yml`):
+- `GITHUB_TOKEN` - GitHub API access for PR operations
+- Additional AI API keys as configured
+
+---
+
+## 🔗 Related Documentation
+
+- **Project Manager Mode**: `.github/prompts/modes/project-manager.md`
+- **Independence Guide**: `.github/prompts/INDEPENDENCE_GUIDE.md`
+- **Label Validation**: `.github/prompts/LABEL_VALIDATION_GUIDE.md`
+- **Issue Templates**: `.github/ISSUE_TEMPLATE/*.yml`
+- **Workflow Testing**: `scripts/TEST_LIFECYCLE_README.md`
 | **Validation Failure**   | Variable       | 0         | 0        | No         | 1            | 70% (30% abandon)         |
 | **PM Rejection**         | Hours          | 0         | 0        | No         | 1            | 0% (terminal)             |
 | **Maintainer Rejection** | Day+           | 3         | 2        | Yes        | 3            | 0% (terminal or redesign) |
