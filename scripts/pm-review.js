@@ -717,11 +717,55 @@ async function main() {
     const number = event?.issue?.number;
     if (!number) throw new Error("Issue number not found in event payload");
 
+    // Determine if this is a re-evaluation scenario
+    const eventAction = event?.action || "opened";
+    const isReEvaluation =
+      eventAction === "edited" ||
+      eventAction === "created" || // comment created
+      eventAction === "edited"; // comment edited
+
+    // For comment events, check if it's from the issue author or a contributor
+    if (event.comment) {
+      const commentAuthor = event.comment.user?.login;
+      const issueAuthor = event.issue.user?.login;
+
+      // Only re-evaluate if comment is from issue author or a contributor
+      const isAuthorOrContributor =
+        commentAuthor === issueAuthor ||
+        (await isContributor(owner, repo, commentAuthor));
+
+      if (!isAuthorOrContributor) {
+        console.log(
+          `Skipping re-evaluation: comment from non-contributor ${commentAuthor}`
+        );
+        return;
+      }
+
+      console.log(
+        `Re-evaluating issue #${number} due to ${eventAction} comment from ${commentAuthor}`
+      );
+    } else if (isReEvaluation) {
+      console.log(`Re-evaluating issue #${number} due to issue ${eventAction}`);
+    }
+
     const issue = await getIssue(owner, repo, number);
     const labelsText = (issue.labels || [])
       .map((l) => (typeof l === "string" ? l : l.name))
       .filter(Boolean)
       .join(", ");
+
+    // Skip re-evaluation if issue is already approved by human
+    const hasImplementationReady = (issue.labels || []).some((l) => {
+      const name = typeof l === "string" ? l : l.name;
+      return name && name.toLowerCase().includes("implementation ready");
+    });
+
+    if (isReEvaluation && hasImplementationReady) {
+      console.log(
+        `Skipping re-evaluation: issue #${number} already has human approval (implementation ready)`
+      );
+      return;
+    }
 
     const { skipped, content, result } = await generatePMReview({
       title: issue.title,
@@ -751,13 +795,21 @@ async function main() {
           `Issue #${number} is too large and will be split into ${result.subIssues.length} sub-issues.`
         );
 
+        // Detect [TI] prefix from parent issue title
+        const testIssuePrefix = issue.title.match(/^\[TI\]/i) ? "[TI] " : "";
+        if (testIssuePrefix) {
+          console.log(`✓ Detected test issue prefix, will apply to sub-issues`);
+        }
+
         const createdSubIssues = [];
         for (const subIssue of result.subIssues) {
           const subBody = `${subIssue.body}\n\n---\n\n**Parent Issue:** #${number}`;
+          // Prepend [TI] prefix if parent has it
+          const subTitle = testIssuePrefix + subIssue.title;
           const created = await createIssue(
             owner,
             repo,
-            subIssue.title,
+            subTitle,
             subBody,
             subIssue.labels || []
           );
@@ -897,7 +949,7 @@ async function applyLabelsFromResult(
 ) {
   const current = toNameSet(existingLabels);
 
-  // Apply exactly what the AI returned - no business logic here
+  // Apply exactly what the AI returned - but filter out approval labels (human-only)
   const adds = new Set(
     Array.isArray(result?.labels?.add) ? result.labels.add : []
   );
@@ -905,8 +957,19 @@ async function applyLabelsFromResult(
     Array.isArray(result?.labels?.remove) ? result.labels.remove : []
   );
 
+  // Filter: AI cannot add labels containing "approv" (human collaborators only)
+  const filteredAdds = Array.from(adds).filter((label) => {
+    if (label.toLowerCase().includes("approv")) {
+      console.log(
+        `⚠️  Filtered out "${label}" - only human collaborators can apply approval labels`
+      );
+      return false;
+    }
+    return true;
+  });
+
   // Ensure labels exist before setting
-  const finalAdds = Array.from(adds).filter((n) => !current.has(n));
+  const finalAdds = filteredAdds.filter((n) => !current.has(n));
   for (const name of finalAdds) {
     await ensureLabel(owner, repo, name, "d4c5f9");
     current.add(name);

@@ -192,7 +192,7 @@ function makeGitHubRequest(path, method, data) {
 async function checkExistingIssue(title) {
   try {
     const encodedTitle = encodeURIComponent(title);
-    const searchPath = `/search/issues?q=${encodedTitle}+in:title+repo:${REPO_OWNER}/${REPO_NAME}+type:issue`;
+    const searchPath = `/search/issues?q=${encodedTitle}+in:title+repo:${REPO_OWNER}/${REPO_NAME}+type:issue+state:open`;
     const result = await makeGitHubRequest(searchPath, "GET");
 
     // Check if any of the results match the exact title
@@ -205,8 +205,6 @@ async function checkExistingIssue(title) {
     return null;
   }
 }
-
-
 
 /**
  * Create a GitHub issue from data and optionally add it to a project
