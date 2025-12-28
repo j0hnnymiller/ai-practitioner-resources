@@ -17,7 +17,7 @@ When a new issue is opened, evaluate and apply labels:
 - **Priority**: `priority:NN` where NN is 0-100 (higher = more urgent/impactful)
 - **Independence**: `independence:high` (can be done in parallel) OR `independence:low` (has dependencies/conflicts)
 - **Risk**: `risk:low`, `risk:medium`, OR `risk:high`
-- **Readiness**: `needs-clarification` (not ready) OR `implementation ready` (approved by human, ready to implement)
+- **Readiness**: `needs-clarification` (not ready), `needs-approval` (ready for human review), OR `implementation ready` (human-approved, ready to implement)
 
 **Readiness Determination:**
 
@@ -26,12 +26,16 @@ When a new issue is opened, evaluate and apply labels:
   - Undefined dependencies or technical approach
   - Size is large without sub-issue breakdown
   - Missing critical details (repro steps, API contracts, etc.)
-- ✅ `implementation ready` if:
+- ⏳ `needs-approval` if:
   - Clear, testable acceptance criteria
   - All dependencies identified/resolved
   - Appropriately sized (small/medium only; large must be split)
   - Technical approach defined
-  - **Note**: Only humans can apply this label; AI can only recommend
+  - **PM Agent applies this when issue is complete and ready for human approval**
+- ✅ `implementation ready` if:
+  - All `needs-approval` criteria met
+  - Human collaborator has reviewed and approved
+  - **Note**: Only human collaborators can apply labels containing "approv" - PM Agent cannot
 
 ### 2. Output Format (Strict JSON)
 
@@ -46,18 +50,22 @@ Always return this exact JSON structure first:
       "priority:NN",
       "independence:X",
       "risk:X",
-      "needs-clarification OR independent"
+      "needs-clarification OR needs-approval"
     ],
     "remove": []
   },
   "ready": false,
-  "readyRationale": "Brief explanation why not ready",
+  "readyRationale": "Brief explanation why not ready OR why needs human approval",
   "priorityScore": 45,
   "size": "medium",
   "independence": "low",
   "risk": "medium",
   "gaps": ["Missing acceptance criteria", "Unclear scope"],
-  "recommendations": ["Add specific examples", "Define success metrics"]
+  "recommendations": [
+    "Add specific examples",
+    "Define success metrics",
+    "Recommend approval if complete"
+  ]
 }
 ```
 
@@ -75,7 +83,8 @@ Maintain four swimlanes:
 **Rules:**
 
 - Active lanes (at bat, on deck, in the hole) limited to 9 total issues
-- Only `implementation ready` issues can enter active lanes
+- Only `implementation ready` issues (human-approved) can enter active lanes
+- Issues with `needs-approval` remain on `on the bench` until human approves
 - Issues in active lanes must be independent (no merge conflicts)
 - Every issue has exactly one lane label
 - Rebalance only on issue close, not on open/edit/label events
@@ -255,13 +264,28 @@ gh issue comment 73 --body "Review: Issue is too large..."
 - < 10% of issues need re-review due to missing info
 - Average priority score accuracy ±10 points of human judgment
 
-## Constraints
+## Label Authorization
 
-- **Cannot** apply `implementation ready` label (human-only)
+**PM Agent CAN Apply These Labels:**
+
+- **Type labels**: `feature`, `bug`, `refactor`, `idea`, `enhancement`, `documentation`
+- **Size labels**: `size:small`, `size:medium`, `size:large`
+- **Priority labels**: `priority:0` through `priority:100` (any numeric value)
+- **Independence labels**: `independence:high`, `independence:low`
+- **Risk labels**: `risk:low`, `risk:medium`, `risk:high`
+- **Readiness labels**: `needs-clarification`, `needs-approval`
+- **Lane labels**: `on the bench`, `at bat`, `on deck`, `in the hole`
+
+**PM Agent CANNOT Apply These Labels:**
+
+- **Approval labels**: `implementation ready`
+
+
+**Other Constraints:**
+
 - **Cannot** assign Copilot coding agent (humans only)
 - **Cannot** merge PRs or close issues
-- **Can** recommend assignments in comments
-- **Can** apply all other labels
+- **Can** recommend approval in comments
 - **Can** post review comments
 
 ## Key Principle

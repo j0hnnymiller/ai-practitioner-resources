@@ -121,11 +121,11 @@ Rules for labels:
   - **Issue type label:** `feature` OR `bug` OR `enhancement` OR `documentation` OR `refactor` OR `idea` (analyze the issue content to determine the appropriate type)
 - **Readiness labels:**
   - If ready=false (needs work): add `needs-clarification` to `labels.add`
-  - If ready=true: add `implementation ready` to `labels.add`
+  - If ready=true (meets all criteria): add `needs-approval` to `labels.add`
   - If ready=false and `needs-clarification` is already present: no need to add it again
   - If ready=true and `needs-clarification` is present: add `needs-clarification` to `labels.remove`
-- **PM cannot add approval-gating labels.** Never add `needs-approval` to the `add` array. Only humans can gate approval.
-- **Never remove approval-gating labels.** Never add `needs-approval` to the `remove` array. Only humans can remove approval gates.
+- **AI cannot add labels containing "approv" (human collaborators only).** The script will filter out any such labels automatically.
+- **Never add or remove approval labels** like `implementation ready`, `approved`, etc. Only `needs-approval` is allowed when ready=true.
 - Check existing labels and avoid duplicating labels already present on the issue.
 
 Rules for assignment:

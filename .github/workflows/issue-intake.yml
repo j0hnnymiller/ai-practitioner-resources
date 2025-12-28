@@ -3,7 +3,9 @@ name: Issue Intake
 on:
   workflow_dispatch:
   issues:
-    types: [opened]
+    types: [opened, edited]
+  issue_comment:
+    types: [created, edited]
 
 permissions:
   issues: write
