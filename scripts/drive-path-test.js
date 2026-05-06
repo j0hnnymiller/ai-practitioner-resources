@@ -32,8 +32,22 @@ const PROJECT_NUMBER = Number(process.env.PROJECT_NUMBER || 5);
 const PROJECT_STATUS_FIELD_NAME =
   process.env.PROJECT_STATUS_FIELD_NAME || "Status";
 const LANE_LABELS = ["at bat", "on deck", "in the hole", "on the bench"];
+const COMMENT_DELAY_MS = 60 * 1000;
+const SECONDARY_RATE_LIMIT_BASE_DELAY_MS = 15 * 1000;
 
 let projectContextPromise;
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function isSecondaryRateLimit(status, text) {
+  return status === 403 && /secondary rate limit/i.test(text);
+}
+
+function secondaryRateLimitDelayMs(attempt) {
+  return SECONDARY_RATE_LIMIT_BASE_DELAY_MS * 2 ** (attempt - 1);
+}
 
 // ─── GitHub REST helpers ──────────────────────────────────────────────────────
 
@@ -60,16 +74,28 @@ async function ghPost(path, body) {
     console.log(`  [DRY] POST ${path}`, JSON.stringify(body).slice(0, 120));
     return {};
   }
-  const res = await fetch(`${API}${path}`, {
-    method: "POST",
-    headers: baseHeaders(),
-    body: JSON.stringify(body),
-  });
-  if (!res.ok) {
+
+  for (let attempt = 1; attempt <= 4; attempt += 1) {
+    const res = await fetch(`${API}${path}`, {
+      method: "POST",
+      headers: baseHeaders(),
+      body: JSON.stringify(body),
+    });
+
+    if (res.ok) {
+      return res.json();
+    }
+
     const text = await res.text();
+    if (isSecondaryRateLimit(res.status, text) && attempt < 4) {
+      await sleep(secondaryRateLimitDelayMs(attempt));
+      continue;
+    }
+
     throw new Error(`POST ${path}: ${res.status} — ${text}`);
   }
-  return res.json();
+
+  return {};
 }
 
 async function ghPatch(path, body) {
@@ -106,22 +132,62 @@ async function ghDelete(path) {
 }
 
 async function ghGraphQL(query, variables) {
-  const res = await fetch(GRAPHQL_API, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${TOKEN}`,
-      Accept: "application/vnd.github+json",
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ query, variables }),
-  });
+  let lastError = null;
 
-  const data = await res.json();
-  if (!res.ok || data.errors) {
-    throw new Error(`GraphQL error: ${JSON.stringify(data.errors || data)}`);
+  for (let attempt = 1; attempt <= 4; attempt += 1) {
+    try {
+      const res = await fetch(GRAPHQL_API, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${TOKEN}`,
+          Accept: "application/vnd.github+json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ query, variables }),
+      });
+
+      const text = await res.text();
+      if (isSecondaryRateLimit(res.status, text) && attempt < 4) {
+        await sleep(secondaryRateLimitDelayMs(attempt));
+        continue;
+      }
+
+      let data;
+
+      try {
+        data = JSON.parse(text);
+      } catch (error) {
+        const retryableText = /^<!DOCTYPE html>/i.test(text.trim());
+        if (retryableText && attempt < 4) {
+          await new Promise((resolve) => setTimeout(resolve, attempt * 1000));
+          continue;
+        }
+
+        throw error;
+      }
+
+      if ((!res.ok || data.errors) && attempt < 4 && res.status >= 500) {
+        await new Promise((resolve) => setTimeout(resolve, attempt * 1000));
+        continue;
+      }
+
+      if (!res.ok || data.errors) {
+        throw new Error(
+          `GraphQL error: ${JSON.stringify(data.errors || data)}`,
+        );
+      }
+
+      return data.data;
+    } catch (error) {
+      lastError = error;
+      if (attempt < 4) {
+        await new Promise((resolve) => setTimeout(resolve, attempt * 1000));
+        continue;
+      }
+    }
   }
 
-  return data.data;
+  throw lastError;
 }
 
 // ─── Issue operations ─────────────────────────────────────────────────────────
@@ -154,7 +220,20 @@ async function updateBody(number, body) {
 }
 
 async function postComment(number, markdown) {
-  await ghPost(`${issuePath(number)}/comments`, { body: markdown });
+  try {
+    await ghPost(`${issuePath(number)}/comments`, { body: markdown });
+    if (!DRY_RUN) {
+      await sleep(COMMENT_DELAY_MS);
+    }
+  } catch (error) {
+    if (/secondary rate limit/i.test(String(error.message || error))) {
+      console.warn(
+        `  Warning: skipped comment on #${number} due to GitHub secondary rate limit`,
+      );
+      return;
+    }
+    throw error;
+  }
 }
 
 async function getProjectContext() {
