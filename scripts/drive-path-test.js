@@ -15,7 +15,9 @@
 
 const fetch = require("node-fetch");
 
-const TOKEN =
+const REST_TOKEN =
+  process.env.GITHUB_TOKEN || process.env.TOKEN || process.env.PROJECTS_TOKEN;
+const PROJECT_TOKEN =
   process.env.PROJECTS_TOKEN || process.env.TOKEN || process.env.GITHUB_TOKEN;
 const REPO =
   process.env.GITHUB_REPOSITORY ||
@@ -54,7 +56,7 @@ function secondaryRateLimitDelayMs(attempt) {
 
 function baseHeaders() {
   return {
-    Authorization: `Bearer ${TOKEN}`,
+    Authorization: `Bearer ${REST_TOKEN}`,
     Accept: "application/vnd.github+json",
     "X-GitHub-Api-Version": "2022-11-28",
     "Content-Type": "application/json",
@@ -140,7 +142,7 @@ async function ghGraphQL(query, variables) {
       const res = await fetch(GRAPHQL_API, {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${TOKEN}`,
+          Authorization: `Bearer ${PROJECT_TOKEN}`,
           Accept: "application/vnd.github+json",
           "Content-Type": "application/json",
         },
@@ -727,8 +729,10 @@ async function driveIssue(number) {
 // ─── Main ─────────────────────────────────────────────────────────────────────
 
 async function main() {
-  if (!TOKEN) {
-    console.error("GITHUB_TOKEN or TOKEN environment variable must be set");
+  if (!REST_TOKEN || !PROJECT_TOKEN) {
+    console.error(
+      "GITHUB_TOKEN or TOKEN must be set for repo access, and PROJECTS_TOKEN, TOKEN, or GITHUB_TOKEN must be set for project access",
+    );
     process.exit(1);
   }
 
