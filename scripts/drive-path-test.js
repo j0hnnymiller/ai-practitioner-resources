@@ -15,7 +15,8 @@
 
 const fetch = require("node-fetch");
 
-const TOKEN = process.env.GITHUB_TOKEN || process.env.TOKEN;
+const TOKEN =
+  process.env.PROJECTS_TOKEN || process.env.TOKEN || process.env.GITHUB_TOKEN;
 const REPO =
   process.env.GITHUB_REPOSITORY ||
   "JohnMichaelMiller/ai-practitioner-resources";
@@ -244,16 +245,33 @@ async function getProjectContext() {
 }
 
 async function loadProjectContext() {
-  const query = `query($login:String!,$number:Int!){ user(login:$login){ projectV2(number:$number){ id number fields(first:100){ nodes{ __typename ... on ProjectV2FieldCommon { id name } ... on ProjectV2SingleSelectField { id name options{ id name } } } } } } }`;
-  const data = await ghGraphQL(query, {
-    login: PROJECT_OWNER,
-    number: PROJECT_NUMBER,
-  });
-  const project = data?.user?.projectV2;
+  const fieldFragments = `fields(first:100){ nodes{ __typename ... on ProjectV2FieldCommon { id name } ... on ProjectV2SingleSelectField { id name options{ id name } } } }`;
+  const orgQuery = `query($login:String!,$number:Int!){ organization(login:$login){ projectV2(number:$number){ id number ${fieldFragments} } } }`;
+  const userQuery = `query($login:String!,$number:Int!){ user(login:$login){ projectV2(number:$number){ id number ${fieldFragments} } } }`;
+
+  let project = null;
+
+  try {
+    const orgData = await ghGraphQL(orgQuery, {
+      login: PROJECT_OWNER,
+      number: PROJECT_NUMBER,
+    });
+    project = orgData?.organization?.projectV2 || null;
+  } catch (_) {
+    project = null;
+  }
+
+  if (!project) {
+    const userData = await ghGraphQL(userQuery, {
+      login: PROJECT_OWNER,
+      number: PROJECT_NUMBER,
+    });
+    project = userData?.user?.projectV2 || null;
+  }
 
   if (!project) {
     throw new Error(
-      `Project ${PROJECT_NUMBER} not found for user ${PROJECT_OWNER}`,
+      `Project ${PROJECT_NUMBER} not found for owner ${PROJECT_OWNER}`,
     );
   }
 
