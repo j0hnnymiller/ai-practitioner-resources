@@ -61,6 +61,28 @@ ai-practitioner-resources/
 └── README.md                          # This file
 ```
 
+## Workflow Path Artifacts
+
+The issue lifecycle test paths are now derived directly from the Mermaid state diagram in [ISSUE_LIFECYCLE_STATE_DIAGRAM.md](.github/workflows/ISSUE_LIFECYCLE_STATE_DIAGRAM.md).
+
+Current workflow:
+
+```bash
+npm run generate:path-artifacts
+npm run validate:path-artifacts
+pwsh -File scripts/create-path-issues.ps1
+```
+
+What each step does:
+
+1. `generate:path-artifacts` regenerates [docs/transition-catalog.json](docs/transition-catalog.json) and [docs/path-test-issues.seed.json](docs/path-test-issues.seed.json) together from one diagram snapshot.
+2. `validate:path-artifacts` confirms the checked-in diagram, catalog, and seed are internally consistent.
+3. `create-path-issues.ps1` renders GitHub issues only from the generated seed data.
+
+CI enforcement:
+
+- [validate-path-artifacts.yml](.github/workflows/validate-path-artifacts.yml) runs on relevant pushes and pull requests, regenerates the artifacts, validates them, and executes the focused artifact tests.
+
 ## 🤖 Automated Weekly Updates
 
 This project features **fully automated weekly resource generation** using GitHub Actions:

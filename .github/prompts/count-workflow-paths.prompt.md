@@ -5,6 +5,13 @@ description: "Count all unique paths through a workflow state machine by analyzi
 
 Given the possible entry points into the workflow and all of the possible end points, how many unique paths through the workflow exist?
 
+Note: this prompt is now primarily a reasoning aid for understanding the path count. The repository's operational source of truth is the generated artifact flow:
+
+1. Update `.github/workflows/ISSUE_LIFECYCLE_STATE_DIAGRAM.md`.
+2. Run `npm run generate:path-artifacts`.
+3. Run `npm run validate:path-artifacts`.
+4. Run `pwsh -File scripts/create-path-issues.ps1` if GitHub issues need to be created from the generated seed.
+
 To answer this:
 
 1. Locate the state machine diagram for this repository (look for a file like `ISSUE_LIFECYCLE_STATE_DIAGRAM.md` or a Mermaid `stateDiagram` in `.github/workflows/`).
@@ -24,8 +31,9 @@ To answer this:
 
 7. Capture the numeric Number of the **'Workflow Testing'** GitHub project for the repository owner using: `gh project list --owner <owner> --format json` and extract the `id` field from the project with title `Workflow Testing`.
 
-8. For each unique path found, create a GitHub issue describing the exact path that issue should follow:
+8. If you are explicitly creating workflow path issues from this analysis, prefer the generated seed path flow instead of manually authoring issue bodies. For each unique path found, create a GitHub issue describing the exact path that issue should follow:
    - **Title**: `[Workflow Path Test] <exit_state> via <key_branch>` (e.g. `[Workflow Path Test] Merged via On_Bench, AI Round 2 Pass`)
+   - **Body** must match the structured data rendered from `docs/path-test-issues.seed.json` rather than an ad hoc hand-written summary.
    - **Body** must include (use `\n\n` between each item to produce blank lines in the rendered issue):
      - A numbered list of every state in the path in order, where each entry shows: `<step>. <current_state> → <transition_trigger> → <next_state>` (e.g. `1. Issue_Created → issue created → Auto_Validation`)
      - The expected label applied at each state transition (e.g. `Step 4: label "needs-details" applied`)

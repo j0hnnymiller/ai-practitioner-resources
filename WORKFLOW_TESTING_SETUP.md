@@ -155,7 +155,35 @@ The following scripts need to be modified to filter by project:
 2. `scripts/pm-review.js` - Only review issues in target project
 3. `scripts/issue-intake.js` - May need project assignment logic
 
-See `PROJECT_AWARENESS_MIGRATION.md` for detailed migration steps.
+See `PROJECT_AWARENESS_MIGRATION.md` for the full transition-automation implementation plan, including project awareness, workflow observation, real-vs-simulated transition coverage, and rollout phases.
+
+## Diagram-Derived Workflow Path Issues
+
+Workflow path issues are now generated from the lifecycle diagram rather than maintained as hardcoded issue templates.
+
+Manual workflow:
+
+```bash
+npm run generate:path-artifacts
+npm run validate:path-artifacts
+```
+
+Then create issues from the generated seed:
+
+```powershell
+pwsh -File scripts/create-path-issues.ps1
+```
+
+Artifacts involved:
+
+- [docs/transition-catalog.json](docs/transition-catalog.json)
+- [docs/path-test-issues.seed.json](docs/path-test-issues.seed.json)
+- [scripts/generate-path-artifacts.js](scripts/generate-path-artifacts.js)
+- [scripts/validate-path-artifacts.js](scripts/validate-path-artifacts.js)
+
+CI enforcement:
+
+- [validate-path-artifacts.yml](.github/workflows/validate-path-artifacts.yml) regenerates the catalog and seed together, validates the checked-in artifacts, and runs the focused artifact tests on relevant pull requests and pushes.
 
 ## Troubleshooting
 

@@ -1,0 +1,1668 @@
+{
+  "schemaVersion": 1,
+  "generated": "2026-05-06",
+  "generatedBy": "scripts/generate-transition-catalog.js",
+  "derivationRulesVersion": 1,
+  "sourceDiagram": ".github/workflows/ISSUE_LIFECYCLE_STATE_DIAGRAM.md",
+  "description": "Generated transition catalog derived from the lifecycle state diagram using repository-specific action rules.",
+  "transitionClasses": {
+    "A": "Real repository automation",
+    "B": "Manual or GitHub-native transition",
+    "C": "Diagram-only or simulated transition"
+  },
+  "transitions": [
+    {
+      "transitionId": "issue-created_to_auto-validation",
+      "fromState": "Issue_Created",
+      "toState": "Auto_Validation",
+      "trigger": "Issue created",
+      "triggerType": "issues.opened",
+      "transitionClass": "A",
+      "actingRole": "repository-automation",
+      "verificationMode": "real workflow",
+      "owningImplementation": {
+        "workflow": ".github/workflows/issue-intake.yml",
+        "script": "scripts/issue-intake.js"
+      },
+      "testStrategy": "observe_issue_intake_for_issue-created_to_auto-validation",
+      "requiredFixtureType": "test-issue",
+      "expectedObservableEffects": [
+        "issue-intake workflow run exists",
+        "state advances toward Auto_Validation"
+      ],
+      "implementationPromptPolicy": null
+    },
+    {
+      "transitionId": "auto-validation_to_validation-failed",
+      "fromState": "Auto_Validation",
+      "toState": "Validation_Failed",
+      "trigger": "Validation fails",
+      "triggerType": "issues.opened",
+      "transitionClass": "A",
+      "actingRole": "repository-automation",
+      "verificationMode": "real workflow",
+      "owningImplementation": {
+        "workflow": ".github/workflows/issue-intake.yml",
+        "script": "scripts/issue-intake.js"
+      },
+      "testStrategy": "observe_issue_intake_for_auto-validation_to_validation-failed",
+      "requiredFixtureType": "test-issue",
+      "expectedObservableEffects": [
+        "issue-intake workflow run exists",
+        "state advances toward Validation_Failed"
+      ],
+      "implementationPromptPolicy": null
+    },
+    {
+      "transitionId": "validation-failed_to_needs-details",
+      "fromState": "Validation_Failed",
+      "toState": "Needs_Details",
+      "trigger": "Request details",
+      "triggerType": "issues.opened",
+      "transitionClass": "A",
+      "actingRole": "repository-automation",
+      "verificationMode": "real workflow",
+      "owningImplementation": {
+        "workflow": ".github/workflows/issue-intake.yml",
+        "script": "scripts/issue-intake.js"
+      },
+      "testStrategy": "observe_issue_intake_for_validation-failed_to_needs-details",
+      "requiredFixtureType": "test-issue",
+      "expectedObservableEffects": [
+        "issue-intake workflow run exists",
+        "needs-details artifact is posted"
+      ],
+      "implementationPromptPolicy": null
+    },
+    {
+      "transitionId": "needs-details_to_auto-validation",
+      "fromState": "Needs_Details",
+      "toState": "Auto_Validation",
+      "trigger": "User updates",
+      "triggerType": "issues.edited",
+      "transitionClass": "A",
+      "actingRole": "submitter",
+      "verificationMode": "real workflow",
+      "owningImplementation": {
+        "workflow": ".github/workflows/issue-intake.yml",
+        "script": "scripts/issue-intake.js"
+      },
+      "testStrategy": "observe_issue_intake_for_needs-details_to_auto-validation",
+      "requiredFixtureType": "test-issue",
+      "expectedObservableEffects": [
+        "issue-intake workflow run exists",
+        "state advances toward Auto_Validation"
+      ],
+      "implementationPromptPolicy": null
+    },
+    {
+      "transitionId": "needs-details_to_auto-abandoned",
+      "fromState": "Needs_Details",
+      "toState": "Auto_Abandoned",
+      "trigger": "No response - 30d",
+      "triggerType": "schedule|workflow_dispatch",
+      "transitionClass": "A",
+      "actingRole": "repository-automation",
+      "verificationMode": "real workflow",
+      "owningImplementation": {
+        "workflow": ".github/workflows/stale-issues.yml",
+        "script": null
+      },
+      "testStrategy": "trigger_stale_workflow_on_eligible_issue_and_observe_abandonment",
+      "requiredFixtureType": "aged-test-issue",
+      "expectedObservableEffects": [
+        "auto-abandoned label applied",
+        "issue closed after inactivity policy is met"
+      ],
+      "implementationPromptPolicy": null
+    },
+    {
+      "transitionId": "auto-validation_to_backlog",
+      "fromState": "Auto_Validation",
+      "toState": "Backlog",
+      "trigger": "Pass validation",
+      "triggerType": "issues.opened",
+      "transitionClass": "A",
+      "actingRole": "repository-automation",
+      "verificationMode": "real workflow",
+      "owningImplementation": {
+        "workflow": ".github/workflows/issue-intake.yml",
+        "script": "scripts/issue-intake.js"
+      },
+      "testStrategy": "observe_issue_intake_for_auto-validation_to_backlog",
+      "requiredFixtureType": "test-issue",
+      "expectedObservableEffects": [
+        "issue-intake workflow run exists",
+        "state advances toward Backlog"
+      ],
+      "implementationPromptPolicy": null
+    },
+    {
+      "transitionId": "backlog_to_pm-triage",
+      "fromState": "Backlog",
+      "toState": "PM_Triage",
+      "trigger": "To triage",
+      "triggerType": "maintainer-triage",
+      "transitionClass": "B",
+      "actingRole": "maintainer",
+      "verificationMode": "manual contract",
+      "owningImplementation": {
+        "workflow": null,
+        "script": "scripts/pm-review.js"
+      },
+      "testStrategy": "simulate_pm_triage_entry_and_assert_pm_review_artifact",
+      "requiredFixtureType": "test-issue",
+      "expectedObservableEffects": [
+        "PM review artifact exists"
+      ],
+      "implementationPromptPolicy": null
+    },
+    {
+      "transitionId": "pm-triage_to_triage-rejected",
+      "fromState": "PM_Triage",
+      "toState": "Triage_Rejected",
+      "trigger": "Reject",
+      "triggerType": "maintainer-triage-decision",
+      "transitionClass": "B",
+      "actingRole": "maintainer",
+      "verificationMode": "manual contract",
+      "owningImplementation": {
+        "workflow": null,
+        "script": "scripts/pm-review.js"
+      },
+      "testStrategy": "simulate_pm_triage_decision_for_triage-rejected",
+      "requiredFixtureType": "test-issue",
+      "expectedObservableEffects": [
+        "rejection artifact is recorded"
+      ],
+      "implementationPromptPolicy": null
+    },
+    {
+      "transitionId": "triage-rejected_to_closed-rejected",
+      "fromState": "Triage_Rejected",
+      "toState": "Closed_Rejected",
+      "trigger": "Close",
+      "triggerType": "modeled-monitor-state",
+      "transitionClass": "C",
+      "actingRole": "harness",
+      "verificationMode": "simulated",
+      "owningImplementation": {
+        "workflow": null,
+        "script": null
+      },
+      "testStrategy": "simulate_lane_monitor_transition_for_triage-rejected_to_closed-rejected",
+      "requiredFixtureType": "test-issue",
+      "expectedObservableEffects": [
+        "simulation note recorded for lane-monitor transition"
+      ],
+      "implementationPromptPolicy": null
+    },
+    {
+      "transitionId": "pm-triage_to_assigned-lane",
+      "fromState": "PM_Triage",
+      "toState": "Assigned_Lane",
+      "trigger": "Assign lane",
+      "triggerType": "maintainer-triage-decision",
+      "transitionClass": "B",
+      "actingRole": "maintainer",
+      "verificationMode": "manual contract",
+      "owningImplementation": {
+        "workflow": null,
+        "script": "scripts/pm-review.js"
+      },
+      "testStrategy": "simulate_pm_triage_decision_for_assigned-lane",
+      "requiredFixtureType": "test-issue",
+      "expectedObservableEffects": [
+        "lane assignment artifact reflects Assigned_Lane"
+      ],
+      "implementationPromptPolicy": null
+    },
+    {
+      "transitionId": "assigned-lane_to_on-bench",
+      "fromState": "Assigned_Lane",
+      "toState": "On_Bench",
+      "trigger": "Low priority",
+      "triggerType": "maintainer-triage-decision",
+      "transitionClass": "B",
+      "actingRole": "maintainer",
+      "verificationMode": "manual contract",
+      "owningImplementation": {
+        "workflow": null,
+        "script": "scripts/pm-review.js"
+      },
+      "testStrategy": "simulate_pm_triage_decision_for_on-bench",
+      "requiredFixtureType": "test-issue",
+      "expectedObservableEffects": [
+        "lane assignment artifact reflects On_Bench"
+      ],
+      "implementationPromptPolicy": null
+    },
+    {
+      "transitionId": "assigned-lane_to_in-hole",
+      "fromState": "Assigned_Lane",
+      "toState": "In_Hole",
+      "trigger": "With dependencies",
+      "triggerType": "maintainer-triage-decision",
+      "transitionClass": "B",
+      "actingRole": "maintainer",
+      "verificationMode": "manual contract",
+      "owningImplementation": {
+        "workflow": null,
+        "script": "scripts/pm-review.js"
+      },
+      "testStrategy": "simulate_pm_triage_decision_for_in-hole",
+      "requiredFixtureType": "test-issue",
+      "expectedObservableEffects": [
+        "lane assignment artifact reflects In_Hole"
+      ],
+      "implementationPromptPolicy": null
+    },
+    {
+      "transitionId": "assigned-lane_to_on-deck",
+      "fromState": "Assigned_Lane",
+      "toState": "On_Deck",
+      "trigger": "Next in line",
+      "triggerType": "maintainer-triage-decision",
+      "transitionClass": "B",
+      "actingRole": "maintainer",
+      "verificationMode": "manual contract",
+      "owningImplementation": {
+        "workflow": null,
+        "script": "scripts/pm-review.js"
+      },
+      "testStrategy": "simulate_pm_triage_decision_for_on-deck",
+      "requiredFixtureType": "test-issue",
+      "expectedObservableEffects": [
+        "lane assignment artifact reflects On_Deck"
+      ],
+      "implementationPromptPolicy": null
+    },
+    {
+      "transitionId": "assigned-lane_to_at-bat",
+      "fromState": "Assigned_Lane",
+      "toState": "At_Bat",
+      "trigger": "Ready now",
+      "triggerType": "maintainer-triage-decision",
+      "transitionClass": "B",
+      "actingRole": "maintainer",
+      "verificationMode": "manual contract",
+      "owningImplementation": {
+        "workflow": null,
+        "script": "scripts/pm-review.js"
+      },
+      "testStrategy": "simulate_pm_triage_decision_for_at-bat",
+      "requiredFixtureType": "test-issue",
+      "expectedObservableEffects": [
+        "lane assignment artifact reflects At_Bat"
+      ],
+      "implementationPromptPolicy": "standard-at-bat-prompt"
+    },
+    {
+      "transitionId": "on-bench_to_bench-check",
+      "fromState": "On_Bench",
+      "toState": "Bench_Check",
+      "trigger": "Monitor",
+      "triggerType": "modeled-monitor-state",
+      "transitionClass": "C",
+      "actingRole": "harness",
+      "verificationMode": "simulated",
+      "owningImplementation": {
+        "workflow": null,
+        "script": null
+      },
+      "testStrategy": "simulate_lane_monitor_transition_for_on-bench_to_bench-check",
+      "requiredFixtureType": "test-issue",
+      "expectedObservableEffects": [
+        "simulation note recorded for lane-monitor transition"
+      ],
+      "implementationPromptPolicy": null
+    },
+    {
+      "transitionId": "bench-check_to_rebalance-bench",
+      "fromState": "Bench_Check",
+      "toState": "Rebalance_Bench",
+      "trigger": "Rebalance trigger",
+      "triggerType": "modeled-monitor-state",
+      "transitionClass": "C",
+      "actingRole": "harness",
+      "verificationMode": "simulated",
+      "owningImplementation": {
+        "workflow": null,
+        "script": null
+      },
+      "testStrategy": "simulate_lane_monitor_transition_for_bench-check_to_rebalance-bench",
+      "requiredFixtureType": "test-issue",
+      "expectedObservableEffects": [
+        "simulation note recorded for lane-monitor transition"
+      ],
+      "implementationPromptPolicy": null
+    },
+    {
+      "transitionId": "rebalance-bench_to_in-hole",
+      "fromState": "Rebalance_Bench",
+      "toState": "In_Hole",
+      "trigger": "",
+      "triggerType": "issues.closed|workflow_dispatch",
+      "transitionClass": "A",
+      "actingRole": "repository-automation",
+      "verificationMode": "real workflow",
+      "owningImplementation": {
+        "workflow": ".github/workflows/rebalance-on-close.yml",
+        "script": "scripts/rebalance-lanes.js"
+      },
+      "testStrategy": "observe_rebalance_transition_for_rebalance-bench_to_in-hole",
+      "requiredFixtureType": "test-issue",
+      "expectedObservableEffects": [
+        "rebalance workflow run exists",
+        "lane artifact reflects In_Hole"
+      ],
+      "implementationPromptPolicy": null
+    },
+    {
+      "transitionId": "in-hole_to_hole-check",
+      "fromState": "In_Hole",
+      "toState": "Hole_Check",
+      "trigger": "Monitor",
+      "triggerType": "modeled-monitor-state",
+      "transitionClass": "C",
+      "actingRole": "harness",
+      "verificationMode": "simulated",
+      "owningImplementation": {
+        "workflow": null,
+        "script": null
+      },
+      "testStrategy": "simulate_lane_monitor_transition_for_in-hole_to_hole-check",
+      "requiredFixtureType": "test-issue",
+      "expectedObservableEffects": [
+        "simulation note recorded for lane-monitor transition"
+      ],
+      "implementationPromptPolicy": null
+    },
+    {
+      "transitionId": "hole-check_to_rebalance-hole",
+      "fromState": "Hole_Check",
+      "toState": "Rebalance_Hole",
+      "trigger": "Rebalance trigger",
+      "triggerType": "modeled-monitor-state",
+      "transitionClass": "C",
+      "actingRole": "harness",
+      "verificationMode": "simulated",
+      "owningImplementation": {
+        "workflow": null,
+        "script": null
+      },
+      "testStrategy": "simulate_lane_monitor_transition_for_hole-check_to_rebalance-hole",
+      "requiredFixtureType": "test-issue",
+      "expectedObservableEffects": [
+        "simulation note recorded for lane-monitor transition"
+      ],
+      "implementationPromptPolicy": null
+    },
+    {
+      "transitionId": "rebalance-hole_to_on-deck",
+      "fromState": "Rebalance_Hole",
+      "toState": "On_Deck",
+      "trigger": "",
+      "triggerType": "issues.closed|workflow_dispatch",
+      "transitionClass": "A",
+      "actingRole": "repository-automation",
+      "verificationMode": "real workflow",
+      "owningImplementation": {
+        "workflow": ".github/workflows/rebalance-on-close.yml",
+        "script": "scripts/rebalance-lanes.js"
+      },
+      "testStrategy": "observe_rebalance_transition_for_rebalance-hole_to_on-deck",
+      "requiredFixtureType": "test-issue",
+      "expectedObservableEffects": [
+        "rebalance workflow run exists",
+        "lane artifact reflects On_Deck"
+      ],
+      "implementationPromptPolicy": null
+    },
+    {
+      "transitionId": "on-deck_to_deck-check",
+      "fromState": "On_Deck",
+      "toState": "Deck_Check",
+      "trigger": "Monitor",
+      "triggerType": "modeled-monitor-state",
+      "transitionClass": "C",
+      "actingRole": "harness",
+      "verificationMode": "simulated",
+      "owningImplementation": {
+        "workflow": null,
+        "script": null
+      },
+      "testStrategy": "simulate_lane_monitor_transition_for_on-deck_to_deck-check",
+      "requiredFixtureType": "test-issue",
+      "expectedObservableEffects": [
+        "simulation note recorded for lane-monitor transition"
+      ],
+      "implementationPromptPolicy": null
+    },
+    {
+      "transitionId": "deck-check_to_rebalance-deck",
+      "fromState": "Deck_Check",
+      "toState": "Rebalance_Deck",
+      "trigger": "Rebalance trigger",
+      "triggerType": "modeled-monitor-state",
+      "transitionClass": "C",
+      "actingRole": "harness",
+      "verificationMode": "simulated",
+      "owningImplementation": {
+        "workflow": null,
+        "script": null
+      },
+      "testStrategy": "simulate_lane_monitor_transition_for_deck-check_to_rebalance-deck",
+      "requiredFixtureType": "test-issue",
+      "expectedObservableEffects": [
+        "simulation note recorded for lane-monitor transition"
+      ],
+      "implementationPromptPolicy": null
+    },
+    {
+      "transitionId": "rebalance-deck_to_at-bat",
+      "fromState": "Rebalance_Deck",
+      "toState": "At_Bat",
+      "trigger": "",
+      "triggerType": "issues.closed|workflow_dispatch",
+      "transitionClass": "A",
+      "actingRole": "repository-automation",
+      "verificationMode": "real workflow",
+      "owningImplementation": {
+        "workflow": ".github/workflows/rebalance-on-close.yml",
+        "script": "scripts/rebalance-lanes.js"
+      },
+      "testStrategy": "observe_rebalance_transition_for_rebalance-deck_to_at-bat",
+      "requiredFixtureType": "test-issue",
+      "expectedObservableEffects": [
+        "rebalance workflow run exists",
+        "lane artifact reflects At_Bat"
+      ],
+      "implementationPromptPolicy": "standard-at-bat-prompt"
+    },
+    {
+      "transitionId": "at-bat_to_ac-check",
+      "fromState": "At_Bat",
+      "toState": "AC_Check",
+      "trigger": "Verify AC",
+      "triggerType": "modeled-at-bat-progress",
+      "transitionClass": "C",
+      "actingRole": "harness",
+      "verificationMode": "simulated",
+      "owningImplementation": {
+        "workflow": null,
+        "script": null
+      },
+      "testStrategy": "simulate_issue_side_progress_for_at-bat_to_ac-check",
+      "requiredFixtureType": "test-issue",
+      "expectedObservableEffects": [
+        "simulation artifact reflects AC_Check"
+      ],
+      "implementationPromptPolicy": "standard-at-bat-prompt"
+    },
+    {
+      "transitionId": "ac-check_to_dev-assigned",
+      "fromState": "AC_Check",
+      "toState": "Dev_Assigned",
+      "trigger": "AC Ready",
+      "triggerType": "modeled-at-bat-progress",
+      "transitionClass": "C",
+      "actingRole": "harness",
+      "verificationMode": "simulated",
+      "owningImplementation": {
+        "workflow": null,
+        "script": null
+      },
+      "testStrategy": "simulate_issue_side_progress_for_ac-check_to_dev-assigned",
+      "requiredFixtureType": "test-issue",
+      "expectedObservableEffects": [
+        "implementation prompt executes when issue reaches At_Bat"
+      ],
+      "implementationPromptPolicy": null
+    },
+    {
+      "transitionId": "ac-check_to_needs-prep",
+      "fromState": "AC_Check",
+      "toState": "Needs_Prep",
+      "trigger": "AC Needed",
+      "triggerType": "modeled-at-bat-progress",
+      "transitionClass": "C",
+      "actingRole": "maintainer",
+      "verificationMode": "simulated",
+      "owningImplementation": {
+        "workflow": null,
+        "script": null
+      },
+      "testStrategy": "simulate_issue_side_progress_for_ac-check_to_needs-prep",
+      "requiredFixtureType": "test-issue",
+      "expectedObservableEffects": [
+        "simulation artifact reflects Needs_Prep"
+      ],
+      "implementationPromptPolicy": null
+    },
+    {
+      "transitionId": "needs-prep_to_ac-check",
+      "fromState": "Needs_Prep",
+      "toState": "AC_Check",
+      "trigger": "",
+      "triggerType": "modeled-at-bat-progress",
+      "transitionClass": "C",
+      "actingRole": "harness",
+      "verificationMode": "simulated",
+      "owningImplementation": {
+        "workflow": null,
+        "script": null
+      },
+      "testStrategy": "simulate_issue_side_progress_for_needs-prep_to_ac-check",
+      "requiredFixtureType": "test-issue",
+      "expectedObservableEffects": [
+        "simulation artifact reflects AC_Check"
+      ],
+      "implementationPromptPolicy": null
+    },
+    {
+      "transitionId": "dev-assigned_to_dev-in-progress",
+      "fromState": "Dev_Assigned",
+      "toState": "Dev_In_Progress",
+      "trigger": "Create branch",
+      "triggerType": "developer-action",
+      "transitionClass": "B",
+      "actingRole": "developer",
+      "verificationMode": "manual contract",
+      "owningImplementation": {
+        "workflow": null,
+        "script": null
+      },
+      "testStrategy": "simulate_developer_action_for_dev-assigned_to_dev-in-progress",
+      "requiredFixtureType": "test-issue",
+      "expectedObservableEffects": [
+        "developer artifact reflects Dev_In_Progress"
+      ],
+      "implementationPromptPolicy": null
+    },
+    {
+      "transitionId": "dev-in-progress_to_pr-created",
+      "fromState": "Dev_In_Progress",
+      "toState": "PR_Created",
+      "trigger": "Create PR",
+      "triggerType": "modeled-review-loop",
+      "transitionClass": "C",
+      "actingRole": "harness",
+      "verificationMode": "simulated",
+      "owningImplementation": {
+        "workflow": null,
+        "script": null
+      },
+      "testStrategy": "simulate_review_loop_for_dev-in-progress_to_pr-created",
+      "requiredFixtureType": "test-pr",
+      "expectedObservableEffects": [
+        "simulation artifact records review-loop progression"
+      ],
+      "implementationPromptPolicy": null
+    },
+    {
+      "transitionId": "pr-created_to_stage-1-pr-format",
+      "fromState": "PR_Created",
+      "toState": "Stage_1_PR_Format",
+      "trigger": "Validate format",
+      "triggerType": "pull_request.opened|pull_request.synchronize|pull_request.reopened",
+      "transitionClass": "A",
+      "actingRole": "repository-automation",
+      "verificationMode": "real workflow",
+      "owningImplementation": {
+        "workflow": ".github/workflows/ai-code-review.yml",
+        "script": null
+      },
+      "testStrategy": "observe_ai_review_workflow_for_pr-created_to_stage-1-pr-format",
+      "requiredFixtureType": "test-pr",
+      "expectedObservableEffects": [
+        "ai-code-review workflow run exists",
+        "review artifact reflects Stage_1_PR_Format"
+      ],
+      "implementationPromptPolicy": null
+    },
+    {
+      "transitionId": "stage-1-pr-format_to_stage-1-fail",
+      "fromState": "Stage_1_PR_Format",
+      "toState": "Stage_1_Fail",
+      "trigger": "Invalid",
+      "triggerType": "pull_request.opened|pull_request.synchronize|pull_request.reopened",
+      "transitionClass": "A",
+      "actingRole": "repository-automation",
+      "verificationMode": "real workflow",
+      "owningImplementation": {
+        "workflow": ".github/workflows/ai-code-review.yml",
+        "script": null
+      },
+      "testStrategy": "observe_ai_review_workflow_for_stage-1-pr-format_to_stage-1-fail",
+      "requiredFixtureType": "test-pr",
+      "expectedObservableEffects": [
+        "ai-code-review workflow run exists",
+        "review artifact reflects Stage_1_Fail"
+      ],
+      "implementationPromptPolicy": null
+    },
+    {
+      "transitionId": "stage-1-fail_to_needs-pr-update",
+      "fromState": "Stage_1_Fail",
+      "toState": "Needs_PR_Update",
+      "trigger": "Update PR",
+      "triggerType": "pull_request.opened|pull_request.synchronize|pull_request.reopened",
+      "transitionClass": "A",
+      "actingRole": "repository-automation",
+      "verificationMode": "real workflow",
+      "owningImplementation": {
+        "workflow": ".github/workflows/ai-code-review.yml",
+        "script": null
+      },
+      "testStrategy": "observe_ai_review_workflow_for_stage-1-fail_to_needs-pr-update",
+      "requiredFixtureType": "test-pr",
+      "expectedObservableEffects": [
+        "ai-code-review workflow run exists",
+        "review artifact reflects Needs_PR_Update"
+      ],
+      "implementationPromptPolicy": null
+    },
+    {
+      "transitionId": "needs-pr-update_to_stage-1-pr-format",
+      "fromState": "Needs_PR_Update",
+      "toState": "Stage_1_PR_Format",
+      "trigger": "",
+      "triggerType": "developer-follow-up",
+      "transitionClass": "B",
+      "actingRole": "developer",
+      "verificationMode": "manual contract",
+      "owningImplementation": {
+        "workflow": null,
+        "script": null
+      },
+      "testStrategy": "simulate_developer_follow_up_for_needs-pr-update_to_stage-1-pr-format",
+      "requiredFixtureType": "test-pr",
+      "expectedObservableEffects": [
+        "follow-up commit or update artifact exists"
+      ],
+      "implementationPromptPolicy": null
+    },
+    {
+      "transitionId": "stage-1-pr-format_to_stage-2-ai-review",
+      "fromState": "Stage_1_PR_Format",
+      "toState": "Stage_2_AI_Review",
+      "trigger": "Valid - Start review",
+      "triggerType": "pull_request.opened|pull_request.synchronize|pull_request.reopened",
+      "transitionClass": "A",
+      "actingRole": "repository-automation",
+      "verificationMode": "real workflow",
+      "owningImplementation": {
+        "workflow": ".github/workflows/ai-code-review.yml",
+        "script": null
+      },
+      "testStrategy": "observe_ai_review_workflow_for_stage-1-pr-format_to_stage-2-ai-review",
+      "requiredFixtureType": "test-pr",
+      "expectedObservableEffects": [
+        "ai-code-review workflow run exists",
+        "review artifact reflects Stage_2_AI_Review"
+      ],
+      "implementationPromptPolicy": null
+    },
+    {
+      "transitionId": "stage-2-ai-review_to_review-r1",
+      "fromState": "Stage_2_AI_Review",
+      "toState": "Review_R1",
+      "trigger": "Begin review",
+      "triggerType": "modeled-review-loop",
+      "transitionClass": "C",
+      "actingRole": "harness",
+      "verificationMode": "simulated",
+      "owningImplementation": {
+        "workflow": null,
+        "script": null
+      },
+      "testStrategy": "simulate_review_loop_for_stage-2-ai-review_to_review-r1",
+      "requiredFixtureType": "test-pr",
+      "expectedObservableEffects": [
+        "simulation artifact records review-loop progression"
+      ],
+      "implementationPromptPolicy": null
+    },
+    {
+      "transitionId": "review-r1_to_check-r1",
+      "fromState": "Review_R1",
+      "toState": "Check_R1",
+      "trigger": "Evaluate",
+      "triggerType": "modeled-review-loop",
+      "transitionClass": "C",
+      "actingRole": "harness",
+      "verificationMode": "simulated",
+      "owningImplementation": {
+        "workflow": null,
+        "script": null
+      },
+      "testStrategy": "simulate_review_loop_for_review-r1_to_check-r1",
+      "requiredFixtureType": "test-pr",
+      "expectedObservableEffects": [
+        "simulation artifact records review-loop progression"
+      ],
+      "implementationPromptPolicy": null
+    },
+    {
+      "transitionId": "check-r1_to_ai-comments-r1",
+      "fromState": "Check_R1",
+      "toState": "AI_Comments_R1",
+      "trigger": "Issues found",
+      "triggerType": "modeled-review-loop",
+      "transitionClass": "C",
+      "actingRole": "harness",
+      "verificationMode": "simulated",
+      "owningImplementation": {
+        "workflow": null,
+        "script": null
+      },
+      "testStrategy": "simulate_review_loop_for_check-r1_to_ai-comments-r1",
+      "requiredFixtureType": "test-pr",
+      "expectedObservableEffects": [
+        "simulation artifact records review-loop progression"
+      ],
+      "implementationPromptPolicy": null
+    },
+    {
+      "transitionId": "check-r1_to_ai-approved-r1",
+      "fromState": "Check_R1",
+      "toState": "AI_Approved_R1",
+      "trigger": "No issues",
+      "triggerType": "modeled-review-loop",
+      "transitionClass": "C",
+      "actingRole": "harness",
+      "verificationMode": "simulated",
+      "owningImplementation": {
+        "workflow": null,
+        "script": null
+      },
+      "testStrategy": "simulate_review_loop_for_check-r1_to_ai-approved-r1",
+      "requiredFixtureType": "test-pr",
+      "expectedObservableEffects": [
+        "simulation artifact records review-loop progression"
+      ],
+      "implementationPromptPolicy": null
+    },
+    {
+      "transitionId": "ai-comments-r1_to_auto-fix-attempt",
+      "fromState": "AI_Comments_R1",
+      "toState": "Auto_Fix_Attempt",
+      "trigger": "Auto fix",
+      "triggerType": "modeled-review-loop",
+      "transitionClass": "C",
+      "actingRole": "harness",
+      "verificationMode": "simulated",
+      "owningImplementation": {
+        "workflow": null,
+        "script": null
+      },
+      "testStrategy": "simulate_review_loop_for_ai-comments-r1_to_auto-fix-attempt",
+      "requiredFixtureType": "test-pr",
+      "expectedObservableEffects": [
+        "simulation artifact records review-loop progression"
+      ],
+      "implementationPromptPolicy": null
+    },
+    {
+      "transitionId": "auto-fix-attempt_to_re-review-r1",
+      "fromState": "Auto_Fix_Attempt",
+      "toState": "Re_Review_R1",
+      "trigger": "Re-review",
+      "triggerType": "modeled-review-loop",
+      "transitionClass": "C",
+      "actingRole": "harness",
+      "verificationMode": "simulated",
+      "owningImplementation": {
+        "workflow": null,
+        "script": null
+      },
+      "testStrategy": "simulate_review_loop_for_auto-fix-attempt_to_re-review-r1",
+      "requiredFixtureType": "test-pr",
+      "expectedObservableEffects": [
+        "simulation artifact records review-loop progression"
+      ],
+      "implementationPromptPolicy": null
+    },
+    {
+      "transitionId": "re-review-r1_to_check-r2",
+      "fromState": "Re_Review_R1",
+      "toState": "Check_R2",
+      "trigger": "Evaluate",
+      "triggerType": "modeled-review-loop",
+      "transitionClass": "C",
+      "actingRole": "harness",
+      "verificationMode": "simulated",
+      "owningImplementation": {
+        "workflow": null,
+        "script": null
+      },
+      "testStrategy": "simulate_review_loop_for_re-review-r1_to_check-r2",
+      "requiredFixtureType": "test-pr",
+      "expectedObservableEffects": [
+        "simulation artifact records review-loop progression"
+      ],
+      "implementationPromptPolicy": null
+    },
+    {
+      "transitionId": "check-r2_to_ai-comments-r2",
+      "fromState": "Check_R2",
+      "toState": "AI_Comments_R2",
+      "trigger": "Issues found",
+      "triggerType": "modeled-review-loop",
+      "transitionClass": "C",
+      "actingRole": "harness",
+      "verificationMode": "simulated",
+      "owningImplementation": {
+        "workflow": null,
+        "script": null
+      },
+      "testStrategy": "simulate_review_loop_for_check-r2_to_ai-comments-r2",
+      "requiredFixtureType": "test-pr",
+      "expectedObservableEffects": [
+        "simulation artifact records review-loop progression"
+      ],
+      "implementationPromptPolicy": null
+    },
+    {
+      "transitionId": "check-r2_to_ai-approved-r2",
+      "fromState": "Check_R2",
+      "toState": "AI_Approved_R2",
+      "trigger": "No issues",
+      "triggerType": "modeled-review-loop",
+      "transitionClass": "C",
+      "actingRole": "harness",
+      "verificationMode": "simulated",
+      "owningImplementation": {
+        "workflow": null,
+        "script": null
+      },
+      "testStrategy": "simulate_review_loop_for_check-r2_to_ai-approved-r2",
+      "requiredFixtureType": "test-pr",
+      "expectedObservableEffects": [
+        "simulation artifact records review-loop progression"
+      ],
+      "implementationPromptPolicy": null
+    },
+    {
+      "transitionId": "ai-comments-r2_to_auto-fix-attempt-2",
+      "fromState": "AI_Comments_R2",
+      "toState": "Auto_Fix_Attempt_2",
+      "trigger": "Auto fix",
+      "triggerType": "modeled-review-loop",
+      "transitionClass": "C",
+      "actingRole": "harness",
+      "verificationMode": "simulated",
+      "owningImplementation": {
+        "workflow": null,
+        "script": null
+      },
+      "testStrategy": "simulate_review_loop_for_ai-comments-r2_to_auto-fix-attempt-2",
+      "requiredFixtureType": "test-pr",
+      "expectedObservableEffects": [
+        "simulation artifact records review-loop progression"
+      ],
+      "implementationPromptPolicy": null
+    },
+    {
+      "transitionId": "auto-fix-attempt-2_to_re-review-r2",
+      "fromState": "Auto_Fix_Attempt_2",
+      "toState": "Re_Review_R2",
+      "trigger": "Re-review",
+      "triggerType": "modeled-review-loop",
+      "transitionClass": "C",
+      "actingRole": "harness",
+      "verificationMode": "simulated",
+      "owningImplementation": {
+        "workflow": null,
+        "script": null
+      },
+      "testStrategy": "simulate_review_loop_for_auto-fix-attempt-2_to_re-review-r2",
+      "requiredFixtureType": "test-pr",
+      "expectedObservableEffects": [
+        "simulation artifact records review-loop progression"
+      ],
+      "implementationPromptPolicy": null
+    },
+    {
+      "transitionId": "re-review-r2_to_check-r3",
+      "fromState": "Re_Review_R2",
+      "toState": "Check_R3",
+      "trigger": "Evaluate",
+      "triggerType": "modeled-review-loop",
+      "transitionClass": "C",
+      "actingRole": "harness",
+      "verificationMode": "simulated",
+      "owningImplementation": {
+        "workflow": null,
+        "script": null
+      },
+      "testStrategy": "simulate_review_loop_for_re-review-r2_to_check-r3",
+      "requiredFixtureType": "test-pr",
+      "expectedObservableEffects": [
+        "simulation artifact records review-loop progression"
+      ],
+      "implementationPromptPolicy": null
+    },
+    {
+      "transitionId": "check-r3_to_ai-comments-r3",
+      "fromState": "Check_R3",
+      "toState": "AI_Comments_R3",
+      "trigger": "Issues remain",
+      "triggerType": "modeled-review-loop",
+      "transitionClass": "C",
+      "actingRole": "harness",
+      "verificationMode": "simulated",
+      "owningImplementation": {
+        "workflow": null,
+        "script": null
+      },
+      "testStrategy": "simulate_review_loop_for_check-r3_to_ai-comments-r3",
+      "requiredFixtureType": "test-pr",
+      "expectedObservableEffects": [
+        "simulation artifact records review-loop progression"
+      ],
+      "implementationPromptPolicy": null
+    },
+    {
+      "transitionId": "check-r3_to_ai-approved-r3",
+      "fromState": "Check_R3",
+      "toState": "AI_Approved_R3",
+      "trigger": "No issues",
+      "triggerType": "modeled-review-loop",
+      "transitionClass": "C",
+      "actingRole": "harness",
+      "verificationMode": "simulated",
+      "owningImplementation": {
+        "workflow": null,
+        "script": null
+      },
+      "testStrategy": "simulate_review_loop_for_check-r3_to_ai-approved-r3",
+      "requiredFixtureType": "test-pr",
+      "expectedObservableEffects": [
+        "simulation artifact records review-loop progression"
+      ],
+      "implementationPromptPolicy": null
+    },
+    {
+      "transitionId": "ai-comments-r3_to_escalation-decision",
+      "fromState": "AI_Comments_R3",
+      "toState": "Escalation_Decision",
+      "trigger": "Escalate after R3",
+      "triggerType": "modeled-review-loop",
+      "transitionClass": "C",
+      "actingRole": "harness",
+      "verificationMode": "simulated",
+      "owningImplementation": {
+        "workflow": null,
+        "script": null
+      },
+      "testStrategy": "simulate_review_loop_for_ai-comments-r3_to_escalation-decision",
+      "requiredFixtureType": "test-pr",
+      "expectedObservableEffects": [
+        "simulation artifact records review-loop progression"
+      ],
+      "implementationPromptPolicy": null
+    },
+    {
+      "transitionId": "escalation-decision_to_auto-assign-maintainer",
+      "fromState": "Escalation_Decision",
+      "toState": "Auto_Assign_Maintainer",
+      "trigger": "Assign to human",
+      "triggerType": "modeled-review-loop",
+      "transitionClass": "C",
+      "actingRole": "harness",
+      "verificationMode": "simulated",
+      "owningImplementation": {
+        "workflow": null,
+        "script": null
+      },
+      "testStrategy": "simulate_review_loop_for_escalation-decision_to_auto-assign-maintainer",
+      "requiredFixtureType": "test-pr",
+      "expectedObservableEffects": [
+        "simulation artifact records review-loop progression"
+      ],
+      "implementationPromptPolicy": null
+    },
+    {
+      "transitionId": "auto-assign-maintainer_to_stage-5-escalated",
+      "fromState": "Auto_Assign_Maintainer",
+      "toState": "Stage_5_Escalated",
+      "trigger": "",
+      "triggerType": "modeled-review-loop",
+      "transitionClass": "C",
+      "actingRole": "harness",
+      "verificationMode": "simulated",
+      "owningImplementation": {
+        "workflow": null,
+        "script": null
+      },
+      "testStrategy": "simulate_review_loop_for_auto-assign-maintainer_to_stage-5-escalated",
+      "requiredFixtureType": "test-pr",
+      "expectedObservableEffects": [
+        "simulation artifact records review-loop progression"
+      ],
+      "implementationPromptPolicy": null
+    },
+    {
+      "transitionId": "ai-approved-r2_to_stage-3-acceptance",
+      "fromState": "AI_Approved_R2",
+      "toState": "Stage_3_Acceptance",
+      "trigger": "",
+      "triggerType": "modeled-review-loop",
+      "transitionClass": "C",
+      "actingRole": "harness",
+      "verificationMode": "simulated",
+      "owningImplementation": {
+        "workflow": null,
+        "script": null
+      },
+      "testStrategy": "simulate_review_loop_for_ai-approved-r2_to_stage-3-acceptance",
+      "requiredFixtureType": "test-pr",
+      "expectedObservableEffects": [
+        "simulation artifact records review-loop progression"
+      ],
+      "implementationPromptPolicy": null
+    },
+    {
+      "transitionId": "ai-approved-r1_to_stage-3-acceptance",
+      "fromState": "AI_Approved_R1",
+      "toState": "Stage_3_Acceptance",
+      "trigger": "",
+      "triggerType": "modeled-review-loop",
+      "transitionClass": "C",
+      "actingRole": "harness",
+      "verificationMode": "simulated",
+      "owningImplementation": {
+        "workflow": null,
+        "script": null
+      },
+      "testStrategy": "simulate_review_loop_for_ai-approved-r1_to_stage-3-acceptance",
+      "requiredFixtureType": "test-pr",
+      "expectedObservableEffects": [
+        "simulation artifact records review-loop progression"
+      ],
+      "implementationPromptPolicy": null
+    },
+    {
+      "transitionId": "ai-approved-r3_to_stage-3-acceptance",
+      "fromState": "AI_Approved_R3",
+      "toState": "Stage_3_Acceptance",
+      "trigger": "",
+      "triggerType": "modeled-review-loop",
+      "transitionClass": "C",
+      "actingRole": "harness",
+      "verificationMode": "simulated",
+      "owningImplementation": {
+        "workflow": null,
+        "script": null
+      },
+      "testStrategy": "simulate_review_loop_for_ai-approved-r3_to_stage-3-acceptance",
+      "requiredFixtureType": "test-pr",
+      "expectedObservableEffects": [
+        "simulation artifact records review-loop progression"
+      ],
+      "implementationPromptPolicy": null
+    },
+    {
+      "transitionId": "stage-3-acceptance_to_ac-check",
+      "fromState": "Stage_3_Acceptance",
+      "toState": "AC_Check",
+      "trigger": "Verify",
+      "triggerType": "workflow-internal-check",
+      "transitionClass": "A",
+      "actingRole": "repository-automation",
+      "verificationMode": "real workflow",
+      "owningImplementation": {
+        "workflow": ".github/workflows/ai-code-review.yml",
+        "script": null
+      },
+      "testStrategy": "observe_review_gate_for_stage-3-acceptance_to_ac-check",
+      "requiredFixtureType": "test-pr",
+      "expectedObservableEffects": [
+        "workflow artifacts show gate progression"
+      ],
+      "implementationPromptPolicy": null
+    },
+    {
+      "transitionId": "ac-check_to_ac-failed",
+      "fromState": "AC_Check",
+      "toState": "AC_Failed",
+      "trigger": "Not met",
+      "triggerType": "modeled-review-loop",
+      "transitionClass": "C",
+      "actingRole": "harness",
+      "verificationMode": "simulated",
+      "owningImplementation": {
+        "workflow": null,
+        "script": null
+      },
+      "testStrategy": "simulate_review_loop_for_ac-check_to_ac-failed",
+      "requiredFixtureType": "test-pr",
+      "expectedObservableEffects": [
+        "simulation artifact records review-loop progression"
+      ],
+      "implementationPromptPolicy": null
+    },
+    {
+      "transitionId": "ac-check_to_stage-4-ci-cd",
+      "fromState": "AC_Check",
+      "toState": "Stage_4_CI_CD",
+      "trigger": "Met",
+      "triggerType": "modeled-review-loop",
+      "transitionClass": "C",
+      "actingRole": "harness",
+      "verificationMode": "simulated",
+      "owningImplementation": {
+        "workflow": null,
+        "script": null
+      },
+      "testStrategy": "simulate_review_loop_for_ac-check_to_stage-4-ci-cd",
+      "requiredFixtureType": "test-pr",
+      "expectedObservableEffects": [
+        "simulation artifact records review-loop progression"
+      ],
+      "implementationPromptPolicy": null
+    },
+    {
+      "transitionId": "ac-failed_to_ac-needs-update",
+      "fromState": "AC_Failed",
+      "toState": "AC_Needs_Update",
+      "trigger": "Update",
+      "triggerType": "workflow-internal-check",
+      "transitionClass": "A",
+      "actingRole": "repository-automation",
+      "verificationMode": "real workflow",
+      "owningImplementation": {
+        "workflow": ".github/workflows/ai-code-review.yml",
+        "script": null
+      },
+      "testStrategy": "observe_review_gate_for_ac-failed_to_ac-needs-update",
+      "requiredFixtureType": "test-pr",
+      "expectedObservableEffects": [
+        "workflow artifacts show gate progression"
+      ],
+      "implementationPromptPolicy": null
+    },
+    {
+      "transitionId": "ac-needs-update_to_ac-check",
+      "fromState": "AC_Needs_Update",
+      "toState": "AC_Check",
+      "trigger": "",
+      "triggerType": "developer-follow-up",
+      "transitionClass": "B",
+      "actingRole": "developer",
+      "verificationMode": "manual contract",
+      "owningImplementation": {
+        "workflow": null,
+        "script": null
+      },
+      "testStrategy": "simulate_developer_follow_up_for_ac-needs-update_to_ac-check",
+      "requiredFixtureType": "test-pr",
+      "expectedObservableEffects": [
+        "follow-up commit or update artifact exists"
+      ],
+      "implementationPromptPolicy": null
+    },
+    {
+      "transitionId": "stage-4-ci-cd_to_ci-check",
+      "fromState": "Stage_4_CI_CD",
+      "toState": "CI_Check",
+      "trigger": "Run tests",
+      "triggerType": "workflow-internal-check",
+      "transitionClass": "A",
+      "actingRole": "repository-automation",
+      "verificationMode": "real workflow",
+      "owningImplementation": {
+        "workflow": ".github/workflows/ai-code-review.yml",
+        "script": null
+      },
+      "testStrategy": "observe_review_gate_for_stage-4-ci-cd_to_ci-check",
+      "requiredFixtureType": "test-pr",
+      "expectedObservableEffects": [
+        "workflow artifacts show gate progression"
+      ],
+      "implementationPromptPolicy": null
+    },
+    {
+      "transitionId": "ci-check_to_ci-failed",
+      "fromState": "CI_Check",
+      "toState": "CI_Failed",
+      "trigger": "Failed",
+      "triggerType": "workflow-internal-check",
+      "transitionClass": "A",
+      "actingRole": "repository-automation",
+      "verificationMode": "real workflow",
+      "owningImplementation": {
+        "workflow": ".github/workflows/ai-code-review.yml",
+        "script": null
+      },
+      "testStrategy": "observe_review_gate_for_ci-check_to_ci-failed",
+      "requiredFixtureType": "test-pr",
+      "expectedObservableEffects": [
+        "workflow artifacts show gate progression"
+      ],
+      "implementationPromptPolicy": null
+    },
+    {
+      "transitionId": "ci-check_to_stage-5-human",
+      "fromState": "CI_Check",
+      "toState": "Stage_5_Human",
+      "trigger": "Passed",
+      "triggerType": "workflow-internal-check",
+      "transitionClass": "A",
+      "actingRole": "repository-automation",
+      "verificationMode": "real workflow",
+      "owningImplementation": {
+        "workflow": ".github/workflows/ai-code-review.yml",
+        "script": null
+      },
+      "testStrategy": "observe_review_gate_for_ci-check_to_stage-5-human",
+      "requiredFixtureType": "test-pr",
+      "expectedObservableEffects": [
+        "workflow artifacts show gate progression"
+      ],
+      "implementationPromptPolicy": null
+    },
+    {
+      "transitionId": "ci-failed_to_ci-needs-fix",
+      "fromState": "CI_Failed",
+      "toState": "CI_Needs_Fix",
+      "trigger": "Fix",
+      "triggerType": "workflow-internal-check",
+      "transitionClass": "A",
+      "actingRole": "repository-automation",
+      "verificationMode": "real workflow",
+      "owningImplementation": {
+        "workflow": ".github/workflows/ai-code-review.yml",
+        "script": null
+      },
+      "testStrategy": "observe_review_gate_for_ci-failed_to_ci-needs-fix",
+      "requiredFixtureType": "test-pr",
+      "expectedObservableEffects": [
+        "workflow artifacts show gate progression"
+      ],
+      "implementationPromptPolicy": null
+    },
+    {
+      "transitionId": "ci-needs-fix_to_ci-check",
+      "fromState": "CI_Needs_Fix",
+      "toState": "CI_Check",
+      "trigger": "",
+      "triggerType": "developer-follow-up",
+      "transitionClass": "B",
+      "actingRole": "developer",
+      "verificationMode": "manual contract",
+      "owningImplementation": {
+        "workflow": null,
+        "script": null
+      },
+      "testStrategy": "simulate_developer_follow_up_for_ci-needs-fix_to_ci-check",
+      "requiredFixtureType": "test-pr",
+      "expectedObservableEffects": [
+        "follow-up commit or update artifact exists"
+      ],
+      "implementationPromptPolicy": null
+    },
+    {
+      "transitionId": "stage-5-human_to_maintainer-review",
+      "fromState": "Stage_5_Human",
+      "toState": "Maintainer_Review",
+      "trigger": "Begin review",
+      "triggerType": "pull_request_review.submitted|maintainer-decision",
+      "transitionClass": "B",
+      "actingRole": "maintainer",
+      "verificationMode": "manual contract",
+      "owningImplementation": {
+        "workflow": null,
+        "script": null
+      },
+      "testStrategy": "simulate_maintainer_review_for_stage-5-human_to_maintainer-review",
+      "requiredFixtureType": "test-pr",
+      "expectedObservableEffects": [
+        "review artifact reflects maintainer decision"
+      ],
+      "implementationPromptPolicy": null
+    },
+    {
+      "transitionId": "maintainer-review_to_review-decision",
+      "fromState": "Maintainer_Review",
+      "toState": "Review_Decision",
+      "trigger": "Decide",
+      "triggerType": "pull_request_review.submitted|maintainer-decision",
+      "transitionClass": "B",
+      "actingRole": "maintainer",
+      "verificationMode": "manual contract",
+      "owningImplementation": {
+        "workflow": null,
+        "script": null
+      },
+      "testStrategy": "simulate_maintainer_review_for_maintainer-review_to_review-decision",
+      "requiredFixtureType": "test-pr",
+      "expectedObservableEffects": [
+        "review artifact reflects maintainer decision"
+      ],
+      "implementationPromptPolicy": null
+    },
+    {
+      "transitionId": "review-decision_to_approval-rejected",
+      "fromState": "Review_Decision",
+      "toState": "Approval_Rejected",
+      "trigger": "Request changes",
+      "triggerType": "pull_request_review.submitted|maintainer-decision",
+      "transitionClass": "B",
+      "actingRole": "maintainer",
+      "verificationMode": "manual contract",
+      "owningImplementation": {
+        "workflow": null,
+        "script": null
+      },
+      "testStrategy": "simulate_maintainer_review_for_review-decision_to_approval-rejected",
+      "requiredFixtureType": "test-pr",
+      "expectedObservableEffects": [
+        "review artifact reflects maintainer decision"
+      ],
+      "implementationPromptPolicy": null
+    },
+    {
+      "transitionId": "review-decision_to_stage-6-merge",
+      "fromState": "Review_Decision",
+      "toState": "Stage_6_Merge",
+      "trigger": "Approve",
+      "triggerType": "pull_request_review.submitted|maintainer-decision",
+      "transitionClass": "B",
+      "actingRole": "maintainer",
+      "verificationMode": "manual contract",
+      "owningImplementation": {
+        "workflow": ".github/workflows/auto-merge.yml",
+        "script": null
+      },
+      "testStrategy": "simulate_maintainer_review_for_review-decision_to_stage-6-merge",
+      "requiredFixtureType": "test-pr",
+      "expectedObservableEffects": [
+        "review artifact reflects maintainer decision"
+      ],
+      "implementationPromptPolicy": null
+    },
+    {
+      "transitionId": "stage-5-escalated_to_maintainer-review-esc",
+      "fromState": "Stage_5_Escalated",
+      "toState": "Maintainer_Review_Esc",
+      "trigger": "Review escalated",
+      "triggerType": "pull_request_review.submitted|maintainer-decision",
+      "transitionClass": "B",
+      "actingRole": "maintainer",
+      "verificationMode": "manual contract",
+      "owningImplementation": {
+        "workflow": null,
+        "script": null
+      },
+      "testStrategy": "simulate_maintainer_review_for_stage-5-escalated_to_maintainer-review-esc",
+      "requiredFixtureType": "test-pr",
+      "expectedObservableEffects": [
+        "review artifact reflects maintainer decision"
+      ],
+      "implementationPromptPolicy": null
+    },
+    {
+      "transitionId": "maintainer-review-esc_to_review-decision-esc",
+      "fromState": "Maintainer_Review_Esc",
+      "toState": "Review_Decision_Esc",
+      "trigger": "Decide",
+      "triggerType": "pull_request_review.submitted|maintainer-decision",
+      "transitionClass": "B",
+      "actingRole": "maintainer",
+      "verificationMode": "manual contract",
+      "owningImplementation": {
+        "workflow": null,
+        "script": null
+      },
+      "testStrategy": "simulate_maintainer_review_for_maintainer-review-esc_to_review-decision-esc",
+      "requiredFixtureType": "test-pr",
+      "expectedObservableEffects": [
+        "review artifact reflects maintainer decision"
+      ],
+      "implementationPromptPolicy": null
+    },
+    {
+      "transitionId": "review-decision-esc_to_approval-rejected-esc",
+      "fromState": "Review_Decision_Esc",
+      "toState": "Approval_Rejected_Esc",
+      "trigger": "Reject",
+      "triggerType": "pull_request_review.submitted|maintainer-decision",
+      "transitionClass": "B",
+      "actingRole": "maintainer",
+      "verificationMode": "manual contract",
+      "owningImplementation": {
+        "workflow": null,
+        "script": null
+      },
+      "testStrategy": "simulate_maintainer_review_for_review-decision-esc_to_approval-rejected-esc",
+      "requiredFixtureType": "test-pr",
+      "expectedObservableEffects": [
+        "review artifact reflects maintainer decision"
+      ],
+      "implementationPromptPolicy": null
+    },
+    {
+      "transitionId": "review-decision-esc_to_stage-6-merge",
+      "fromState": "Review_Decision_Esc",
+      "toState": "Stage_6_Merge",
+      "trigger": "Approve",
+      "triggerType": "pull_request_review.submitted|maintainer-decision",
+      "transitionClass": "B",
+      "actingRole": "maintainer",
+      "verificationMode": "manual contract",
+      "owningImplementation": {
+        "workflow": ".github/workflows/auto-merge.yml",
+        "script": null
+      },
+      "testStrategy": "simulate_maintainer_review_for_review-decision-esc_to_stage-6-merge",
+      "requiredFixtureType": "test-pr",
+      "expectedObservableEffects": [
+        "review artifact reflects maintainer decision"
+      ],
+      "implementationPromptPolicy": null
+    },
+    {
+      "transitionId": "approval-rejected_to_dev-updates",
+      "fromState": "Approval_Rejected",
+      "toState": "Dev_Updates",
+      "trigger": "Developer updates",
+      "triggerType": "pull_request_review.submitted|maintainer-decision",
+      "transitionClass": "B",
+      "actingRole": "maintainer",
+      "verificationMode": "manual contract",
+      "owningImplementation": {
+        "workflow": null,
+        "script": null
+      },
+      "testStrategy": "simulate_maintainer_review_for_approval-rejected_to_dev-updates",
+      "requiredFixtureType": "test-pr",
+      "expectedObservableEffects": [
+        "review artifact reflects maintainer decision"
+      ],
+      "implementationPromptPolicy": null
+    },
+    {
+      "transitionId": "dev-updates_to_maintainer-review",
+      "fromState": "Dev_Updates",
+      "toState": "Maintainer_Review",
+      "trigger": "",
+      "triggerType": "developer-follow-up",
+      "transitionClass": "B",
+      "actingRole": "developer",
+      "verificationMode": "manual contract",
+      "owningImplementation": {
+        "workflow": null,
+        "script": null
+      },
+      "testStrategy": "simulate_developer_follow_up_for_dev-updates_to_maintainer-review",
+      "requiredFixtureType": "test-pr",
+      "expectedObservableEffects": [
+        "follow-up commit or update artifact exists"
+      ],
+      "implementationPromptPolicy": null
+    },
+    {
+      "transitionId": "approval-rejected-esc_to_pr-closed-rejected",
+      "fromState": "Approval_Rejected_Esc",
+      "toState": "PR_Closed_Rejected",
+      "trigger": "Close PR",
+      "triggerType": "pull_request_review.submitted|maintainer-decision",
+      "transitionClass": "B",
+      "actingRole": "maintainer",
+      "verificationMode": "manual contract",
+      "owningImplementation": {
+        "workflow": null,
+        "script": null
+      },
+      "testStrategy": "simulate_maintainer_review_for_approval-rejected-esc_to_pr-closed-rejected",
+      "requiredFixtureType": "test-pr",
+      "expectedObservableEffects": [
+        "review artifact reflects maintainer decision"
+      ],
+      "implementationPromptPolicy": null
+    },
+    {
+      "transitionId": "pr-closed-rejected_to_closed-failed",
+      "fromState": "PR_Closed_Rejected",
+      "toState": "Closed_Failed",
+      "trigger": "Redesign needed",
+      "triggerType": "modeled-review-loop",
+      "transitionClass": "C",
+      "actingRole": "harness",
+      "verificationMode": "simulated",
+      "owningImplementation": {
+        "workflow": null,
+        "script": null
+      },
+      "testStrategy": "simulate_review_loop_for_pr-closed-rejected_to_closed-failed",
+      "requiredFixtureType": "test-pr",
+      "expectedObservableEffects": [
+        "simulation artifact records review-loop progression"
+      ],
+      "implementationPromptPolicy": null
+    },
+    {
+      "transitionId": "stage-6-merge_to_auto-merge",
+      "fromState": "Stage_6_Merge",
+      "toState": "Auto_Merge",
+      "trigger": "Merge",
+      "triggerType": "pull_request_review.submitted",
+      "transitionClass": "A",
+      "actingRole": "repository-automation",
+      "verificationMode": "real workflow",
+      "owningImplementation": {
+        "workflow": ".github/workflows/auto-merge.yml",
+        "script": null
+      },
+      "testStrategy": "observe_merge_sequence_for_stage-6-merge_to_auto-merge",
+      "requiredFixtureType": "test-pr",
+      "expectedObservableEffects": [
+        "merge workflow artifact exists"
+      ],
+      "implementationPromptPolicy": null
+    },
+    {
+      "transitionId": "auto-merge_to_merged-success",
+      "fromState": "Auto_Merge",
+      "toState": "Merged_Success",
+      "trigger": "Merged",
+      "triggerType": "github-native-merge",
+      "transitionClass": "A",
+      "actingRole": "repository-automation",
+      "verificationMode": "real workflow",
+      "owningImplementation": {
+        "workflow": ".github/workflows/auto-merge.yml",
+        "script": null
+      },
+      "testStrategy": "observe_merge_sequence_for_auto-merge_to_merged-success",
+      "requiredFixtureType": "test-pr",
+      "expectedObservableEffects": [
+        "merge workflow artifact exists"
+      ],
+      "implementationPromptPolicy": null
+    },
+    {
+      "transitionId": "merged-success_to_issue-complete",
+      "fromState": "Merged_Success",
+      "toState": "Issue_Complete",
+      "trigger": "Complete",
+      "triggerType": "github-native-merge",
+      "transitionClass": "B",
+      "actingRole": "github-native",
+      "verificationMode": "manual contract",
+      "owningImplementation": {
+        "workflow": ".github/workflows/auto-merge.yml",
+        "script": null
+      },
+      "testStrategy": "observe_merge_sequence_for_merged-success_to_issue-complete",
+      "requiredFixtureType": "test-pr",
+      "expectedObservableEffects": [
+        "linked issue closure artifact exists"
+      ],
+      "implementationPromptPolicy": null
+    },
+    {
+      "transitionId": "issue-complete_to_close-issue",
+      "fromState": "Issue_Complete",
+      "toState": "Close_Issue",
+      "trigger": "Close",
+      "triggerType": "modeled-review-loop",
+      "transitionClass": "C",
+      "actingRole": "harness",
+      "verificationMode": "simulated",
+      "owningImplementation": {
+        "workflow": null,
+        "script": null
+      },
+      "testStrategy": "simulate_review_loop_for_issue-complete_to_close-issue",
+      "requiredFixtureType": "test-pr",
+      "expectedObservableEffects": [
+        "simulation artifact records review-loop progression"
+      ],
+      "implementationPromptPolicy": null
+    },
+    {
+      "transitionId": "at-bat_to_manual-close-check",
+      "fromState": "At_Bat",
+      "toState": "Manual_Close_Check",
+      "trigger": "Manual close?",
+      "triggerType": "modeled-manual-close-decision",
+      "transitionClass": "C",
+      "actingRole": "harness",
+      "verificationMode": "simulated",
+      "owningImplementation": {
+        "workflow": null,
+        "script": null
+      },
+      "testStrategy": "simulate_manual_close_check_after_at_bat",
+      "requiredFixtureType": "test-issue",
+      "expectedObservableEffects": [
+        "simulation note recorded before manual closure"
+      ],
+      "implementationPromptPolicy": "standard-at-bat-prompt"
+    },
+    {
+      "transitionId": "manual-close-check_to_manual-completed",
+      "fromState": "Manual_Close_Check",
+      "toState": "Manual_Completed",
+      "trigger": "Close manually",
+      "triggerType": "simulated-close-issue",
+      "transitionClass": "C",
+      "actingRole": "harness",
+      "verificationMode": "simulated",
+      "owningImplementation": {
+        "workflow": null,
+        "script": null
+      },
+      "testStrategy": "simulate_manual_issue_close_and_record_artifact",
+      "requiredFixtureType": "test-issue",
+      "expectedObservableEffects": [
+        "issue closes with completed reason"
+      ],
+      "implementationPromptPolicy": null
+    }
+  ]
+}

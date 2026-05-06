@@ -4,6 +4,30 @@
 
 This document summarizes the complete test plan implementation for automating the entire issue lifecycle as documented in `.github/workflows/ISSUE_LIFECYCLE_STATE_DIAGRAM.md`.
 
+## Diagram-Derived Path Artifact System
+
+The workflow path issue system has since been refactored so the lifecycle diagram is the operational source of truth for path definitions.
+
+Current architecture:
+
+1. `.github/workflows/ISSUE_LIFECYCLE_STATE_DIAGRAM.md` defines the graph.
+2. `scripts/generate-path-artifacts.js` regenerates `docs/transition-catalog.json` and `docs/path-test-issues.seed.json` together from one diagram snapshot.
+3. `scripts/validate-path-artifacts.js` verifies that the checked-in diagram, transition catalog, and path seed remain internally consistent.
+4. `scripts/create-path-issues.ps1` renders GitHub issues only from the generated seed file.
+
+This replaced the earlier hybrid model where workflow path issues were partly described in structured seed data and partly hardcoded in the issue-creation script. The result is that state-model changes now flow through generation and validation instead of requiring manual synchronization across multiple hand-authored path bodies.
+
+CI enforcement:
+
+- `.github/workflows/validate-path-artifacts.yml` regenerates the path artifacts, runs the validator, and executes the focused artifact tests on relevant pushes and pull requests.
+
+Focused regression coverage now includes:
+
+- `tests/transition-catalog-generation.test.js`
+- `tests/path-seed-generation.test.js`
+- `tests/path-artifacts-generation.test.js`
+- `tests/path-seed-sync.test.js`
+
 ## What Was Implemented
 
 ### 1. Comprehensive Node.js Test Script
@@ -11,6 +35,7 @@ This document summarizes the complete test plan implementation for automating th
 **File**: `scripts/test-issue-lifecycle.js`
 
 A fully automated test script that:
+
 - Creates real GitHub issues via API
 - Simulates all states and transitions in the lifecycle
 - Tests all gates (auto validation, PM triage, PR checks, AI review, AC, CI/CD, human approval)
@@ -19,6 +44,7 @@ A fully automated test script that:
 - Supports dry-run mode for testing without creating issues
 
 **Key Features**:
+
 - 12 comprehensive test scenarios
 - Configurable via environment variables
 - Real-time progress reporting
@@ -27,8 +53,9 @@ A fully automated test script that:
 - Rate limit handling with configurable delays
 
 **Test Scenarios**:
+
 1. Happy Path - Complete flow from creation to merge
-2. Validation Failure - Missing details → provided → accepted  
+2. Validation Failure - Missing details → provided → accepted
 3. PM Rejection - Out of scope → rejected
 4. Lane Progression - All lanes (bench → hole → deck → bat)
 5. PR Format Failure - Invalid → corrected → pass
@@ -45,6 +72,7 @@ A fully automated test script that:
 **File**: `scripts/test-issue-lifecycle.sh`
 
 A simplified bash script using GitHub CLI:
+
 - Easier to run locally with `gh` CLI
 - Direct GitHub CLI integration
 - Executes 5 key test scenarios
@@ -52,6 +80,7 @@ A simplified bash script using GitHub CLI:
 - Automatic issue creation and closure
 
 **Test Scenarios** (Shell):
+
 1. Happy Path
 2. Validation Failure
 3. PM Rejection
@@ -63,6 +92,7 @@ A simplified bash script using GitHub CLI:
 **File**: `.github/workflows/test-issue-lifecycle.yml`
 
 An automated workflow for CI/CD integration:
+
 - Manual trigger via workflow_dispatch
 - Configurable options (dry-run, cleanup, delay)
 - Automatic report generation
@@ -70,6 +100,7 @@ An automated workflow for CI/CD integration:
 - No additional auth required (uses GITHUB_TOKEN)
 
 **Workflow Features**:
+
 - Input parameters for customization
 - Runs on ubuntu-latest
 - Uses Node.js 20
@@ -79,10 +110,12 @@ An automated workflow for CI/CD integration:
 ### 4. Documentation
 
 **Files**:
+
 - `scripts/TEST_LIFECYCLE_README.md` - Detailed test script documentation
 - `scripts/EXECUTION_GUIDE.md` - Step-by-step execution instructions
 
 **Documentation Coverage**:
+
 - Prerequisites and setup
 - Execution methods (3 different ways)
 - Configuration options
@@ -95,6 +128,7 @@ An automated workflow for CI/CD integration:
 ### 5. NPM Scripts
 
 Added to `package.json`:
+
 ```json
 {
   "scripts": {
@@ -107,6 +141,7 @@ Added to `package.json`:
 ## Test Coverage
 
 ### Issue Types Tested ✓
+
 - Bug reports
 - Feature requests
 - UI/UX improvements
@@ -115,6 +150,7 @@ Added to `package.json`:
 - Contributor requests
 
 ### States Tested ✓
+
 - Issue Created
 - Auto Validation (pass/fail)
 - Needs Details (validation recovery)
@@ -133,6 +169,7 @@ Added to `package.json`:
 - Closed (various reasons)
 
 ### Transitions Tested ✓
+
 - Happy path (creation → merge → close)
 - Validation failure → retry → success
 - PM rejection (triage failed)
@@ -147,6 +184,7 @@ Added to `package.json`:
 - Auto-abandonment (timeout)
 
 ### Gates Tested ✓
+
 1. **Auto Validation** - Field validation, format checks
 2. **PM Triage** - Manual approval/rejection
 3. **PR Format Check** (Stage 1) - PR validation
@@ -160,15 +198,17 @@ Added to `package.json`:
 ### Quick Start
 
 1. **Dry Run (Recommended First)**:
+
    ```bash
    npm run test-lifecycle-dry
    ```
 
 2. **Live Run (Creates Real Issues)**:
+
    ```bash
    # Export GitHub token
    export GITHUB_TOKEN="ghp_your_token_here"
-   
+
    # Run tests
    npm run test-lifecycle
    ```
@@ -182,6 +222,7 @@ Added to `package.json`:
 ### Detailed Instructions
 
 See `scripts/EXECUTION_GUIDE.md` for complete execution instructions including:
+
 - Prerequisites
 - All execution methods
 - Configuration options
@@ -218,6 +259,7 @@ All 12 test scenarios passed in dry-run mode, validating the logic is correct.
 To execute the live test with real issue creation:
 
 **Option 1: Manual Execution**
+
 ```bash
 # Set token
 export GITHUB_TOKEN="your_token_here"
@@ -227,6 +269,7 @@ npm run test-lifecycle
 ```
 
 **Option 2: GitHub Actions** (Recommended)
+
 1. Navigate to repository Actions tab
 2. Select "Test Issue Lifecycle" workflow
 3. Click "Run workflow" button
@@ -239,6 +282,7 @@ npm run test-lifecycle
 7. Download report artifact when complete
 
 **Option 3: Shell Script**
+
 ```bash
 # Authenticate gh CLI
 gh auth login
@@ -276,11 +320,13 @@ When executed live, the test will:
 After execution:
 
 1. **Check Issues Created**:
+
    ```bash
    gh issue list --label test-automation --state all
    ```
 
 2. **View Test Report**:
+
    ```bash
    cat automation-results/issue-lifecycle-test-*.md | less
    ```
@@ -299,18 +345,21 @@ After execution:
 ## Test Limitations
 
 ### What is Simulated (Not Actual):
+
 - **PR Creation**: Comments simulate PR creation (no real PRs/branches)
 - **AI Code Review**: Comments simulate review feedback (no actual AI review)
 - **CI/CD Execution**: Comments simulate test results (no actual test runs)
 - **Code Changes**: No actual code commits or changes
 
 ### Why Simulation:
+
 1. **Focus**: Testing issue lifecycle states/transitions, not implementation
 2. **Simplicity**: No need to create branches, PRs, or run CI/CD
 3. **Speed**: Tests run in ~1 minute vs hours for full PR workflow
 4. **Safety**: No risk of breaking builds or polluting git history
 
 ### What is Real:
+
 - ✓ Issue creation via GitHub API
 - ✓ Label updates and management
 - ✓ Comment creation
@@ -346,6 +395,7 @@ To execute the test:
 ### Updating Tests
 
 To add new scenarios:
+
 1. Edit `scripts/test-issue-lifecycle.js`
 2. Add new test function following existing patterns
 3. Add to `runAllTests()` function
@@ -355,10 +405,11 @@ To add new scenarios:
 ### Scheduled Execution
 
 Add to `.github/workflows/test-issue-lifecycle.yml`:
+
 ```yaml
 on:
   schedule:
-    - cron: '0 0 * * 0'  # Weekly
+    - cron: "0 0 * * 0" # Weekly
 ```
 
 ## Conclusion

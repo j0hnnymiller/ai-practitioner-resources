@@ -23,6 +23,11 @@
     "test:run-automation": "npm run test:fetch-current && npm run test:generate && npm run test:merge && npm run test:validate && npm run test:update-gist && npm run test:create-summary",
     "test": "vitest run",
     "test:watch": "vitest",
+    "generate:transition-catalog": "node scripts/generate-transition-catalog.js",
+    "generate:path-seed": "node scripts/generate-path-artifacts.js",
+    "generate:path-artifacts": "node scripts/generate-path-artifacts.js",
+    "validate:path-artifacts": "node scripts/validate-path-artifacts.js",
+    "validate:path-seed": "node scripts/validate-path-artifacts.js",
     "test-lifecycle": "node scripts/test-issue-lifecycle.js",
     "test-lifecycle-dry": "cross-env DRY_RUN=true node scripts/test-issue-lifecycle.js"
   },

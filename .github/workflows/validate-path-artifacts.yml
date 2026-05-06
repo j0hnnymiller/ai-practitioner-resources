@@ -1,0 +1,69 @@
+name: Validate Path Artifacts
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/ISSUE_LIFECYCLE_STATE_DIAGRAM.md"
+      - ".github/workflows/validate-path-artifacts.yml"
+      - "docs/transition-catalog.json"
+      - "docs/path-test-issues.seed.json"
+      - "package.json"
+      - "scripts/generate-path-artifacts.js"
+      - "scripts/generate-path-test-seed.js"
+      - "scripts/generate-transition-catalog.js"
+      - "scripts/validate-path-artifacts.js"
+      - "scripts/validate-path-seed.js"
+      - "scripts/lib/state-diagram.js"
+      - "tests/path-artifacts-generation.test.js"
+      - "tests/path-seed-generation.test.js"
+      - "tests/path-seed-sync.test.js"
+      - "tests/transition-catalog-generation.test.js"
+  push:
+    branches: [ "main" ]
+    paths:
+      - ".github/workflows/ISSUE_LIFECYCLE_STATE_DIAGRAM.md"
+      - ".github/workflows/validate-path-artifacts.yml"
+      - "docs/transition-catalog.json"
+      - "docs/path-test-issues.seed.json"
+      - "package.json"
+      - "scripts/generate-path-artifacts.js"
+      - "scripts/generate-path-test-seed.js"
+      - "scripts/generate-transition-catalog.js"
+      - "scripts/validate-path-artifacts.js"
+      - "scripts/validate-path-seed.js"
+      - "scripts/lib/state-diagram.js"
+      - "tests/path-artifacts-generation.test.js"
+      - "tests/path-seed-generation.test.js"
+      - "tests/path-seed-sync.test.js"
+      - "tests/transition-catalog-generation.test.js"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate path artifacts
+        run: npm run generate:path-artifacts
+
+      - name: Validate path artifacts
+        run: npm run validate:path-artifacts
+
+      - name: Run focused artifact tests
+        run: npx vitest run tests/path-artifacts-generation.test.js
+          tests/transition-catalog-generation.test.js
+          tests/path-seed-generation.test.js tests/path-seed-sync.test.js

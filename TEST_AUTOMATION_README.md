@@ -5,6 +5,15 @@ This directory contains a complete test automation suite for the issue lifecycle
 ## 🎯 Quick Start
 
 ```bash
+# Regenerate diagram-derived workflow path artifacts
+npm run generate:path-artifacts
+
+# Validate checked-in path artifacts against the current diagram snapshot
+npm run validate:path-artifacts
+
+# Create workflow path test issues from the generated seed
+pwsh -File scripts/create-path-issues.ps1
+
 # Test without creating issues (recommended first)
 npm run test-lifecycle-dry
 
@@ -18,27 +27,47 @@ npm run test-lifecycle
 
 See [QUICK_REFERENCE.md](QUICK_REFERENCE.md) for more options.
 
+## Diagram-Derived Path Artifacts
+
+Workflow path issues are now derived from the state diagram in [ISSUE_LIFECYCLE_STATE_DIAGRAM.md](.github/workflows/ISSUE_LIFECYCLE_STATE_DIAGRAM.md), not hand-maintained.
+
+Current flow:
+
+1. Update the Mermaid diagram.
+2. Run `npm run generate:path-artifacts` to regenerate [docs/transition-catalog.json](docs/transition-catalog.json) and [docs/path-test-issues.seed.json](docs/path-test-issues.seed.json) together.
+3. Run `npm run validate:path-artifacts` to confirm the checked-in diagram, catalog, and seed are internally consistent.
+4. Run `pwsh -File scripts/create-path-issues.ps1` to create GitHub issues from the generated seed.
+
+CI enforcement:
+
+- [validate-path-artifacts.yml](.github/workflows/validate-path-artifacts.yml) regenerates the artifacts, runs the validator, and executes the focused artifact tests on relevant changes.
+
 ## 📚 Documentation
 
-| Document | Purpose |
-|----------|---------|
-| [QUICK_REFERENCE.md](QUICK_REFERENCE.md) | Quick start guide |
-| [ISSUE_LIFECYCLE_TEST_SUMMARY.md](ISSUE_LIFECYCLE_TEST_SUMMARY.md) | Complete implementation summary |
-| [scripts/EXECUTION_GUIDE.md](scripts/EXECUTION_GUIDE.md) | Detailed execution instructions |
-| [scripts/TEST_LIFECYCLE_README.md](scripts/TEST_LIFECYCLE_README.md) | Test script documentation |
+| Document                                                             | Purpose                         |
+| -------------------------------------------------------------------- | ------------------------------- |
+| [QUICK_REFERENCE.md](QUICK_REFERENCE.md)                             | Quick start guide               |
+| [ISSUE_LIFECYCLE_TEST_SUMMARY.md](ISSUE_LIFECYCLE_TEST_SUMMARY.md)   | Complete implementation summary |
+| [scripts/EXECUTION_GUIDE.md](scripts/EXECUTION_GUIDE.md)             | Detailed execution instructions |
+| [scripts/TEST_LIFECYCLE_README.md](scripts/TEST_LIFECYCLE_README.md) | Test script documentation       |
 
 ## 🛠️ What's Included
 
 ### Test Scripts
+
 - **scripts/test-issue-lifecycle.js** - Node.js automation (12 scenarios)
 - **scripts/test-issue-lifecycle.sh** - Shell script alternative (5 scenarios)
 
 ### GitHub Actions
+
 - **.github/workflows/test-issue-lifecycle.yml** - Automated workflow
 
 ### NPM Scripts
+
 ```json
 {
+  "generate:path-artifacts": "node scripts/generate-path-artifacts.js",
+  "validate:path-artifacts": "node scripts/validate-path-artifacts.js",
   "test-lifecycle": "node scripts/test-issue-lifecycle.js",
   "test-lifecycle-dry": "DRY_RUN=true node scripts/test-issue-lifecycle.js"
 }
@@ -70,12 +99,14 @@ See [QUICK_REFERENCE.md](QUICK_REFERENCE.md) for more options.
 ## 🚀 Execution Methods
 
 ### 1. GitHub Actions (Recommended)
+
 1. Navigate to **Actions** tab
 2. Select **"Test Issue Lifecycle"**
 3. Click **"Run workflow"**
 4. Configure options and run
 
 ### 2. Node.js Script
+
 ```bash
 # Dry run
 npm run test-lifecycle-dry
@@ -86,6 +117,7 @@ npm run test-lifecycle
 ```
 
 ### 3. Shell Script
+
 ```bash
 gh auth login
 ./scripts/test-issue-lifecycle.sh
@@ -94,6 +126,7 @@ gh auth login
 ## 📊 Expected Results
 
 When executed, the test will:
+
 - Create 12-15 test issues
 - Simulate all lifecycle states
 - Generate a detailed report
@@ -114,11 +147,13 @@ cat automation-results/issue-lifecycle-test-*.md | less
 ## 📁 Generated Output
 
 Reports are saved to:
+
 ```
 automation-results/issue-lifecycle-test-{timestamp}.md
 ```
 
 Each report contains:
+
 - Test execution metadata
 - Scenario results
 - Created issues list
@@ -127,12 +162,12 @@ Each report contains:
 
 ## ⚙️ Configuration
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `GITHUB_TOKEN` | Required | GitHub PAT |
-| `DRY_RUN` | `false` | Simulate mode |
-| `CLEANUP_AFTER` | `true` | Auto-close issues |
-| `DELAY_MS` | `2000` | Operation delay |
+| Variable        | Default  | Description       |
+| --------------- | -------- | ----------------- |
+| `GITHUB_TOKEN`  | Required | GitHub PAT        |
+| `DRY_RUN`       | `false`  | Simulate mode     |
+| `CLEANUP_AFTER` | `true`   | Auto-close issues |
+| `DELAY_MS`      | `2000`   | Operation delay   |
 
 ## 🎓 Features
 
@@ -145,12 +180,12 @@ Each report contains:
 
 ## 🆘 Troubleshooting
 
-| Issue | Solution |
-|-------|----------|
+| Issue                  | Solution                                      |
+| ---------------------- | --------------------------------------------- |
 | "GITHUB_TOKEN not set" | Export token: `export GITHUB_TOKEN="ghp_..."` |
-| "Not authenticated" | Login to gh: `gh auth login` |
-| "Permission denied" | Make executable: `chmod +x scripts/*.sh` |
-| "Rate limit" | Increase delay: `DELAY_MS=5000` |
+| "Not authenticated"    | Login to gh: `gh auth login`                  |
+| "Permission denied"    | Make executable: `chmod +x scripts/*.sh`      |
+| "Rate limit"           | Increase delay: `DELAY_MS=5000`               |
 
 ## ✅ Status
 
@@ -171,6 +206,6 @@ Each report contains:
 
 ---
 
-**Implementation Date**: 2025-11-05  
-**Status**: ✅ Complete  
+**Implementation Date**: 2025-11-05
+**Status**: ✅ Complete
 **Next Step**: Execute via GitHub Actions or `npm run test-lifecycle`
