@@ -49,6 +49,7 @@ jobs:
           PROJECT_OWNER: ${{ github.repository_owner }}
           PROJECT_NUMBER: 5
           PROJECT_STATUS_FIELD_NAME: Status
+          COMMENT_DELAY_MS: 5000
           ISSUE_NUMBERS: ${{ inputs.issue_numbers }}
           DRY_RUN: ${{ inputs.dry_run }}
         run: node scripts/drive-path-test.js

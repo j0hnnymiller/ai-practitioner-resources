@@ -6,9 +6,11 @@
 //
 // Environment variables:
 //   GITHUB_TOKEN / TOKEN   — GitHub token with issues:write scope
+//   PROJECTS_TOKEN         — GitHub token with Projects v2 access
 //   GITHUB_REPOSITORY      — "owner/repo" (defaults to hardcoded repo)
 //   ISSUE_NUMBERS          — optional comma-separated list to restrict which
 //                            issues are driven (e.g. "185,186,187")
+//   COMMENT_DELAY_MS       — optional pause after each comment write
 //   DRY_RUN                — "true" to parse and log without writing anything
 
 "use strict";
@@ -35,7 +37,7 @@ const PROJECT_NUMBER = Number(process.env.PROJECT_NUMBER || 5);
 const PROJECT_STATUS_FIELD_NAME =
   process.env.PROJECT_STATUS_FIELD_NAME || "Status";
 const LANE_LABELS = ["at bat", "on deck", "in the hole", "on the bench"];
-const COMMENT_DELAY_MS = 60 * 1000;
+const COMMENT_DELAY_MS = Number(process.env.COMMENT_DELAY_MS || 5 * 1000);
 const SECONDARY_RATE_LIMIT_BASE_DELAY_MS = 15 * 1000;
 
 let projectContextPromise;
