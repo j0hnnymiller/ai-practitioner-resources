@@ -182,7 +182,7 @@ async function main() {
   }
 
   const projectOwner = process.env.PROJECT_OWNER || owner;
-  const projectNumber = Number(process.env.PROJECT_NUMBER || 1);
+  const projectNumber = Number(process.env.PROJECT_NUMBER || 4);
   const statusFieldName = process.env.PROJECT_STATUS_FIELD_NAME || "Status";
   const laneMapRaw = process.env.LANE_STATUS_MAP || "";
   const laneMap = laneMapRaw ? JSON.parse(laneMapRaw) : null;

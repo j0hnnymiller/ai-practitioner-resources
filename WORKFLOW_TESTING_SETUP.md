@@ -55,7 +55,7 @@ Set these when running test scripts:
 
 ```bash
 export GITHUB_TOKEN=ghp_your_token_here
-export TEST_PROJECT_NUMBER=1  # The test project number
+export TEST_PROJECT_NUMBER=5  # The Workflow Testing project number
 export GITHUB_REPOSITORY=JohnMichaelMiller/ai-practitioner-resources
 ```
 
@@ -83,7 +83,7 @@ Project IDs are needed for GraphQL operations. Run this to get them:
 node -e "
 const { getProjectId } = require('./scripts/lib/graphql-helpers');
 (async () => {
-  const project = await getProjectId('JohnMichaelMiller', 1, process.env.GITHUB_TOKEN);
+  const project = await getProjectId('JohnMichaelMiller', 5, process.env.GITHUB_TOKEN);
   console.log('Test Project ID:', project.id);
 })();
 "
@@ -92,7 +92,7 @@ const { getProjectId } = require('./scripts/lib/graphql-helpers');
 node -e "
 const { getProjectId } = require('./scripts/lib/graphql-helpers');
 (async () => {
-  const project = await getProjectId('JohnMichaelMiller', 2, process.env.GITHUB_TOKEN);
+  const project = await getProjectId('JohnMichaelMiller', 4, process.env.GITHUB_TOKEN);
   console.log('Production Project ID:', project.id);
 })();
 "
@@ -105,7 +105,7 @@ Save these IDs - you'll need them for workflow configuration.
 ```bash
 # Set environment variables
 export GITHUB_TOKEN=your_token
-export TEST_PROJECT_NUMBER=1
+export TEST_PROJECT_NUMBER=5
 
 # Create a single test issue
 ISSUE_FILE=feature-add-dark-mode.md node scripts/create-test-issues.js

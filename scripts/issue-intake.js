@@ -25,7 +25,7 @@ async function ghFetch(url, opts = {}) {
   if (!res.ok) {
     const text = await res.text();
     throw new Error(
-      `GitHub API ${res.status} ${res.statusText} for ${url}: ${text}`
+      `GitHub API ${res.status} ${res.statusText} for ${url}: ${text}`,
     );
   }
   return res;
@@ -74,11 +74,11 @@ function findStatusField(project, statusFieldName) {
   const nodes = project.fields?.nodes || [];
   const match = nodes.find(
     (f) =>
-      String(f.name).toLowerCase() === String(statusFieldName).toLowerCase()
+      String(f.name).toLowerCase() === String(statusFieldName).toLowerCase(),
   );
   if (!match)
     throw new Error(
-      `Field '${statusFieldName}' not found in Project ${project.number}`
+      `Field '${statusFieldName}' not found in Project ${project.number}`,
     );
   if (!match.options)
     throw new Error(`Field '${statusFieldName}' is not a single-select field`);
@@ -87,13 +87,13 @@ function findStatusField(project, statusFieldName) {
 
 function resolveOptionIdByName(field, name) {
   const opt = (field.options || []).find(
-    (o) => String(o.name).toLowerCase() === String(name).toLowerCase()
+    (o) => String(o.name).toLowerCase() === String(name).toLowerCase(),
   );
   return opt?.id || null;
 }
 
 async function getIssueProjectItemId(issueNodeId, projectId) {
-  const q = `query($id:ID!){ node(id:$id){ ... on Issue { projectItems(first:20){ nodes{ id project{ id number } } } } } }`;
+  const q = `query($id:ID!){ node(id:$id){ ... on Issue { projectItems(first:20){ nodes{ id project{ id number title } } } } } }`;
   const data = await ghGraphQL(q, { id: issueNodeId });
   const items = data?.node?.projectItems?.nodes || [];
   const found = items.find((n) => n.project?.id === projectId);
@@ -117,7 +117,7 @@ async function removeIssueFromProject(projectId, itemId) {
 }
 
 async function getAllIssueProjectItems(issueNodeId) {
-  const q = `query($id:ID!){ node(id:$id){ ... on Issue { projectItems(first:20){ nodes{ id project{ id number } } } } } }`;
+  const q = `query($id:ID!){ node(id:$id){ ... on Issue { projectItems(first:20){ nodes{ id project{ id number title } } } } } }`;
   const data = await ghGraphQL(q, { id: issueNodeId });
   return data?.node?.projectItems?.nodes || [];
 }
@@ -132,7 +132,7 @@ async function listLabels(owner, repo) {
   let page = 1;
   while (true) {
     const res = await ghFetch(
-      `/repos/${owner}/${repo}/labels?per_page=100&page=${page}`
+      `/repos/${owner}/${repo}/labels?per_page=100&page=${page}`,
     );
     const data = await res.json();
     labels.push(...data);
@@ -145,7 +145,7 @@ async function listLabels(owner, repo) {
 async function ensureLabel(owner, repo, name, color, description) {
   const existing = await listLabels(owner, repo);
   const found = existing.find(
-    (l) => l.name.toLowerCase() === name.toLowerCase()
+    (l) => l.name.toLowerCase() === name.toLowerCase(),
   );
   if (found) return found;
   const res = await ghFetch(`/repos/${owner}/${repo}/labels`, {
@@ -159,7 +159,7 @@ function toNameSet(labels) {
   return new Set(
     (labels || [])
       .map((l) => (typeof l === "string" ? l : l.name))
-      .filter(Boolean)
+      .filter(Boolean),
   );
 }
 
@@ -216,22 +216,37 @@ async function main() {
   // Fetch current issue
   const issue = await getIssue(owner, repo, number);
   const labelSet = toNameSet(issue.labels);
+  const workflowTestingProjectName =
+    process.env.TEST_PROJECT_TITLE || "Workflow Testing";
+  const issueProjectItems = await getAllIssueProjectItems(issue.node_id);
+  const workflowTestingProjectItem = issueProjectItems.find(
+    (item) =>
+      String(item.project?.title || "").toLowerCase() ===
+      workflowTestingProjectName.toLowerCase(),
+  );
 
-  // Detect test issues by [TI] in title OR **TI** in body
+  // Detect test issues by explicit [TI] markers, the workflow-path-test label,
+  // or existing membership in the Workflow Testing project.
   const isTestIssue =
+    Boolean(workflowTestingProjectItem) ||
+    labelSet.has("workflow-path-test") ||
     (issue.title && issue.title.includes("[TI]")) ||
     (issue.body && issue.body.includes("**TI**"));
 
   // Optionally manage Project item/Status here (default off when Project workflows handle it)
   const manageProject = /^(1|true|yes)$/i.test(
-    String(process.env.INTAKE_MANAGE_PROJECT || "")
+    String(process.env.INTAKE_MANAGE_PROJECT || ""),
   );
   if (manageProject) {
     const projectOwner = process.env.PROJECT_OWNER || owner;
-    // Route to test project (3) if **TI** in title, otherwise production (1)
+    const testProjectNumber = workflowTestingProjectItem?.project?.number
+      ? Number(workflowTestingProjectItem.project.number)
+      : Number(process.env.TEST_PROJECT_NUMBER || 5);
+    // Route to the Workflow Testing project when already present there,
+    // otherwise fall back to the configured test project number.
     const projectNumber = isTestIssue
-      ? 3
-      : Number(process.env.PROJECT_NUMBER || 1);
+      ? testProjectNumber
+      : Number(process.env.PROJECT_NUMBER || 4);
     const statusFieldName = process.env.PROJECT_STATUS_FIELD_NAME || "Status";
     const laneMapRaw = process.env.LANE_STATUS_MAP || "";
     const laneMap = laneMapRaw ? JSON.parse(laneMapRaw) : null;
@@ -240,7 +255,7 @@ async function main() {
     console.log(
       `${
         isTestIssue ? "🧪 Test issue detected" : "📋 Production issue"
-      } - routing to project #${projectNumber}`
+      } - routing to project #${projectNumber}`,
     );
 
     const project = await getProject(projectOwner, projectNumber);
@@ -248,7 +263,7 @@ async function main() {
     const benchOptionId = resolveOptionIdByName(statusField, benchName);
     if (!benchOptionId)
       throw new Error(
-        `Status option '${benchName}' not found in Project ${project.number}`
+        `Status option '${benchName}' not found in Project ${project.number}`,
       );
 
     let itemId = await getIssueProjectItemId(issue.node_id, project.id);
@@ -259,30 +274,36 @@ async function main() {
       project.id,
       itemId,
       statusField.id,
-      benchOptionId
+      benchOptionId,
     );
 
     // If this is a test issue, remove it from the production project (if present)
-    if (isTestIssue && projectNumber === 3) {
-      const productionProjectNumber = Number(process.env.PROJECT_NUMBER || 1);
-      const productionProject = await getProject(
-        projectOwner,
-        productionProjectNumber
-      );
-      const productionItemId = await getIssueProjectItemId(
-        issue.node_id,
-        productionProject.id
-      );
-      if (productionItemId) {
-        console.log(
-          `Removing test issue #${number} from production project #${productionProjectNumber}`
+    if (isTestIssue && projectNumber === testProjectNumber) {
+      const productionProjectNumber = Number(process.env.PROJECT_NUMBER || 4);
+      try {
+        const productionProject = await getProject(
+          projectOwner,
+          productionProjectNumber,
         );
-        await removeIssueFromProject(productionProject.id, productionItemId);
+        const productionItemId = await getIssueProjectItemId(
+          issue.node_id,
+          productionProject.id,
+        );
+        if (productionItemId) {
+          console.log(
+            `Removing test issue #${number} from production project #${productionProjectNumber}`,
+          );
+          await removeIssueFromProject(productionProject.id, productionItemId);
+        }
+      } catch (error) {
+        console.warn(
+          `Skipping production project cleanup for test issue #${number}: ${error.message}`,
+        );
       }
     }
   } else {
     console.log(
-      `Skipping Project item/Status management for #${number} (INTAKE_MANAGE_PROJECT not set)`
+      `Skipping Project item/Status management for #${number} (INTAKE_MANAGE_PROJECT not set)`,
     );
   }
 
@@ -290,7 +311,7 @@ async function main() {
   let newSet = stripLaneLabels(labelSet);
   const detailsAssessment = assessIssueDetails(issue.body);
   const hadNeedsDetails = [...newSet].some(
-    (label) => label.toLowerCase() === "needs-details"
+    (label) => label.toLowerCase() === "needs-details",
   );
 
   if (!detailsAssessment.passed) {
@@ -299,20 +320,21 @@ async function main() {
       repo,
       "needs-details",
       "d93f0b",
-      "Issue lacks required detail for implementation"
+      "Issue lacks required detail for implementation",
     );
     newSet = new Set(
-      [...newSet].filter((label) => label.toLowerCase() !== "needs-details")
+      [...newSet].filter((label) => label.toLowerCase() !== "needs-details"),
     );
     newSet.add("needs-details");
     if (!hadNeedsDetails) {
       const missing = [];
-      if (!detailsAssessment.hasBody) missing.push("- Add a non-empty issue body.");
+      if (!detailsAssessment.hasBody)
+        missing.push("- Add a non-empty issue body.");
       if (!detailsAssessment.hasMinLength)
         missing.push("- Expand the issue body to more than 50 characters.");
       if (!detailsAssessment.hasStructuredContent) {
         missing.push(
-          "- Include at least one section heading (`##`) or one checklist item (`- [ ]`)."
+          "- Include at least one section heading (`##`) or one checklist item (`- [ ]`).",
         );
       }
       await addComment(
@@ -320,13 +342,13 @@ async function main() {
         repo,
         number,
         `Thanks for opening this issue. I added the \`needs-details\` label because it is missing required intake detail:\n\n${missing.join(
-          "\n"
-        )}\n\nUpdate the issue body and this intake workflow will re-run automatically.`
+          "\n",
+        )}\n\nUpdate the issue body and this intake workflow will re-run automatically.`,
       );
     }
   } else {
     newSet = new Set(
-      [...newSet].filter((label) => label.toLowerCase() !== "needs-details")
+      [...newSet].filter((label) => label.toLowerCase() !== "needs-details"),
     );
   }
 
@@ -336,9 +358,9 @@ async function main() {
     fs.appendFileSync(
       process.env.GITHUB_OUTPUT,
       `labels=${appliedLabels.join(",")}\nlabels_json=${JSON.stringify(
-        appliedLabels
+        appliedLabels,
       )}\n`,
-      "utf8"
+      "utf8",
     );
   }
 

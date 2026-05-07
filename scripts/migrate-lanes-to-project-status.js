@@ -35,7 +35,7 @@ function getConfig() {
   if (!owner && repoFull) owner = repoFull.split("/")[0];
   if (!repo && repoFull) repo = repoFull.split("/")[1];
   const projectNumber = Number(
-    args["project-number"] || process.env.PROJECT_NUMBER || 1
+    args["project-number"] || process.env.PROJECT_NUMBER || 4
   );
   const statusFieldName =
     args["status-field"] || process.env.PROJECT_STATUS_FIELD_NAME || "Status";

@@ -14,14 +14,14 @@
  *   GITHUB_TOKEN=your_token ISSUE_FILE=feature-add-dark-mode.md node scripts/create-issue.js
  *
  *   # Create issue and add to project
- *   GITHUB_TOKEN=your_token ISSUE_FILE=feature-add-dark-mode.md PROJECT_NUMBER=3 node scripts/create-issue.js
+ *   GITHUB_TOKEN=your_token ISSUE_FILE=feature-add-dark-mode.md PROJECT_NUMBER=5 node scripts/create-issue.js
  *
  * Required environment variables:
  *   - GITHUB_TOKEN: Personal access token with 'repo' scope (add 'project' scope if using PROJECT_NUMBER)
  *   - ISSUE_FILE: Name of the markdown file containing the issue description
  *
  * Optional environment variables:
- *   - PROJECT_NUMBER: The number of the GitHub Project to add the issue to (e.g., 3 for Project #3)
+ *   - PROJECT_NUMBER: The number of the GitHub Project to add the issue to (e.g., 5 for Project #5)
  *   - GITHUB_REPOSITORY: Repository in format 'owner/repo' (optional, auto-detected in CI)
  *   - ISSUES_DIR: Directory containing issue files (optional, defaults to automation-results/test-issues)
  */
@@ -43,7 +43,7 @@ const ISSUE_FILE = process.env.ISSUE_FILE; // Required: specific file to create
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
 const PROJECT_NUMBER = process.env.PROJECT_NUMBER
   ? parseInt(process.env.PROJECT_NUMBER)
-  : 3; // Default to test project #3
+  : 5; // Default to test project #5
 const GITHUB_REPOSITORY =
   process.env.GITHUB_REPOSITORY || "j0hnnymiller/ai-practitioner-resources";
 const [REPO_OWNER, REPO_NAME] = GITHUB_REPOSITORY.split("/");
@@ -52,10 +52,10 @@ const [REPO_OWNER, REPO_NAME] = GITHUB_REPOSITORY.split("/");
 if (!GITHUB_TOKEN) {
   console.error("❌ Error: GITHUB_TOKEN environment variable is required");
   console.error(
-    'Please provide a GitHub personal access token with "repo" scope'
+    'Please provide a GitHub personal access token with "repo" scope',
   );
   console.error(
-    "Usage: GITHUB_TOKEN=your_token ISSUE_FILE=feature-name.md node scripts/create-issue.js"
+    "Usage: GITHUB_TOKEN=your_token ISSUE_FILE=feature-name.md node scripts/create-issue.js",
   );
   process.exit(1);
 }
@@ -63,10 +63,10 @@ if (!GITHUB_TOKEN) {
 if (!ISSUE_FILE) {
   console.error("❌ Error: ISSUE_FILE environment variable is required");
   console.error(
-    "Please provide the name of the markdown file to create an issue from"
+    "Please provide the name of the markdown file to create an issue from",
   );
   console.error(
-    "Usage: GITHUB_TOKEN=your_token ISSUE_FILE=feature-name.md node scripts/create-issue.js"
+    "Usage: GITHUB_TOKEN=your_token ISSUE_FILE=feature-name.md node scripts/create-issue.js",
   );
   process.exit(1);
 }
@@ -83,7 +83,7 @@ if (!REPO_OWNER || !REPO_NAME) {
  */
 function getIssueTypeFromFilename(filename) {
   const match = filename.match(
-    /^(feature|bug|refactor|idea|enhancement|documentation)-/
+    /^(feature|bug|refactor|idea|enhancement|documentation)-/,
   );
   return match ? match[1] : "unknown";
 }
@@ -110,6 +110,16 @@ function generateTitle(filename) {
   return `${capitalizedType}: ${description}`;
 }
 
+function markAsTestIssue(title, body) {
+  const normalizedTitle = title.startsWith("[TI] ") ? title : `[TI] ${title}`;
+  const normalizedBody = body.includes("**TI**") ? body : `**TI**\n\n${body}`;
+
+  return {
+    title: normalizedTitle,
+    body: normalizedBody,
+  };
+}
+
 /**
  * Read the issue file
  */
@@ -124,14 +134,19 @@ function readIssueFile() {
   }
 
   const content = fs.readFileSync(filePath, "utf8").trim();
-  const title = generateTitle(ISSUE_FILE);
+  let title = generateTitle(ISSUE_FILE);
+  let body = content;
+
+  if (PROJECT_NUMBER === 5) {
+    ({ title, body } = markAsTestIssue(title, content));
+  }
 
   return {
     filename: ISSUE_FILE,
-    title: title,
+    title,
     labels: [], // Let PM Agent apply all labels based on content analysis
     assignees: [],
-    body: content,
+    body,
   };
 }
 
@@ -168,7 +183,7 @@ function makeGitHubRequest(path, method, data) {
           }
         } else {
           reject(
-            new Error(`GitHub API error: ${res.statusCode} - ${responseData}`)
+            new Error(`GitHub API error: ${res.statusCode} - ${responseData}`),
           );
         }
       });
@@ -200,7 +215,7 @@ async function checkExistingIssue(title) {
     return exactMatch || null;
   } catch (error) {
     console.warn(
-      `⚠️  Warning: Could not check for existing issue: ${error.message}`
+      `⚠️  Warning: Could not check for existing issue: ${error.message}`,
     );
     return null;
   }
@@ -236,7 +251,7 @@ async function createIssue(issueData, projectId, targetProjectNumber) {
     const issue = await makeGitHubRequest(
       `/repos/${REPO_OWNER}/${REPO_NAME}/issues`,
       "POST",
-      requestData
+      requestData,
     );
 
     console.log(`✅ Created: Issue #${issue.number}`);
@@ -249,13 +264,13 @@ async function createIssue(issueData, projectId, targetProjectNumber) {
           REPO_OWNER,
           REPO_NAME,
           issue.number,
-          GITHUB_TOKEN
+          GITHUB_TOKEN,
         );
         await addIssueToProject(projectId, issueNodeId, GITHUB_TOKEN);
         console.log(`📊 Added to project #${targetProjectNumber}`);
       } catch (projectError) {
         console.warn(
-          `⚠️  Warning: Could not add to project: ${projectError.message}`
+          `⚠️  Warning: Could not add to project: ${projectError.message}`,
         );
       }
     }
@@ -286,7 +301,7 @@ async function main() {
       const project = await getProjectId(
         REPO_OWNER,
         PROJECT_NUMBER,
-        GITHUB_TOKEN
+        GITHUB_TOKEN,
       );
       projectId = project.id;
       console.log(`✅ Found project: "${project.title}"`);

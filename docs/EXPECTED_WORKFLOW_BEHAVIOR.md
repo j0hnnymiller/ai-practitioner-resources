@@ -16,7 +16,7 @@ This document describes the complete expected behavior of the automated workflow
 - `GITHUB_REPOSITORY` (automatic)
 - `ISSUE_NUMBER` (from event payload)
 - `GITHUB_TOKEN` (from secrets)
-- `PROJECT_NUMBER=1` (hardcoded)
+- `PROJECT_NUMBER=4` (hardcoded)
 - `INTAKE_MANAGE_PROJECT=true` (hardcoded)
 
 **Action:** GitHub Actions workflow initiates
@@ -35,13 +35,13 @@ This document describes the complete expected behavior of the automated workflow
 3. Fetches full issue details via GitHub REST API
 4. Checks `INTAKE_MANAGE_PROJECT` environment variable
 5. If `INTAKE_MANAGE_PROJECT=true`:
-   - Adds issue to Project #1 (production)
+   - Adds issue to Project #4 (production)
    - Sets project status field to `"on the bench"`
    - Strips any existing lane labels (`"at bat"`, `"on deck"`, `"in the hole"`, `"on the bench"`)
 6. **Does NOT** add `needs-approval` label (PM review decides this)
 
 **Expected Result:**
-- Issue exists in Project #1
+- Issue exists in Project #4
 - Issue has status: `"on the bench"`
 - No lane labels present
 - No approval labels yet
@@ -100,7 +100,7 @@ This document describes the complete expected behavior of the automated workflow
 ## Current State After Issue Creation
 
 **Project Status:** `"on the bench"`
-**Project:** Project #1 (Production)
+**Project:** Project #4 (Production)
 **Labels (if AI ran):**
 - One of: `needs-approval` OR `implementation ready`
 - Priority: `priority:XX` (score 0-100)
@@ -109,7 +109,7 @@ This document describes the complete expected behavior of the automated workflow
 
 **Labels (if AI skipped):** None added
 
-**Next Manual Step:** 
+**Next Manual Step:**
 - If `needs-approval` label present: maintainer reviews and either adds `implementation ready` or closes issue
 - If `implementation ready` label present: issue is eligible for lane promotion
 
@@ -127,7 +127,7 @@ This document describes the complete expected behavior of the automated workflow
 - `GITHUB_REPOSITORY` (automatic)
 - `ISSUE_NUMBER` (from event payload)
 - `GITHUB_TOKEN` (from secrets)
-- `PROJECT_NUMBER=1` (hardcoded)
+- `PROJECT_NUMBER=4` (hardcoded)
 
 **Action:** GitHub Actions workflow initiates
 
@@ -140,7 +140,7 @@ This document describes the complete expected behavior of the automated workflow
 **Execution:** Node.js script runs as workflow job step
 
 **Process:**
-1. Queries Project #1 for all open issues
+1. Queries Project #4 for all open issues
 2. For each issue:
    - Extracts labels and current status
    - Calculates priority score from labels
@@ -157,11 +157,11 @@ This document describes the complete expected behavior of the automated workflow
    - Next 3 eligible → `"on deck"`
    - Next 3 eligible → `"in the hole"`
    - All others → `"on the bench"`
-6. Updates Project #1 status field for each issue
+6. Updates Project #4 status field for each issue
 7. Strips any legacy lane labels from issues
 
 **Expected Result:**
-- All open issues in Project #1 have updated status
+- All open issues in Project #4 have updated status
 - Active pipeline (`"at bat"`, `"on deck"`, `"in the hole"`) contains max 3 issues each
 - Only `implementation ready` issues can be in active pipeline
 - Issues without `implementation ready` are in `"on the bench"`
@@ -173,16 +173,16 @@ This document describes the complete expected behavior of the automated workflow
 
 ### Not Project-Aware
 
-**Issue:** All three scripts (`issue-intake.js`, `pm-review.js`, `rebalance-lanes.js`) currently hardcode `PROJECT_NUMBER=1` and process ALL issues, regardless of which project they're in.
+**Issue:** The production workflows still default to `PROJECT_NUMBER=4`, and scripts process issue events regardless of which project triggered them.
 
 **Impact on Testing:**
-- Test issues (Project #3) will trigger the same workflows
+- Test issues (Project #5) will trigger the same workflows
 - Test issues will be processed by PM review
 - Test issues will be included in lane rebalancing
 - Cannot isolate test workflow execution from production
 
 **Workaround (Partial):**
-- `scripts/create-issue.js` automatically removes test issues from Project #1 and adds to Project #3
+- `scripts/create-issue.js` automatically removes test issues from Project #4 and adds to Project #5
 - This prevents test issues from appearing in production project view
 - However, workflows still execute for test issues
 
@@ -203,31 +203,36 @@ This document describes the complete expected behavior of the automated workflow
 
 **Environment Variables Required:**
 - `GITHUB_TOKEN` (with repo, project scopes)
-- `PROJECT_NUMBER=3` (default, can override)
+- `PROJECT_NUMBER=5` (default, can override)
 
 **Process:**
 1. Reads markdown file from `automation-results/test-issues/`
-2. Adds `**TI**` prefix to title
+2. Adds `[TI]` prefix to title and `**TI**` marker to body
 3. Creates GitHub issue via REST API
 4. Waits 1 second (allows auto-add workflow to complete)
 5. Queries all projects issue is assigned to via GraphQL
-6. Removes issue from all projects except target project (Project #3)
+6. Removes issue from all projects except target project (Project #5)
 7. Adds issue to target project if not present
 8. Outputs project assignment status
 
 **Expected Result:**
-- Test issue created with `**TI**` prefix in title
-- Issue appears ONLY in Project #3 (Workflow Testing)
-- Issue removed from Project #1 if auto-add workflow added it there
+- Test issue created with `[TI]` prefix in title
+- Issue appears ONLY in Project #5 (Workflow Testing)
+- Issue removed from Project #4 if auto-add workflow added it there
 
-**Note:** The `issue-intake.yml` and `pm-review.yml` workflows will STILL execute because they trigger on `issues: [opened]` event, but the issue won't be visible in Project #1.
+**Note:** The `issue-intake.yml` and `pm-review.yml` workflows will STILL execute because they trigger on `issues: [opened]` event, but the issue won't be visible in Project #4.
+
+**Canonical Test-Issue Detection:**
+- Intake treats an issue as a test issue if it is already in the `Workflow Testing` project, has the `workflow-path-test` label, has a `[TI]` title prefix, or has a `**TI**` marker in the body.
+- Manual test issues created with `create-issue.js` use `[TI]` and `**TI**`.
+- Workflow path test issues use the `workflow-path-test` label and do not need a `[TI]` title prefix.
 
 ---
 
 ## Verification Checklist
 
 ### For New Issue (Production)
-- [ ] Issue exists in Project #1
+- [ ] Issue exists in Project #4
 - [ ] Issue status = `"on the bench"` (normal) OR `"In Review"` (error condition)
 - [ ] PM review comment posted (success) OR error message posted (failure)
 - [ ] If AI ran: labels applied (`needs-approval` OR `implementation ready`, priority, size, independence)
@@ -235,13 +240,13 @@ This document describes the complete expected behavior of the automated workflow
 - [ ] No lane labels present
 
 ### For New Issue (Test)
-- [ ] Issue exists ONLY in Project #3
-- [ ] Issue title has `**TI**` prefix
+- [ ] Issue exists ONLY in Project #5
+- [ ] Issue title has `[TI]` prefix
 - [ ] PM review comment posted (workflow executed)
-- [ ] Issue NOT visible in Project #1
+- [ ] Issue NOT visible in Project #4
 
 ### For Closed Issue (Production)
-- [ ] All open issues in Project #1 have updated status
+- [ ] All open issues in Project #4 have updated status
 - [ ] Max 3 issues in `"at bat"`
 - [ ] Max 3 issues in `"on deck"`
 - [ ] Max 3 issues in `"in the hole"`
@@ -253,7 +258,7 @@ This document describes the complete expected behavior of the automated workflow
 
 ## Known Issues
 
-1. **Auto-Add Workflow (#10)**: GitHub Projects built-in workflow automatically adds ALL new issues to Project #1. This is why `create-issue.js` must remove test issues after creation.
+1. **Auto-Add Workflow (#10)**: GitHub Projects built-in workflow automatically adds ALL new issues to Project #4. This is why `create-issue.js` must remove test issues after creation.
 
 2. **Workflow Not Project-Aware**: Scripts process all issues regardless of project membership. Test issues trigger production workflows.
 
@@ -283,10 +288,10 @@ This document describes the complete expected behavior of the automated workflow
 |------|---------|---------|----------------|
 | `.github/workflows/issue-intake.yml` | Orchestrate intake + review | Issue opened | No |
 | `.github/workflows/rebalance-on-close.yml` | Orchestrate rebalancing | Issue closed | No |
-| `scripts/issue-intake.js` | Add to project, set status | Workflow step | No (PROJECT_NUMBER=1) |
+| `scripts/issue-intake.js` | Add to project, set status | Workflow step | No (PROJECT_NUMBER=4) |
 | `scripts/pm-review.js` | AI evaluation, label assignment | Workflow step | No |
-| `scripts/rebalance-lanes.js` | Lane promotion/demotion | Workflow step | No (PROJECT_NUMBER=1) |
-| `scripts/create-issue.js` | Manual test issue creation | Manual execution | Yes (PROJECT_NUMBER=3) |
+| `scripts/rebalance-lanes.js` | Lane promotion/demotion | Workflow step | No (PROJECT_NUMBER=4) |
+| `scripts/create-issue.js` | Manual test issue creation | Manual execution | Yes (PROJECT_NUMBER=5) |
 | `scripts/lib/graphql-helpers.js` | GraphQL utilities | Library | N/A |
 
 ---
@@ -301,8 +306,8 @@ To achieve complete test isolation, the following changes are needed:
    - `scripts/rebalance-lanes.js`: Add PROJECT_ID env var, query only project issues
 
 2. **Create Test Workflows:**
-   - `.github/workflows/test-issue-intake.yml`: Same as production but PROJECT_NUMBER=3
-   - `.github/workflows/test-rebalance.yml`: Same as production but PROJECT_NUMBER=3
+   - `.github/workflows/test-issue-intake.yml`: Same as production but PROJECT_NUMBER=5
+   - `.github/workflows/test-rebalance.yml`: Same as production but PROJECT_NUMBER=5
 
 3. **Add Project Filtering:**
    - Modify GraphQL queries to filter by project membership

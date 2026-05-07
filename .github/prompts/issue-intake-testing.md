@@ -1,8 +1,8 @@
 # Issue Intake Testing - Complete Validation Summary
 
 **Date:** November 7, 2025
-**Test Project:** #3 "Workflow Testing"
-**Production Project:** #1 "AI Practitioner Resources"
+**Test Project:** #5 "Workflow Testing"
+**Production Project:** #4 "AI Practitioner Resources"
 **AI Model:** Claude Sonnet 4.5 (claude-sonnet-4-5-20250929) via Anthropic API
 
 ## Test Objective
@@ -32,7 +32,7 @@ These tests run in production, along side the production issues. Test issues are
 **Test Detection Method**
 
 - Marker: `**TI**` in issue title/body
-- Routing: issues-intake.js detects marker → routes to Project #3
+- Routing: issues-intake.js detects marker, label, or Workflow Testing membership → routes to Project #5
 - Isolation: Production workflows skip test issues automatically
 
 ### Scripts Modified
@@ -40,13 +40,17 @@ These tests run in production, along side the production issues. Test issues are
 1. **scripts/issue-intake.js** (lines 200-214):
 
    ```javascript
-   // Detect test issues by **TI** prefix in title
-   const isTestIssue = issue.title && issue.title.includes("**TI**");
+   // Detect test issues by marker, label, or Workflow Testing membership
+   const isTestIssue =
+     Boolean(workflowTestingProjectItem) ||
+     labelSet.has("workflow-path-test") ||
+     (issue.title && issue.title.includes("[TI]")) ||
+     (issue.body && issue.body.includes("**TI**"));
 
-   // Route to test project (3) if **TI** in title, otherwise production (1)
+   // Route to test project (5) if detected as a test issue, otherwise production (4)
    const projectNumber = isTestIssue
-     ? 3
-     : Number(process.env.PROJECT_NUMBER || 1);
+     ? 5
+     : Number(process.env.PROJECT_NUMBER || 4);
    ```
 
 2. **scripts/pm-review.js** (lines 92-104):
@@ -127,7 +131,7 @@ All issues:
 2. Issue-intake.yml triggers on opened event
 3. Step 1: issue-intake.js runs
    - Detects **TI** marker
-   - Routes to Project #3
+  - Routes to Project #5
    - Sets status to "on the bench"
 4. Step 2: pm-review.js runs
    - Loads ai-assistant-pm.md as system prompt
@@ -145,7 +149,7 @@ All issues:
 ✅ **Issue Creation:** 13/13 (100%)
 
 - All issues created successfully
-- All routed to correct project (#3)
+- All routed to correct project (#5)
 - All received issue numbers in sequence
 
 ✅ **Label Application:** 11/11 open issues (100%)
@@ -165,8 +169,8 @@ All issues:
 
 ✅ **Project Isolation:** 11/11 open issues (100%)
 
-- All test issues in Project #3 only
-- Zero test issues leaked to Project #1
+- All test issues in Project #5 only
+- Zero test issues leaked to Project #4
 - Production workflows unaffected
 
 ### Verification Commands
@@ -330,8 +334,8 @@ gh issue list --state open --json number,title,comments --jq '.[] | select(.titl
 - [x] Test all 13 issues processed successfully
 - [x] Verify label completeness (5 categories per issue)
 - [x] Verify comment posting (1 per issue with PM review)
-- [x] Verify project isolation (test issues in Project #3 only)
-- [x] Verify production unaffected (no test issues in Project #1)
+- [x] Verify project isolation (test issues in Project #5 only)
+- [x] Verify production unaffected (no test issues in Project #4)
 - [x] Document architecture (Option 5 hybrid approach)
 - [x] Create improvement recommendations (7 issues created)
 - [x] Commit all changes (7 logical commits)

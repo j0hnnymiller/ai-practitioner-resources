@@ -2,13 +2,13 @@
 
 ## Problem
 
-When creating test issues with `scripts/create-issue.js`, issues are automatically added to **both** the test project (Project #3) and the production project (Project #1), even though the script only explicitly adds them to the test project.
+When creating test issues with `scripts/create-issue.js`, issues are automatically added to **both** the test project (Project #5) and the production project (Project #4), even though the script only explicitly adds them to the test project.
 
 This defeats the purpose of having an isolated test environment.
 
 ## Root Cause
 
-The production project "AI Practitioner Resources" (Project #1) has a built-in GitHub Projects automation workflow called **"Auto-add to project"** (Workflow #10) that is **enabled**.
+The production project "AI Practitioner Resources" (Project #4) has a built-in GitHub Projects automation workflow called **"Auto-add to project"** (Workflow #10) that is **enabled**.
 
 ### Evidence
 

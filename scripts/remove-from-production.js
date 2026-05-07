@@ -11,7 +11,7 @@ const {
   removeIssueFromProject,
 } = require("./lib/graphql-helpers.js");
 
-const PRODUCTION_PROJECT_ID = "PVT_kwHOCkVgYc4BHOek"; // Project #1: "AI Practitioner Resources"
+const PRODUCTION_PROJECT_ID = "PVT_kwHOAV5oK84BWqcj"; // Project #4: "AI Practitioner Resources"
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
 const OWNER = "j0hnnymiller";
 const REPO = "ai-practitioner-resources";

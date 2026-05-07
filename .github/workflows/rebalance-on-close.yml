@@ -35,6 +35,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_REPOSITORY: ${{ github.repository }}
           PROJECT_OWNER: ${{ github.repository_owner }}
-          PROJECT_NUMBER: 1
+          PROJECT_NUMBER: 4
           PROJECT_STATUS_FIELD_NAME: Status
         run: node scripts/rebalance-lanes.js
